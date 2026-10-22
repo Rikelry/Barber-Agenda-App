@@ -29,6 +29,19 @@ Run lint and typecheck before declaring any task done.
 - Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
 - Docs: https://docs.expo.dev/router/introduction.md
 
+## Design System
+
+O app segue o sistema de design documentado em `design-system/`. Os valores visuais são decisões documentadas, não escolhas livres.
+
+- **Fonte de verdade dos valores:** `design-system/02-tokens.md`. Leia também `01-principios.md`, `03-fundamentos.md`, `04-componentes/` e `06-acessibilidade.md` antes de criar ou alterar qualquer UI.
+- **Tokens em código:** `src/theme/tokens.ts`. Se não existir, crie-o traduzindo `02-tokens.md` fielmente (mesmos nomes e valores) — nunca invente cor, tamanho, raio ou espaçamento.
+- **Componentes reutilizáveis:** `src/components/`. **Telas e rotas:** `src/app/` (Expo Router). Não deixe componentes dentro de `src/app/`.
+- **Especificação de componente:** `design-system/04-componentes/<nome>.md` (use `_modelo-componente.md` como formato). Cubra os estados: padrão, pressionado, foco e desabilitado.
+- **Acessibilidade:** contraste mínimo de 4,5:1, alvo de toque de 48 dp, `accessibilityLabel` e `accessibilityRole` corretos.
+- **Lacunas:** se faltar token, componente ou regra, registre a lacuna e peça esclarecimento em vez de decidir por conta própria.
+- **Origem:** marque cada decisão como `Herdado`, `Adaptado` ou `Novo`.
+- A skill `barber-design-system` (`.trae/skills/`) detalha o fluxo de criar componente e tela. Ao concluir, liste os tokens e componentes usados.
+
 ## Building with EAS
 
 Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
