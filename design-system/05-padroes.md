@@ -16,9 +16,9 @@
 
 | Situação | O que o usuário vê | Componentes e tokens |
 | --- | --- | --- |
-| Carregando | Spinner de carregamento no botão ou sobreposição | `color.action` |
-| Erro | Mensagem de erro abaixo dos campos ou Toast | `color.error`, `font.label` |
-| Sucesso | Feedback visual momentâneo antes do redirecionamento | `color.action` |
+| Carregando | Spinner de carregamento no botão ou sobreposição | `color.primary` |
+| Erro | Mensagem de erro abaixo dos campos ou Toast | `color.error`, `font.label-large` |
+| Sucesso | Feedback visual momentâneo antes do redirecionamento | `color.primary` |
 
 - **Faça:** Forneça feedback claro caso a senha esteja incorreta ou o e-mail já exista.
 - **Evite:** Formulários muito extensos em uma única tela; use feedback de validação em tempo real.
@@ -37,10 +37,10 @@
 
 | Situação | O que o usuário vê | Componentes e tokens |
 | --- | --- | --- |
-| Carregando | Esqueleto (Skeleton) da lista ou detalhes | `color.surface` adaptado |
+| Carregando | Esqueleto (Skeleton) da lista ou detalhes | `color.surface-container-low` |
 | Erro | Mensagem informando que o horário não está mais disponível | `color.error` |
-| Vazio | Mensagem informando que não há barbearias ou horários | `color.on-surface` (opacidade reduzida) |
-| Sucesso | Tela ou Modal de confirmação com resumo do agendamento | `color.action`, `font.title` |
+| Vazio | Mensagem informando que não há barbearias ou horários | `color.on-surface-variant` |
+| Sucesso | Tela ou Modal de confirmação com resumo do agendamento | `color.primary`, `font.title-large` |
 
 - **Faça:** Mostre claramente o preço e a duração do serviço antes da confirmação final.
 - **Evite:** Permitir a seleção de datas passadas ou horários que já foram ocupados.
@@ -60,7 +60,7 @@
 | Situação | O que o usuário vê | Componentes e tokens |
 | --- | --- | --- |
 | Erro | E-mail não encontrado ou senhas não coincidem | `color.error` |
-| Sucesso | Mensagem confirmando o envio do link ou a troca da senha | `color.action` |
+| Sucesso | Mensagem confirmando o envio do link ou a troca da senha | `color.primary` |
 
 ## Padrão 4: Gestão de Perfil do Usuário
 
@@ -110,25 +110,25 @@
 
 | Situação | O que o usuário vê | Componentes e tokens |
 | --- | --- | --- |
-| Confirmado | Badge verde indicando sucesso | `color.action` (variante verde) |
-| Pendente | Badge amarelo indicando espera | `color.action` (variante amarela) |
-| Cancelado | Badge vermelho ou texto riscado | `color.error` |
+| Confirmado | Badge verde indicando sucesso | `neutral.white` sobre fundo `#2E7D32` (pendente de token semântico de status) |
+| Pendente | Badge amarelo indicando espera | `color.secondary-container`, `color.on-secondary-container` |
+| Cancelado | Badge vermelho ou texto riscado | `color.error`, `color.on-error` |
 
 ## Padrão 8: Onboarding de Parceiro (Cadastro de Barbearia)
 
 - **Objetivo do usuário:** Criar uma conta já vinculada a uma nova barbearia no sistema.
-- **Componentes usados:** [Campo de Texto](04-componentes/campo-de-texto.md), [Upload de Imagem](04-componentes/upload.md), [Botão](04-componentes/botao.md).
+- **Componentes usados:** [Campo de Texto](04-componentes/campo-de-texto.md), [Upload de Imagem](04-componentes/upload-imagem.md), [Botão](04-componentes/botao.md).
 - **Passos:**
   1. O usuário escolhe a opção de se cadastrar como barbearia.
   2. Preenche a "Seção 1: Seus dados pessoais".
   3. Preenche a "Seção 2: Sua barbearia" (Nome, Telefone, Endereço e Logo).
   4. Finaliza o cadastro e acessa o painel de gestão.
-- **Faça:** Divida o formulário em seções claras para não sobrecarregar o usuário.
+  - **Faça:** Divida o formulário em seções claras para não sobrecarregar o usuário.
 
 ## Padrão 9: Busca e Filtragem
 
 - **Objetivo do usuário:** Encontrar rapidamente barbearias ou serviços específicos.
-- **Componentes usados:** [Barra de Busca](04-componentes/busca.md), [Chips de Filtro](04-componentes/chips.md).
+- **Componentes usados:** [Barra de Busca](04-componentes/barra-busca.md), [Chips de Filtro](04-componentes/chips.md).
 - **Passos:**
   1. Na Home ou na lista de barbearias, o usuário clica na barra de busca.
   2. Digita o nome da barbearia ou serviço.

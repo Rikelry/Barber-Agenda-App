@@ -24,7 +24,7 @@ Origem no sistema base: Material 3, Center-aligned top app bar. Situação: Adap
 | Variante | Uso | Tokens |
 | --- | --- | --- |
 | Padrão | Maioria das telas do app | `color.surface`, `color.on-surface` |
-| Transparente | Sobre imagens de fundo (ex: detalhes da barbearia) | `rgba(0,0,0,0)`, `color.neutral.white` |
+| Transparente | Sobre imagens de fundo (ex: detalhes da barbearia) | `rgba(0,0,0,0)`, `neutral.white` |
 
 ## Estados
 

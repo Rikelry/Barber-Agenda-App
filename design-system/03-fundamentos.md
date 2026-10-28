@@ -4,14 +4,14 @@
 
 ## Cor
 
-- Use `color.action` somente para destacar a ação principal da tela. (Adaptado)
+- Use `color.primary` somente para destacar a ação principal da tela (substituindo o termo legado `color.action`). (Adaptado)
 - Nunca use cor como única forma de comunicar um estado. Acrescente texto, ícone ou outro indicador visual. (Herdado)
 - Use os tokens semânticos de cor definidos em `02-tokens.md`, sem aplicar valores hexadecimais diretamente nos componentes. (Novo)
 - Garanta contraste adequado nos temas claro e escuro antes de considerar a paleta validada. (Adaptado)
 
 ## Tipografia
 
-- Use `font.title` para títulos e `font.body` para textos corridos. (Herdado)
+- Use `font.headline-small` ou `font.title-large` para títulos de tela e seções, e `font.body-large` ou `font.body-medium` para textos corridos (substituindo os termos legados `font.title` e `font.body`). (Adaptado)
 - Respeite o tamanho de fonte escolhido pelo usuário no sistema, considerando Dynamic Type no iOS e a escala de fonte no Android. (Herdado)
 - Use os estilos tipográficos definidos em `02-tokens.md` e evite criar tamanhos isolados sem necessidade. (Adaptado)
 - Destaque informações essenciais do agendamento, como serviço, profissional, data, horário e preço, sem depender somente da cor. (Novo)

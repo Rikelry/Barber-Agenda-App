@@ -22,7 +22,7 @@ Origem no sistema base: Material 3, Badge/Assist Chip. Situação: Adaptado. Mot
 
 | Variante | Uso | Tokens |
 | --- | --- | --- |
-| Sucesso | Status "Confirmado" ou "Aberto" | `color.action` (variante verde), `color.neutral.white` |
+| Sucesso | Status "Confirmado" ou "Aberto" | `neutral.white` sobre fundo `#2E7D32` (pendente de token semântico de status) |
 | Alerta | Status "Pendente" | `color.secondary-container`, `color.on-secondary-container` |
 | Erro | Status "Cancelado" ou "Fechado" | `color.error`, `color.on-error` |
 

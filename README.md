@@ -52,7 +52,7 @@ Cada token, componente e regra terá uma etiqueta de origem:
 
 | Termo | Significado |
 | --- | --- |
-| Token | Decisão de design identificada por nome e valor, como `color.action.primary`. |
+| Token | Decisão de design identificada por nome e valor, como `color.primary`. |
 | Componente | Elemento reutilizável da interface, como botão, campo de texto ou cartão de agendamento. |
 | Fluxo | Sequência de telas e ações que permite concluir uma tarefa. |
 | Estado | Condição de um componente ou tela, como padrão, pressionado, desabilitado, carregando ou com erro. |
