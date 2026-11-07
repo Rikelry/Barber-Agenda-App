@@ -27,7 +27,7 @@ Ao criar ou alterar qualquer componente ou tela deste app, siga o design system 
 
 - `src/app/` — telas e rotas (Expo Router). Cada arquivo é uma tela; `_layout.tsx` define navegadores.
 - `src/view/components/` — componentes reutilizáveis. Não coloque componentes dentro de `src/app/`.
-- `src/view/` — tokens e tema.
+- `src/view/theme.ts` — tokens e tema.
 
 ## Integração com a arquitetura
 
