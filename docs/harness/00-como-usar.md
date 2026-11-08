@@ -12,6 +12,7 @@
 ## Verificação
 
 - **Claude Code:** os ganchos de `.claude/settings.json` rodam o verificador sozinhos — `--hook` após cada edição e `--stop` antes de encerrar.
+- O gancho `--stop` roda a arquitetura e o `tsc`; o `lint` só roda no `npm run check`.
 - **Trae:** não há ganchos; rodar `npm run check` ao final de cada tarefa.
 
 ## Receitas

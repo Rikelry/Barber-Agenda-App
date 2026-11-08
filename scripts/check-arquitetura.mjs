@@ -272,13 +272,20 @@ function applyUseCaseRules(files) {
   const prefix = join(srcDir, "usecase") + sep;
   for (const abs of files.filter((f) => f.startsWith(prefix))) {
     const rel = relOf(abs);
+    const base = basename(abs).replace(/\.(t|j)sx?$/, "");
     const content = contentOf(abs);
+    // Contrato (iXUseCases.ts) declara a interface; só a classe (xUseCases.ts) exige implements.
+    const isContract = /^i[A-Z]/.test(base);
     for (const { m, line } of eachMatch(content, /from\s+['"]([^'"]+)['"]/g)) {
       if (!m[1].startsWith("@/model")) {
         add("UC-01", rel, line, `Use Case importa "${m[1]}" (só pode importar @/model).`, "Mova a dependência para o domínio (model) e injete pelo construtor.", "docs/harness/01-arquitetura-mvvm.md");
       }
     }
-    if (!/implements\s+I\w+/.test(content)) {
+    if (isContract) {
+      if (!/export\s+interface\s+I[A-Z]\w*/.test(content)) {
+        add("UC-01", rel, 1, "Contrato de Use Case não declara a interface.", 'Declare "export interface IXUseCases {...}".', "docs/harness/01-arquitetura-mvvm.md");
+      }
+    } else if (!/implements\s+I\w+/.test(content)) {
       add("UC-01", rel, 1, "Use Case não usa implements de um contrato.", "Implemente o contrato: class X implements IXUseCases.", "docs/harness/01-arquitetura-mvvm.md");
     }
     for (const { m, line } of eachMatch(content, /new\s+\w*(?:Service|DataSource)\s*\(/g)) {

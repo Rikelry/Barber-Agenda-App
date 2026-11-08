@@ -7,7 +7,7 @@
 - Imports **sempre** com alias `@/`. Nunca `./` ou `../`.
 - Entidades e demais tipos: `type` (não `interface`).
 - Contratos: `interface` com prefixo `i` (`IBookingDataSource`), arquivo em camelCase (`iBookingDataSource.ts`).
-- Arquivos: kebab-case ou camelCase minúsculo (`button.tsx`, `booking.tsx`, `createBooking.ts`, `useBookingViewModel.ts`).
+- Arquivos: sempre camelCase (`button.tsx`, `booking.tsx`, `createBooking.ts`, `useBookingViewModel.ts`).
 - Componentes exportados como **função nomeada** (nunca `export default function`).
 
 ## Proibições
