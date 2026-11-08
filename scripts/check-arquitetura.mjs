@@ -26,6 +26,8 @@ const srcDir = join(root, "src");
 const ALLOWED_SRC_DIRS = ["app", "view", "viewmodel", "usecase", "model", "infra", "di"];
 const DATA_LIBS = ["@/infra", "async-storage", "firebase", "axios", "supabase"];
 const TEST_FILE = /(\.(test|spec)\.(t|j)sx?$)|(__tests__[\\/])/;
+const CAMEL_DIRS = ["view/components/", "usecase/", "model/", "infra/", "di/"];
+const USECASE_NAME = /^(?:i[A-Z][A-Za-z0-9]*|[a-z][A-Za-z0-9]*)UseCases$/;
 
 const errors = [];
 const add = (rule, file, line, problem, fix, doc) =>
@@ -323,6 +325,30 @@ function applyDiRules(files) {
   }
 }
 
+function applyNamingRules(files) {
+  for (const abs of files) {
+    const rel = relOf(abs);
+    if (!rel.startsWith("src/")) continue;
+    const relInSrc = rel.replace(/^src\//, "");
+    const base = basename(abs).replace(/\.(t|j)sx?$/, "");
+
+    // USECASE-LUGAR — arquivo com "UseCase"/"UseCases" no nome fora de src/usecase/
+    if (/UseCases?/.test(base) && !relInSrc.startsWith("usecase/")) {
+      add("USECASE-LUGAR", rel, 1, `Arquivo "${base}" contém "UseCase(s)" fora de src/usecase/.`, "Contratos e implementações de Use Case ficam em src/usecase/; em model/ só entram entities, datasources, services e errors.", "docs/harness/02-convencoes-de-codigo.md");
+    }
+
+    // USECASE-NOME — nome em src/usecase/ deve ser iXUseCases.ts ou xUseCases.ts
+    if (relInSrc.startsWith("usecase/") && !USECASE_NAME.test(base)) {
+      add("USECASE-NOME", rel, 1, `Nome de arquivo "${base}" fora do padrão.`, "Use iXUseCases.ts (contrato) ou xUseCases.ts (implementação), no plural e em camelCase.", "docs/harness/02-convencoes-de-codigo.md");
+    }
+
+    // NOME-CAMELCASE — sem hífen nem underline nas camadas de código
+    if (CAMEL_DIRS.some((d) => relInSrc.startsWith(d)) && /[-_]/.test(base)) {
+      add("NOME-CAMELCASE", rel, 1, `Arquivo "${base}" usa hífen ou underline.`, "Use camelCase, sem hífen nem underline (ex.: textField.tsx, authSession.ts).", "docs/harness/02-convencoes-de-codigo.md");
+    }
+  }
+}
+
 function applyStructureRule() {
   if (!existsSync(srcDir)) return;
   for (const e of readdirSync(srcDir, { withFileTypes: true })) {
@@ -343,6 +369,7 @@ function analyze() {
   applyModelRules(files);
   applyInfraRules(files);
   applyDiRules(files);
+  applyNamingRules(files);
   applyStructureRule();
   errors.sort((a, b) => (a.file === b.file ? a.line - b.line : a.file < b.file ? -1 : 1));
   return errors.slice();

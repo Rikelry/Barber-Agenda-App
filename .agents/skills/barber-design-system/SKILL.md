@@ -57,8 +57,7 @@ Ao criar ou alterar qualquer componente ou tela deste app, siga o design system 
 Rode antes de declarar a tarefa pronta:
 
 ```bash
-npx expo lint
-npx tsc --noEmit
+npm run check
 ```
 
 ## Relatório final

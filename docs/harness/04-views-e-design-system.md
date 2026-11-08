@@ -24,16 +24,16 @@
 | `_modelo-componente.md` | template — não gera arquivo |
 | `avatar.md` | `avatar.tsx` |
 | `badge.md` | `badge.tsx` |
-| `barra-busca.md` | `search-bar.tsx` |
+| `barra-busca.md` | `searchBar.tsx` |
 | `botao.md` | `button.tsx` |
 | `calendario.md` | `calendar.tsx` |
-| `campo-de-texto.md` | `text-field.tsx` |
+| `campo-de-texto.md` | `textField.tsx` |
 | `card.md` | `card.tsx` |
 | `chips.md` | `chips.tsx` |
 | `fab.md` | `fab.tsx` |
 | `lista.md` | `list.tsx` |
 | `switch.md` | `switch.tsx` |
-| `tab-bar.md` | `tab-bar.tsx` |
+| `tab-bar.md` | `tabBar.tsx` |
 | `tabs.md` | `tabs.tsx` |
-| `top-app-bar.md` | `top-app-bar.tsx` |
-| `upload-imagem.md` | `image-upload.tsx` |
+| `top-app-bar.md` | `topAppBar.tsx` |
+| `upload-imagem.md` | `imageUpload.tsx` |
