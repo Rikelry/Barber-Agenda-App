@@ -17,7 +17,7 @@ Ao criar ou alterar qualquer componente ou tela deste app, siga o design system 
 
 ## Regras de valores
 
-- Antes de criar `src/theme/tokens.ts`, leia integralmente `design-system/02-tokens.md` e `design-system/03-fundamentos.md`.
+- Antes de criar `src/view/theme.ts`, leia integralmente `design-system/02-tokens.md` e `design-system/03-fundamentos.md`.
 - Traduza fielmente apenas os tokens cujos valores estejam definidos e sejam utilizáveis em código.
 - Não invente valores para tokens semânticos, referências ilustrativas ou decisões marcadas como `TODO`.
 - Se a tarefa depender de um token ainda indefinido, registre a lacuna e peça esclarecimento antes de implementar a decisão visual afetada.
@@ -26,13 +26,13 @@ Ao criar ou alterar qualquer componente ou tela deste app, siga o design system 
 ## Onde cada arquivo vive
 
 - `src/app/` — telas e rotas (Expo Router). Cada arquivo é uma tela; `_layout.tsx` define navegadores.
-- `src/components/` — componentes reutilizáveis. Não coloque componentes dentro de `src/app/`.
-- `src/theme/` — tokens e tema.
+- `src/view/components/` — componentes reutilizáveis. Não coloque componentes dentro de `src/app/`.
+- `src/view/theme.ts` — tokens e tema.
 
 ## Integração com a arquitetura
 
 - Consulte `AGENTS.md` e `docs/architecture/mvvm-sofisticado.md` quando a tarefa envolver telas, estado de interface, regras de negócio, serviços ou persistência.
-- Mantenha `src/app/` dedicado às rotas e à composição de navegação. Componentes reutilizáveis ficam em `src/components/`; não coloque componentes de domínio ou de negócio dentro das rotas.
+- Mantenha `src/app/` dedicado às rotas e à composição de navegação. Componentes reutilizáveis ficam em `src/view/components/`; não coloque componentes de domínio ou de negócio dentro das rotas.
 - A View deve renderizar o estado e encaminhar interações. Não deve implementar regras de negócio nem acessar diretamente APIs, serviços ou fontes de dados.
 - Quando necessário, mantenha o estado e as ações da tela em uma ViewModel, e as regras de negócio em Use Cases ou no domínio. Não crie essas camadas artificialmente para telas estritamente visuais.
 - Não importe implementações de infraestrutura diretamente para componentes visuais. Siga os contratos e a composição de dependências definidos na arquitetura.
@@ -41,14 +41,14 @@ Ao criar ou alterar qualquer componente ou tela deste app, siga o design system 
 ## Fluxo para criar um componente
 
 1. Confirme a especificação em `design-system/04-componentes/<nome>.md`. Se não existir, crie a spec a partir de `_modelo-componente.md` antes do código.
-2. Implemente em `src/components/` usando só tokens.
+2. Implemente em `src/view/components/` usando só tokens.
 3. Cubra todos os estados previstos: padrão, pressionado, foco e desabilitado.
 4. Aplique acessibilidade: contraste mínimo de 4,5:1, alvo de toque de 48 dp, `accessibilityLabel` e `accessibilityRole` corretos.
 5. Marque a origem no relatório final: `Herdado`, `Adaptado` ou `Novo`.
 
 ## Fluxo para criar uma tela
 
-1. Monte a tela com os componentes de `src/components/`, sem recriar estilos soltos.
+1. Monte a tela com os componentes de `src/view/components/`, sem recriar estilos soltos.
 2. Garanta uma única ação principal, clara e destacada (Princípio 1).
 3. Respeite `design-system/05-padroes.md` quando a tela fizer parte de um fluxo (ex.: autenticação, agendamento).
 
@@ -57,8 +57,7 @@ Ao criar ou alterar qualquer componente ou tela deste app, siga o design system 
 Rode antes de declarar a tarefa pronta:
 
 ```bash
-npx expo lint
-npx tsc --noEmit
+npm run check
 ```
 
 ## Relatório final
