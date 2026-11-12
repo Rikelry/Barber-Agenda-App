@@ -29,6 +29,9 @@ export const Card = ({
     if (isInteractive) {
         return (
             <Pressable
+                accessibilityLabel={viewProps.accessibilityLabel}
+                accessibilityHint={viewProps.accessibilityHint}
+                testID={viewProps.testID}
                 onPress={onPress}
                 disabled={disabled}
                 accessibilityRole="button"

@@ -588,3 +588,16 @@ export const darkTheme: DesignTheme = {
     getElevationStyle,
     state: stateTokens,
 };
+
+// --- tamanhos de componentes (design-system/04-componentes) -----------------
+
+export const componentSizes = {
+    /** avatar.md: pequeno (listas compactas), médio (listas e Home), grande (perfil). */
+    avatar: { small: 32, medium: 48, large: 96 },
+    /** barra-busca.md: altura do contêiner. */
+    searchBar: { height: 48 },
+    /** 06-acessibilidade.md: alvo de toque mínimo. */
+    touchTarget: 48,
+} as const;
+
+export type AvatarSize = keyof typeof componentSizes.avatar;

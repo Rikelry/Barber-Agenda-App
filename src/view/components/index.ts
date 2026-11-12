@@ -1,3 +1,4 @@
+export * from "@/view/components/avatar";
 export * from "@/view/components/button";
 export * from "@/view/components/iconButton";
 export * from "@/view/components/typography";
@@ -10,3 +11,4 @@ export * from "@/view/components/textField";
 export * from "@/view/components/switch";
 export * from "@/view/components/checkbox";
 export * from "@/view/components/themeProvider";
+export * from "@/view/components/searchBar";
