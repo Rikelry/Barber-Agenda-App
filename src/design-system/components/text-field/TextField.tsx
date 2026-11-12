@@ -31,6 +31,7 @@ export function TextField({
 
     disabled = false,
     labelAlwaysFloating = false,
+    labelBackgroundColor,
 
     value,
     defaultValue = "",
@@ -214,7 +215,7 @@ export function TextField({
                                     backgroundColor:
                                         shouldFloatLabel &&
                                             variant === "outlined"
-                                            ? theme.colors.surface
+                                            ? labelBackgroundColor ?? theme.colors.surface
                                             : "transparent",
 
                                     paddingHorizontal:
