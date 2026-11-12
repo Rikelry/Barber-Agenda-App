@@ -20,6 +20,8 @@ const fallbackSymbols: Record<string, string> = {
     chevronLeft: "‹",
     moreVert: "⋮",
     bell: "🔔",
+    location: "📍",
+    phone: "📞",
 };
 
 export const Icon = ({
