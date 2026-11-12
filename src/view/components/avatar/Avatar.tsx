@@ -1,9 +1,9 @@
 // Avatar (design-system/04-componentes/avatar.md): foto circular ou a inicial do nome quando
-// não há foto ou ela falha ao carregar.
+// não há foto, enquanto ela carrega ou se falhar.
 
 import { Image } from "expo-image";
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Typography } from "@/view/components/typography";
@@ -43,19 +43,19 @@ export const Avatar = ({ name, uri, size = "medium" }: AvatarProps) => {
                 justifyContent: "center",
             }}
         >
+            {/* A inicial fica por baixo: aparece enquanto a foto carrega e se ela falhar. */}
+            <Typography variant={VARIANTE_INICIAL[size]} color="onSurfaceVariant">
+                {name.trim().charAt(0).toUpperCase() || "?"}
+            </Typography>
             {mostrarFoto ? (
                 <Image
                     source={{ uri: uri ?? undefined }}
-                    style={{ width: lado, height: lado }}
+                    style={StyleSheet.absoluteFill}
                     contentFit="cover"
                     transition={theme.motion.duration.short4}
                     onError={() => setFalhou(true)}
                 />
-            ) : (
-                <Typography variant={VARIANTE_INICIAL[size]} color="onSurfaceVariant">
-                    {name.trim().charAt(0).toUpperCase() || "?"}
-                </Typography>
-            )}
+            ) : null}
         </View>
     );
 };
