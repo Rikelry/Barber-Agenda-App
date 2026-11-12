@@ -9,3 +9,5 @@ export * from "./fab";
 export * from "./text-field";
 export * from "./switch";
 export * from "./checkbox";
+export * from "./avatar";
+export * from "./tab-bar";
