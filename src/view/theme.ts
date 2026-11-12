@@ -594,6 +594,10 @@ export const darkTheme: DesignTheme = {
 export const componentSizes = {
     /** avatar.md: pequeno (listas compactas), médio (listas e Home), grande (perfil). */
     avatar: { small: 32, medium: 48, large: 96 },
+    /** Imagem de barbearia: miniatura nos cards e capa no detalhe. */
+    thumbnail: { card: 72, heroHeight: 180 },
+    /** Esqueleto de carregamento (padrão 2 de 05-padroes.md). */
+    skeleton: { line: 16, card: 96 },
     /** barra-busca.md: altura do contêiner. */
     searchBar: { height: 48 },
     /** 06-acessibilidade.md: alvo de toque mínimo. */
