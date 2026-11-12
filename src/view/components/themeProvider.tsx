@@ -4,6 +4,7 @@ import {
     useContext,
     useMemo,
     useState,
+    useSyncExternalStore,
     type PropsWithChildren,
 } from "react";
 
@@ -23,6 +24,8 @@ export type DesignSystemContextValue = {
     toggleTheme: () => void;
 };
 
+const semAssinatura = () => () => {};
+
 const DesignSystemContext =
     createContext<DesignSystemContextValue | null>(null);
 
@@ -35,7 +38,12 @@ export const DesignSystemProvider = ({
     mode: initialPreference = "system",
 }: DesignSystemProviderProps) => {
     const [preference, setPreference] = useState<ThemePreference>(initialPreference);
-    const systemColorScheme = useColorScheme();
+    // Na web o HTML vem renderizado no servidor, que não sabe o tema do navegador. O primeiro
+    // desenho usa o tema claro, como o servidor, e só depois aplica o do sistema; sem isso o
+    // React mantém o fundo claro do servidor no modo escuro (erro de hidratação).
+    const hidratado = useSyncExternalStore(semAssinatura, () => true, () => false);
+    const esquemaDoSistema = useColorScheme();
+    const systemColorScheme = hidratado ? esquemaDoSistema : "light";
 
     const resolvedMode: ThemeMode =
         preference === "system"
