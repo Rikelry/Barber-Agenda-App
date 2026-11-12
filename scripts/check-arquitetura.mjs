@@ -202,7 +202,8 @@ function applyViewRules(files) {
       if (/export\s+default\b/.test(content)) {
         add("CMP-01", rel, 1, "Componente em view/components/ usa export default.", "Use export nomeado (ex.: export const Button = () => {...}).", "docs/harness/02-convencoes-de-codigo.md");
       }
-      if (!/export\s+(const|function|class)\s+[A-Za-z_$]/.test(content) && !/export\s*\{/.test(content)) {
+      // Arquivos só de tipos (X.types.ts) e barris (index.ts com export *) também exportam por nome.
+      if (!/export\s+(const|function|class|type|interface)\s+[A-Za-z_$]/.test(content) && !/export\s*(\{|\*)/.test(content)) {
         add("CMP-01", rel, 1, "Componente em view/components/ não tem export nomeado.", "Exporte o componente por nome.", "docs/harness/02-convencoes-de-codigo.md");
       }
       if (/@\/viewmodel/.test(content) || /use\w+ViewModel\s*\(/.test(content)) {
