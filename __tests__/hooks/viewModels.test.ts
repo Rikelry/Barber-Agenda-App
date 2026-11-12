@@ -3,11 +3,9 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 
 import type { Barbershop } from "@/model/entities/barbershop";
 import type { Professional } from "@/model/entities/professional";
-import { DomainError } from "@/model/errors";
 import type { IBarbershopUseCases } from "@/usecase/iBarbershopUseCases";
 import { useBarbeirosViewModel } from "@/viewmodel/useBarbeirosViewModel";
 import { useDetalheBarbeariaViewModel } from "@/viewmodel/useDetalheBarbeariaViewModel";
-import { useHomeViewModel } from "@/viewmodel/useHomeViewModel";
 import { usePerfilBarbeiroViewModel } from "@/viewmodel/usePerfilBarbeiroViewModel";
 
 const mockPush = jest.fn();
@@ -39,43 +37,6 @@ const casosFalsos = (): jest.Mocked<IBarbershopUseCases> => ({
 beforeEach(() => {
   mockPush.mockClear();
   mockParams = {};
-});
-
-describe("useHomeViewModel", () => {
-  it("carrega as barbearias e abre o detalhe e a lista de barbeiros", async () => {
-    const casos = casosFalsos();
-    const { result } = await renderHook(() => useHomeViewModel(casos));
-    await waitFor(() => expect(result.current[0].status).toBe("content"));
-    expect(result.current[0].barbershops).toEqual([BARBEARIA]);
-
-    await act(async () => {
-      result.current[1].openBarbershop("b1");
-    });
-    expect(mockPush).toHaveBeenCalledWith({ pathname: "/barbearia/[id]", params: { id: "b1" } });
-    await act(async () => {
-      result.current[1].openBarbers();
-    });
-    expect(mockPush).toHaveBeenLastCalledWith("/barbeiros");
-  });
-
-  it("busca sem resultado fica vazia e erro mostra a mensagem do domínio", async () => {
-    const casos = casosFalsos();
-    casos.listBarbershops.mockResolvedValueOnce([BARBEARIA]).mockResolvedValueOnce([]);
-    const { result } = await renderHook(() => useHomeViewModel(casos));
-    await waitFor(() => expect(result.current[0].status).toBe("content"));
-    await act(async () => {
-      result.current[1].setSearch("zzz");
-    });
-    await waitFor(() => expect(result.current[0].status).toBe("empty"));
-    expect(casos.listBarbershops).toHaveBeenLastCalledWith("zzz");
-
-    casos.listBarbershops.mockRejectedValueOnce(new DomainError("Entre na sua conta.", "UNAUTHORIZED"));
-    await act(async () => {
-      result.current[1].retry();
-    });
-    await waitFor(() => expect(result.current[0].status).toBe("error"));
-    expect(result.current[0].errorMessage).toBe("Entre na sua conta.");
-  });
 });
 
 describe("useBarbeirosViewModel", () => {

@@ -1,71 +1,95 @@
 import { router } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { barbershopUseCases } from "@/di/container";
-import type { Barbershop } from "@/model/entities/barbershop";
+import { homeUseCases, profileUseCases } from "@/di/container";
+import type { Appointment } from "@/model/entities/appointment";
+import type { BarbershopHighlight, ServiceCategory } from "@/model/entities/highlight";
+import type { User } from "@/model/entities/user";
 import { DomainError } from "@/model/errors";
-import type { IBarbershopUseCases } from "@/usecase/iBarbershopUseCases";
+import type { IHomeUseCases } from "@/usecase/iHomeUseCases";
+import type { IProfileUseCases } from "@/usecase/iProfileUseCases";
 
-export type HomeStatus = "loading" | "error" | "empty" | "content";
+export type HomeStatus = "loading" | "error" | "content";
 
 export type HomeState = {
   status: HomeStatus;
-  search: string;
-  barbershops: Barbershop[];
+  user: User | null;
+  category: ServiceCategory | null;
+  highlights: BarbershopHighlight[];
+  loadingHighlights: boolean;
+  nextAppointment: Appointment | null;
   errorMessage: string | null;
 };
 
 export type HomeActions = {
-  setSearch: (text: string) => void;
+  selectCategory: (category: ServiceCategory) => void;
   retry: () => void;
-  openBarbershop: (barbershopId: string) => void;
-  openBarbers: () => void;
+  openSearch: () => void;
+  openHighlight: (barbershopId: string) => void;
+  goProfile: () => void;
 };
 
-/** Espera o usuário parar de digitar antes de buscar. */
-const ATRASO_BUSCA_MS = 300;
+const mensagem = (erro: unknown) =>
+  erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo.";
 
 export function useHomeViewModel(
-  useCases: IBarbershopUseCases = barbershopUseCases,
+  home: IHomeUseCases = homeUseCases,
+  profile: IProfileUseCases = profileUseCases,
 ): [HomeState, HomeActions] {
   const [status, setStatus] = useState<HomeStatus>("loading");
-  const [search, setSearch] = useState("");
-  const [barbershops, setBarbershops] = useState<Barbershop[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [category, setCategory] = useState<ServiceCategory | null>("cabelo");
+  const [highlights, setHighlights] = useState<BarbershopHighlight[]>([]);
+  const [loadingHighlights, setLoadingHighlights] = useState(false);
+  const [nextAppointment, setNextAppointment] = useState<Appointment | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const pedido = useRef(0);
 
   const carregar = useCallback(
-    async (termo: string) => {
-      const atual = ++pedido.current;
-      setStatus("loading");
-      try {
-        const lista = await useCases.listBarbershops(termo);
-        if (atual !== pedido.current) return;
-        setBarbershops(lista);
-        setErrorMessage(null);
-        setStatus(lista.length === 0 ? "empty" : "content");
-      } catch (erro: unknown) {
-        if (atual !== pedido.current) return;
-        setErrorMessage(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo.");
-        setStatus("error");
-      }
+    (categoria: ServiceCategory | null) => {
+      Promise.all([profile.getProfile(), home.getHighlights(categoria), home.getNextAppointment()]).then(
+        ([usuario, destaques, proximo]) => {
+          setUser(usuario);
+          setHighlights(destaques);
+          setNextAppointment(proximo);
+          setErrorMessage(null);
+          setStatus("content");
+        },
+        (erro: unknown) => {
+          setErrorMessage(mensagem(erro));
+          setStatus("error");
+        },
+      );
     },
-    [useCases],
+    [home, profile],
   );
 
   useEffect(() => {
-    const id = setTimeout(() => void carregar(search), search ? ATRASO_BUSCA_MS : 0);
-    return () => clearTimeout(id);
-  }, [search, carregar]);
+    carregar("cabelo");
+  }, [carregar]);
+
+  const selectCategory = (escolhida: ServiceCategory) => {
+    // Tocar na categoria já escolhida mostra todas de novo.
+    const nova = escolhida === category ? null : escolhida;
+    setCategory(nova);
+    setLoadingHighlights(true);
+    home
+      .getHighlights(nova)
+      .then(setHighlights, (erro: unknown) => setErrorMessage(mensagem(erro)))
+      .finally(() => setLoadingHighlights(false));
+  };
 
   return [
-    { status, search, barbershops, errorMessage },
+    { status, user, category, highlights, loadingHighlights, nextAppointment, errorMessage },
     {
-      setSearch,
-      retry: () => void carregar(search),
-      openBarbershop: (barbershopId) =>
+      selectCategory,
+      retry: () => {
+        setStatus("loading");
+        carregar(category);
+      },
+      openSearch: () => router.navigate("/barbeiros"),
+      openHighlight: (barbershopId) =>
         router.push({ pathname: "/barbearia/[id]", params: { id: barbershopId } }),
-      openBarbers: () => router.push("/barbeiros"),
+      goProfile: () => router.navigate("/perfil"),
     },
   ];
 }

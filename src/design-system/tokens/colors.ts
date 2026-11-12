@@ -109,3 +109,12 @@ export const darkColors = {
 export type ColorTokens = {
     [K in keyof typeof lightColors]: string;
 };
+
+/**
+ * Cores de status de agendamento (05-padroes.md, padrão 7). O verde do "Confirmado"
+ * (#2E7D32) está documentado lá como pendente de token semântico; os demais reaproveitam
+ * papéis do esquema.
+ */
+export const statusColors = {
+    confirmed: { container: "#2E7D32", content: "#FFFFFF" },
+} as const;
