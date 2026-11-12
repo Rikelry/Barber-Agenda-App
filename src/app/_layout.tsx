@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 
+import { DesignSystemProvider as DesignSystemSrcProvider } from "@/design-system";
 import { DesignSystemProvider, useDesignSystem } from "@/view/components/themeProvider";
 
 const StackComTema = () => {
@@ -18,13 +19,17 @@ const StackComTema = () => {
       <Stack.Screen name="barbeiros" options={{ title: "Barbeiros" }} />
       <Stack.Screen name="barbearia/[id]" options={{ title: "Barbearia" }} />
       <Stack.Screen name="barbeiro/[id]" options={{ title: "Barbeiro" }} />
+      <Stack.Screen name="perfil" options={{ headerShown: false }} />
     </Stack>
   );
 };
 
 const RootLayout = () => (
   <DesignSystemProvider>
-    <StackComTema />
+    {/* A tela de perfil usa os componentes de src/design-system, que têm o próprio provider. */}
+    <DesignSystemSrcProvider>
+      <StackComTema />
+    </DesignSystemSrcProvider>
   </DesignSystemProvider>
 );
 

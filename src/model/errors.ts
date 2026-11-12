@@ -14,4 +14,13 @@ export type DomainErrorCode =
   | "NOT_FOUND"
   | "NETWORK"
   | "SERVER"
-  | "INVALID_DATA";
+  | "INVALID_DATA"
+  | "VALIDATION";
+
+/** Campos inválidos de um formulário, cada um com a mensagem que aparece abaixo dele. */
+export class ValidationError<Campo extends string = string> extends DomainError {
+  constructor(readonly fields: Partial<Record<Campo, string>>) {
+    super("Confira os campos destacados.", "VALIDATION");
+    this.name = "ValidationError";
+  }
+}
