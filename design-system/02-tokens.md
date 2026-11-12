@@ -50,9 +50,9 @@ As cores de cabelo são dados visuais de domínio. Não devem ser utilizadas com
 | --- | --- | --- |
 | `neutral.white` | `#FFFFFF` | Novo |
 | `neutral.black` | `#000000` | Novo |
-| `brand.source.primary` | Proposta como `orange-500` (`#FF8500`), pendente de geração de paleta tonal no Material Theme Builder | Adaptado |
-| `brand.source.secondary` | Pendente de definição pelo grupo entre as cores da marca | Novo |
-| `brand.source.tertiary` | Pendente de definição pelo grupo entre as cores da marca | Novo |
+| `brand.source.primary` | `orange-500` (`#FF8500`); esquema tonal gerado com `SchemeFidelity` do Material (`@material/material-color-utilities`, o mesmo algoritmo do Theme Builder), contraste 0 | Adaptado |
+| `brand.source.secondary` | Derivada de `brand.source.primary` pelo esquema tonal (pode ser trocada por outra cor da marca) | Novo |
+| `brand.source.tertiary` | Derivada de `brand.source.primary` pelo esquema tonal (pode ser trocada por outra cor da marca) | Novo |
 
 As fontes de marca devem ser confirmadas pelo grupo e convertidas em paletas tonais completas no Material Theme Builder antes da fixação dos papéis semânticos derivados. As cores naturais de cabelo não constituem paleta tonal de interface.
 
@@ -103,41 +103,41 @@ Os níveis são referências para mapear componentes. Elevação tonal e sombra 
 
 ### Cor
 
-Os papéis semânticos seguem a nomenclatura do Material 3 Expressive. Os valores canônicos de ação (`color.primary`) e conteúdo sobre ação (`color.on-primary`) substituem os termos legados `color.action` e `color.on-action`. Os valores definitivos de produção devem ser confirmados com a exportação do Material Theme Builder a partir das cores de marca da equipe.
+Os papéis semânticos seguem a nomenclatura do Material 3 Expressive. Os valores canônicos de ação (`color.primary`) e conteúdo sobre ação (`color.on-primary`) substituem os termos legados `color.action` e `color.on-action`. Os valores abaixo foram gerados da cor de marca da equipe com o algoritmo do Material Theme Builder (ver nota ao fim da tabela).
 
 | Token | Claro | Escuro | Uso | Origem |
 | --- | --- | --- | --- | --- |
-| `color.primary` | `primary` do esquema tonal claro (proposta base: `orange-500` / `#FF8500`)* | `primary` do esquema tonal escuro* | Ações principais (substitui `color.action`) | Adaptado |
-| `color.on-primary` | `onPrimary` do esquema claro (proposta base: `brown-900` / `#332E29`)* | `onPrimary` do esquema escuro* | Conteúdo sobre primário (substitui `color.on-action`) | Adaptado |
-| `color.primary-container` | `primaryContainer` do esquema claro* | `primaryContainer` do esquema escuro* | Destaques e ações secundárias | Adaptado |
-| `color.on-primary-container` | `onPrimaryContainer` do esquema claro* | `onPrimaryContainer` do esquema escuro* | Conteúdo sobre contêiner primário | Adaptado |
-| `color.secondary` | `secondary` do esquema claro* | `secondary` do esquema escuro* | Ações de apoio | Adaptado |
-| `color.on-secondary` | `onSecondary` do esquema claro* | `onSecondary` do esquema escuro* | Conteúdo sobre secundário | Adaptado |
-| `color.secondary-container` | `secondaryContainer` do esquema claro* | `secondaryContainer` do esquema escuro* | Seleções e ações tonais | Adaptado |
-| `color.on-secondary-container` | `onSecondaryContainer` do esquema claro* | `onSecondaryContainer` do esquema escuro* | Conteúdo sobre contêiner secundário | Adaptado |
-| `color.tertiary` | `tertiary` do esquema claro* | `tertiary` do esquema escuro* | Acentos complementares | Adaptado |
-| `color.on-tertiary` | `onTertiary` do esquema claro* | `onTertiary` do esquema escuro* | Conteúdo sobre terciário | Adaptado |
-| `color.tertiary-container` | `tertiaryContainer` do esquema claro* | `tertiaryContainer` do esquema escuro* | Destaques complementares | Adaptado |
-| `color.on-tertiary-container` | `onTertiaryContainer` do esquema claro* | `onTertiaryContainer` do esquema escuro* | Conteúdo sobre contêiner terciário | Adaptado |
-| `color.surface` | `#FFFFFF` (base M3, sujeito a tom gerado) | `#1C1B1F` (base M3, sujeito a tom gerado) | Superfícies de tela | Adaptado |
-| `color.on-surface` | `#1C1B1F` (base M3, sujeito a tom gerado) | `#E6E1E5` (base M3, sujeito a tom gerado) | Texto e ícones principais | Adaptado |
-| `color.surface-variant` | `surfaceVariant` do esquema claro* | `surfaceVariant` do esquema escuro* | Superfícies diferenciadas | Adaptado |
-| `color.on-surface-variant` | `onSurfaceVariant` do esquema claro* | `onSurfaceVariant` do esquema escuro* | Conteúdo secundário | Adaptado |
-| `color.surface-container-low` | `surfaceContainerLow` do esquema claro* | `surfaceContainerLow` do esquema escuro* | Cartões discretos | Adaptado |
-| `color.surface-container` | `surfaceContainer` do esquema claro* | `surfaceContainer` do esquema escuro* | Agrupamentos de conteúdo | Adaptado |
-| `color.surface-container-high` | `surfaceContainerHigh` do esquema claro* | `surfaceContainerHigh` do esquema escuro* | Diálogos e superfícies elevadas | Adaptado |
-| `color.outline` | `outline` do esquema claro* | `outline` do esquema escuro* | Bordas e campos | Adaptado |
-| `color.outline-variant` | `outlineVariant` do esquema claro* | `outlineVariant` do esquema escuro* | Divisores e contornos sutis | Adaptado |
-| `color.error` | `#B3261E` (base M3)* | `#F2B8B5` (base M3)* | Erros e ações destrutivas | Adaptado |
-| `color.on-error` | `#FFFFFF` (base M3)* | `#601410` (base M3)* | Conteúdo sobre erro | Adaptado |
-| `color.error-container` | `errorContainer` do esquema claro* | `errorContainer` do esquema escuro* | Fundo de mensagens de erro | Adaptado |
-| `color.on-error-container` | `onErrorContainer` do esquema claro* | `onErrorContainer` do esquema escuro* | Conteúdo sobre contêiner de erro | Adaptado |
-| `color.inverse-surface` | `inverseSurface` do esquema claro* | `inverseSurface` do esquema escuro* | Superfícies invertidas | Adaptado |
-| `color.inverse-on-surface` | `inverseOnSurface` do esquema claro* | `inverseOnSurface` do esquema escuro* | Conteúdo em superfícies invertidas | Adaptado |
-| `color.inverse-primary` | `inversePrimary` do esquema claro* | `inversePrimary` do esquema escuro* | Primário em contexto invertido | Adaptado |
+| `color.primary` | `#944B00` | `#FFB783` | Ações principais (substitui `color.action`) | Adaptado |
+| `color.on-primary` | `#FFFFFF` | `#4F2500` | Conteúdo sobre primário (substitui `color.on-action`) | Adaptado |
+| `color.primary-container` | `#FF8500` | `#FF8500` | Destaques e ações secundárias | Adaptado |
+| `color.on-primary-container` | `#602E00` | `#602E00` | Conteúdo sobre contêiner primário | Adaptado |
+| `color.secondary` | `#895023` | `#FFB783` | Ações de apoio | Adaptado |
+| `color.on-secondary` | `#FFFFFF` | `#4F2500` | Conteúdo sobre secundário | Adaptado |
+| `color.secondary-container` | `#FEB37D` | `#6D3A0D` | Seleções e ações tonais | Adaptado |
+| `color.on-secondary-container` | `#794317` | `#EEA570` | Conteúdo sobre contêiner secundário | Adaptado |
+| `color.tertiary` | `#006494` | `#8ECDFF` | Acentos complementares | Adaptado |
+| `color.on-tertiary` | `#FFFFFF` | `#00344F` | Conteúdo sobre terciário | Adaptado |
+| `color.tertiary-container` | `#02AFFF` | `#02AFFF` | Destaques complementares | Adaptado |
+| `color.on-tertiary-container` | `#003F60` | `#003F60` | Conteúdo sobre contêiner terciário | Adaptado |
+| `color.surface` | `#FFF8F5` | `#1B110A` | Superfícies de tela | Adaptado |
+| `color.on-surface` | `#241912` | `#F4DED2` | Texto e ícones principais | Adaptado |
+| `color.surface-variant` | `#FBDDC9` | `#574335` | Superfícies diferenciadas | Adaptado |
+| `color.on-surface-variant` | `#574335` | `#DEC1AE` | Conteúdo secundário | Adaptado |
+| `color.surface-container-low` | `#FFF1E9` | `#241912` | Cartões discretos | Adaptado |
+| `color.surface-container` | `#FFEADE` | `#291D15` | Agrupamentos de conteúdo | Adaptado |
+| `color.surface-container-high` | `#FAE4D7` | `#34271F` | Diálogos e superfícies elevadas | Adaptado |
+| `color.outline` | `#8A7262` | `#A68C7B` | Bordas e campos | Adaptado |
+| `color.outline-variant` | `#DEC1AE` | `#574335` | Divisores e contornos sutis | Adaptado |
+| `color.error` | `#BA1A1A` | `#FFB4AB` | Erros e ações destrutivas | Adaptado |
+| `color.on-error` | `#FFFFFF` | `#690005` | Conteúdo sobre erro | Adaptado |
+| `color.error-container` | `#FFDAD6` | `#93000A` | Fundo de mensagens de erro | Adaptado |
+| `color.on-error-container` | `#93000A` | `#FFDAD6` | Conteúdo sobre contêiner de erro | Adaptado |
+| `color.inverse-surface` | `#3B2E25` | `#F4DED2` | Superfícies invertidas | Adaptado |
+| `color.inverse-on-surface` | `#FFEDE4` | `#3B2E25` | Conteúdo em superfícies invertidas | Adaptado |
+| `color.inverse-primary` | `#FFB783` | `#944B00` | Primário em contexto invertido | Adaptado |
 | `color.focus` | Papel de contorno ou foco validado para o esquema claro* | Papel de contorno ou foco validado para o esquema escuro* | Indicador de foco acessível | Novo |
 
-\* **Situação dos valores semânticos:** Os papéis marcados com asterisco dependem da exportação oficial do Material Theme Builder baseada nas fontes de marca aprovadas pelo grupo. Não se deve considerar valores provisórios ou ilustrativos como especificação definitiva de produção sem validação de contraste e tema.
+\* **Situação dos valores semânticos:** Valores gerados de `orange-500` (`#FF8500`) com `SchemeFidelity`, que mantém a cor da marca como `primary-container`. Contraste medido (claro / escuro): `primary`×`on-primary` 6,43 / 7,73; `primary-container`×`on-primary-container` 4,56 / 4,56; `surface`×`on-surface` 16,35 / 14,34; `surface`×`on-surface-variant` 8,85 / 10,91. Em código: `src/view/theme.ts` (`lightColors` / `darkColors`).
 
 ### Tipografia
 
