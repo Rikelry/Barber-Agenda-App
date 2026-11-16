@@ -98,4 +98,10 @@ describe("ProfessionalUseCases", () => {
     await casos.listMyBlocks();
     expect(pro.getMe).toHaveBeenCalledTimes(2);
   });
+
+  it("remove um bloqueio pontual pelo id do profissional logado", async () => {
+    const { pro, casos } = montar([]);
+    await casos.removeOneOffBlock("u1");
+    expect(pro.removeUnavailability).toHaveBeenCalledWith({ professionalId: "p1", barbershopId: "b1" }, "u1");
+  });
 });

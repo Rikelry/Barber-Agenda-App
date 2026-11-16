@@ -92,6 +92,12 @@ describe("BarbershopUseCases", () => {
     expect(fonte.getProfessional).toHaveBeenCalledWith("b1", "p2");
   });
 
+  it("busca em branco não filtra a lista", async () => {
+    const casos = new BarbershopUseCases(fonteFalsa());
+    expect(normalizeSearch("   ")).toBe("");
+    expect((await casos.listBarbershops("   ")).map((b) => b.id)).toEqual(["b1", "b2"]);
+  });
+
   it("repassa o erro da fonte de dados", async () => {
     const fonte = fonteFalsa();
     fonte.listBarbershops.mockRejectedValueOnce(new Error("falhou"));
