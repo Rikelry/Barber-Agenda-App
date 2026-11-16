@@ -1,10 +1,12 @@
 // Composição das dependências: único lugar (fora dos testes) que importa @/infra.
 
+import { HttpAuthDataSource } from "@/infra/datasources/httpAuthDataSource";
 import { HttpBarbershopDataSource } from "@/infra/datasources/httpBarbershopDataSource";
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
 import { InMemoryUserDataSource } from "@/infra/datasources/inMemoryUserDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
+import { AuthUseCases } from "@/usecase/authUseCases";
 import { BarbershopUseCases } from "@/usecase/barbershopUseCases";
 import { HomeUseCases } from "@/usecase/homeUseCases";
 import { ProfileUseCases } from "@/usecase/profileUseCases";
@@ -15,6 +17,7 @@ const httpClient = new HttpClient(authSession);
 const barbershopDataSource = new HttpBarbershopDataSource(httpClient);
 
 export const barbershopUseCases = new BarbershopUseCases(barbershopDataSource);
+export const authUseCases = new AuthUseCases(new HttpAuthDataSource(httpClient), authSession);
 
 // Perfil: usuário de exemplo em memória até a tela de login existir.
 export const profileUseCases = new ProfileUseCases(new InMemoryUserDataSource());

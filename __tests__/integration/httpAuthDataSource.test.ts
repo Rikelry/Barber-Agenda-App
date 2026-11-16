@@ -1,0 +1,58 @@
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+
+import { HttpAuthDataSource } from "@/infra/datasources/httpAuthDataSource";
+import { HttpClient } from "@/infra/http/httpClient";
+import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
+import { ValidationError } from "@/model/errors";
+
+type Init = { method: string; headers: Record<string, string>; body?: string };
+let fetchMock: jest.Mock<(url: string, init: Init) => Promise<Response>>;
+const resposta = (corpo: unknown, status = 200) =>
+  ({ status, ok: status >= 200 && status < 300, json: async () => corpo }) as unknown as Response;
+const fonte = () => new HttpAuthDataSource(new HttpClient(new MemoryAuthSessionService(), "http://api.teste/api/v1"));
+
+beforeEach(() => {
+  fetchMock = jest.fn();
+  globalThis.fetch = fetchMock as unknown as typeof fetch;
+});
+
+describe("HttpAuthDataSource", () => {
+  it("login envia POST com JSON e converte a sessão", async () => {
+    fetchMock.mockResolvedValue(
+      resposta({
+        token: "jwt",
+        usuario: { id: "u1", name: "Lucas", email: "l@mail.com", phone: "11999999999", role: "cliente", roles: ["cliente", "owner"], createdAt: "2024-01-15T10:00:00Z" },
+      }),
+    );
+    const sessao = await fonte().login("l@mail.com", "segredo12");
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe("http://api.teste/api/v1/auth/login");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body!)).toEqual({ email: "l@mail.com", password: "segredo12" });
+    expect(sessao).toMatchObject({ token: "jwt", roles: ["cliente", "owner"], user: { name: "Lucas" } });
+    expect(sessao.user.memberSince.getUTCFullYear()).toBe(2024);
+  });
+
+  it("traduz os erros do backend: credenciais, e-mail repetido e validação por campo", async () => {
+    fetchMock.mockResolvedValueOnce(resposta({ error: "INVALID_CREDENTIALS", message: "E-mail ou senha inválidos." }, 401));
+    await expect(fonte().login("l@mail.com", "x")).rejects.toMatchObject({ code: "UNAUTHORIZED", message: "E-mail ou senha inválidos." });
+
+    fetchMock.mockResolvedValueOnce(resposta({ error: "EMAIL_ALREADY_EXISTS", message: "E-mail já cadastrado." }, 409));
+    const repetido = await fonte()
+      .register({ name: "Lucas", email: "l@mail.com", phone: "11999999999", password: "segredo12" })
+      .catch((e: unknown) => e);
+    expect((repetido as ValidationError).fields).toEqual({ email: "E-mail já cadastrado." });
+
+    fetchMock.mockResolvedValueOnce(
+      resposta({ error: "VALIDATION_ERROR", message: "Dados inválidos.", details: { newPassword: ["Senha deve ter no mínimo 8 caracteres"] } }, 400),
+    );
+    const invalido = await fonte().resetPassword("tk", "123").catch((e: unknown) => e);
+    expect((invalido as ValidationError).fields).toEqual({ newPassword: "Senha deve ter no mínimo 8 caracteres" });
+    expect(fetchMock.mock.calls[2]![1].method).toBe("PATCH");
+  });
+
+  it("token de redefinição expirado vira mensagem do backend", async () => {
+    fetchMock.mockResolvedValue(resposta({ error: "INVALID_RESET_TOKEN", message: "Token inválido ou expirado." }, 400));
+    await expect(fonte().resetPassword("velho", "segredo12")).rejects.toMatchObject({ message: "Token inválido ou expirado." });
+  });
+});
