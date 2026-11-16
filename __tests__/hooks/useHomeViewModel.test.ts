@@ -4,15 +4,20 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import type { BarbershopHighlight } from "@/model/entities/highlight";
 import type { User } from "@/model/entities/user";
 import type { IHomeUseCases } from "@/usecase/iHomeUseCases";
-import type { IProfileUseCases } from "@/usecase/iProfileUseCases";
+import type { IAuthUseCases } from "@/usecase/iAuthUseCases";
 import { useHomeViewModel } from "@/viewmodel/useHomeViewModel";
 
 const mockNavigate = jest.fn();
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 jest.mock("expo-router", () => ({
-  router: { navigate: (...a: unknown[]) => mockNavigate(...a), push: (...a: unknown[]) => mockPush(...a) },
+  router: {
+    navigate: (...a: unknown[]) => mockNavigate(...a),
+    push: (...a: unknown[]) => mockPush(...a),
+    replace: (...a: unknown[]) => mockReplace(...a),
+  },
 }));
-jest.mock("@/di/container", () => ({ homeUseCases: {}, profileUseCases: {} }));
+jest.mock("@/di/container", () => ({ homeUseCases: {}, authUseCases: {} }));
 
 const USUARIO: User = {
   id: "u1",
@@ -31,17 +36,37 @@ const DESTAQUE: BarbershopHighlight = {
   categories: ["cabelo"],
 };
 
+const autenticado = (logado = true): jest.Mocked<IAuthUseCases> => ({
+  getSession: jest.fn(() => (logado ? { token: "jwt", user: USUARIO, roles: ["cliente" as const] } : null)),
+  login: jest.fn(async () => {
+    throw new Error("não usado");
+  }),
+  register: jest.fn(async () => {
+    throw new Error("não usado");
+  }),
+  requestPasswordReset: jest.fn(async () => undefined),
+  resetPassword: jest.fn(async () => undefined),
+  logout: jest.fn(),
+});
+
 describe("useHomeViewModel", () => {
+  it("sem conta entrada manda para o login", async () => {
+    const home: jest.Mocked<IHomeUseCases> = {
+      getHighlights: jest.fn(async () => []),
+      getNextAppointment: jest.fn(async () => null),
+    };
+    await renderHook(() => useHomeViewModel(home, autenticado(false)));
+    expect(mockReplace).toHaveBeenCalledWith("/login");
+    expect(home.getHighlights).not.toHaveBeenCalled();
+  });
+
   it("carrega usuário, destaques de cabelo e próximo agendamento; navega pela barra", async () => {
     const home: jest.Mocked<IHomeUseCases> = {
       getHighlights: jest.fn(async () => [DESTAQUE]),
       getNextAppointment: jest.fn(async () => null),
     };
-    const perfil: jest.Mocked<IProfileUseCases> = {
-      getProfile: jest.fn(async () => USUARIO),
-      saveProfile: jest.fn(async () => USUARIO),
-    };
-    const { result } = await renderHook(() => useHomeViewModel(home, perfil));
+    const auth = autenticado();
+    const { result } = await renderHook(() => useHomeViewModel(home, auth));
     await waitFor(() => expect(result.current[0].status).toBe("content"));
     expect(result.current[0].user?.name).toBe("Felipe Albuquerque");
     expect(home.getHighlights).toHaveBeenCalledWith("cabelo");

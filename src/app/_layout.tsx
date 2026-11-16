@@ -19,6 +19,7 @@ const StackComTema = () => {
       <Stack.Screen name="barbearia/[id]" options={{ title: "Barbearia" }} />
       <Stack.Screen name="barbeiro/[id]" options={{ title: "Barbeiro" }} />
       <Stack.Screen name="perfil" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
     </Stack>
   );
 };

@@ -1,13 +1,13 @@
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
-import { homeUseCases, profileUseCases } from "@/di/container";
+import { authUseCases, homeUseCases } from "@/di/container";
 import type { Appointment } from "@/model/entities/appointment";
 import type { BarbershopHighlight, ServiceCategory } from "@/model/entities/highlight";
 import type { User } from "@/model/entities/user";
 import { DomainError } from "@/model/errors";
 import type { IHomeUseCases } from "@/usecase/iHomeUseCases";
-import type { IProfileUseCases } from "@/usecase/iProfileUseCases";
+import type { IAuthUseCases } from "@/usecase/iAuthUseCases";
 
 export type HomeStatus = "loading" | "error" | "content";
 
@@ -34,7 +34,7 @@ const mensagem = (erro: unknown) =>
 
 export function useHomeViewModel(
   home: IHomeUseCases = homeUseCases,
-  profile: IProfileUseCases = profileUseCases,
+  auth: IAuthUseCases = authUseCases,
 ): [HomeState, HomeActions] {
   const [status, setStatus] = useState<HomeStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
@@ -46,9 +46,15 @@ export function useHomeViewModel(
 
   const carregar = useCallback(
     (categoria: ServiceCategory | null) => {
-      Promise.all([profile.getProfile(), home.getHighlights(categoria), home.getNextAppointment()]).then(
-        ([usuario, destaques, proximo]) => {
-          setUser(usuario);
+      const sessao = auth.getSession();
+      // Padrão 1 de 05-padroes.md: sem conta entrada, o app abre no login.
+      if (!sessao) {
+        router.replace("/login");
+        return;
+      }
+      Promise.all([home.getHighlights(categoria), home.getNextAppointment()]).then(
+        ([destaques, proximo]) => {
+          setUser(sessao.user);
           setHighlights(destaques);
           setNextAppointment(proximo);
           setErrorMessage(null);
@@ -60,7 +66,7 @@ export function useHomeViewModel(
         },
       );
     },
-    [home, profile],
+    [home, auth],
   );
 
   useEffect(() => {
