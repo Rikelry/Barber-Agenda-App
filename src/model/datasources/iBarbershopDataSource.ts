@@ -1,4 +1,5 @@
 import type { Barbershop } from "@/model/entities/barbershop";
+import type { BusinessHours } from "@/model/entities/businessHours";
 import type { Professional } from "@/model/entities/professional";
 import type { Service } from "@/model/entities/service";
 
@@ -8,4 +9,5 @@ export interface IBarbershopDataSource {
   listProfessionals(barbershopId: string): Promise<Professional[]>;
   getProfessional(barbershopId: string, professionalId: string): Promise<Professional>;
   listServices(barbershopId: string): Promise<Service[]>;
+  listBusinessHours(barbershopId: string): Promise<BusinessHours[]>;
 }

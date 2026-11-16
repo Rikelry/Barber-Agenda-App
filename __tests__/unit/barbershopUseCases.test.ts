@@ -47,6 +47,7 @@ const fonteFalsa = (): jest.Mocked<IBarbershopDataSource> => ({
   listProfessionals: jest.fn(async (id: string) => PROFISSIONAIS[id] ?? []),
   getProfessional: jest.fn(async (b: string, p: string) => PROFISSIONAIS[b]!.find((x) => x.id === p)!),
   listServices: jest.fn(async () => SERVICOS),
+  listBusinessHours: jest.fn(async () => []),
 });
 
 describe("BarbershopUseCases", () => {

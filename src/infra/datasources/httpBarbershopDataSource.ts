@@ -3,6 +3,7 @@
 
 import type { IBarbershopDataSource } from "@/model/datasources/iBarbershopDataSource";
 import type { Barbershop } from "@/model/entities/barbershop";
+import type { BusinessHours } from "@/model/entities/businessHours";
 import type { Professional } from "@/model/entities/professional";
 import type { Service } from "@/model/entities/service";
 import { DomainError } from "@/model/errors";
@@ -101,5 +102,13 @@ export class HttpBarbershopDataSource implements IBarbershopDataSource {
     return asList<ServiceDto>(await this.http.get(`/barbershops/${segment(barbershopId)}/services`)).map(
       toService,
     );
+  }
+
+  async listBusinessHours(barbershopId: string): Promise<BusinessHours[]> {
+    return asList<BusinessHours>(await this.http.get(`/barbershops/${segment(barbershopId)}/hours`)).map((h) => ({
+      dayOfWeek: h.dayOfWeek,
+      openTime: h.openTime.slice(0, 5),
+      closeTime: h.closeTime.slice(0, 5),
+    }));
   }
 }

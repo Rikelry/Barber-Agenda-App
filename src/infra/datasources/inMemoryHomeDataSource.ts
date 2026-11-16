@@ -53,10 +53,15 @@ export class InMemoryHomeDataSource implements IHomeDataSource {
     return [
       {
         id: "a1",
+        barbershopId: "b1",
         barbershopName: "Barbearia Don Corleone",
+        professionalId: "p1",
         professionalName: "Alessandro",
-        serviceNames: ["Corte", "Barba"],
+        serviceId: "s1",
+        serviceName: "Corte & Barba",
+        durationMinutes: 70,
         startsAt: amanhaAs15(),
+        endsAt: new Date(amanhaAs15().getTime() + 70 * 60000),
         status: "confirmed",
       },
     ];

@@ -45,7 +45,7 @@ const hora = (data: Date) =>
 
 const STATUS = {
   confirmed: "Confirmado",
-  pending: "Pendente",
+  completed: "Concluído",
   cancelled: "Cancelado",
 } as const;
 
@@ -59,7 +59,7 @@ const Home = () => {
   const corStatus = (status: Appointment["status"]) =>
     status === "confirmed"
       ? { fundo: statusColors.confirmed.container, texto: statusColors.confirmed.content }
-      : status === "pending"
+      : status === "completed"
         ? { fundo: colors.secondaryContainer, texto: colors.onSecondaryContainer }
         : { fundo: colors.error, texto: colors.onError };
 
@@ -305,8 +305,7 @@ const Home = () => {
                     </View>
                   </View>
                   <Typography variant="bodySmall" color="onPrimaryContainer">
-                    Profissional: {state.nextAppointment.professionalName} (
-                    {state.nextAppointment.serviceNames.join(" & ")})
+                    Profissional: {state.nextAppointment.professionalName} ({state.nextAppointment.serviceName})
                   </Typography>
                 </Card>
               ) : (
