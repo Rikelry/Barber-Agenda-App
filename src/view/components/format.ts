@@ -17,3 +17,18 @@ export const formatPhone = (phone: string): string => {
     if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
     return phone;
 };
+
+const MESES_CURTOS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const DIAS_CURTOS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+/** "Hoje, 16 Nov", "Amanhã, 17 Nov", "Seg, 23 Nov" ou "Ontem, 15 Nov". */
+export const formatDayLabel = (date: Date, now: Date = new Date()): string => {
+    const inicio = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const dias = Math.round((inicio(date) - inicio(now)) / 86400000);
+    const dia = dias === 0 ? "Hoje" : dias === 1 ? "Amanhã" : dias === -1 ? "Ontem" : DIAS_CURTOS[date.getDay()];
+    return `${dia}, ${date.getDate()} ${MESES_CURTOS[date.getMonth()]}`;
+};
+
+/** 15:00 */
+export const formatTime = (date: Date): string =>
+    `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;

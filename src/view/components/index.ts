@@ -17,3 +17,4 @@ export * from "@/view/components/formScreen";
 export * from "@/view/components/passwordField";
 export * from "@/view/components/mainTabBar";
 export * from "@/view/components/weekCalendar";
+export * from "@/view/components/statusBadge";
