@@ -14,6 +14,8 @@ export type AvatarProps = {
     name: string;
     uri?: string | null;
     size?: AvatarSize;
+    /** Anel na cor primária em volta da foto (perfil). */
+    outlined?: boolean;
 };
 
 const VARIANTE_INICIAL = {
@@ -22,17 +24,29 @@ const VARIANTE_INICIAL = {
     large: "headlineMedium",
 } as const;
 
-export const Avatar = ({ name, uri, size = "medium" }: AvatarProps) => {
+export const Avatar = ({ name, uri, size = "medium", outlined = false }: AvatarProps) => {
     const { theme } = useDesignSystem();
     const [falhou, setFalhou] = useState(false);
     const lado = componentSizes.avatar[size];
     const mostrarFoto = Boolean(uri) && !falhou;
+    const anel = outlined ? theme.spacing.xs / 2 : theme.spacing.none;
 
     return (
         <View
             accessible
             accessibilityRole="image"
             accessibilityLabel={`Foto de ${name}`}
+            style={{
+                width: lado + anel * 2,
+                height: lado + anel * 2,
+                borderRadius: theme.shapes.full,
+                borderWidth: anel,
+                borderColor: theme.colors.primary,
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <View
             style={{
                 width: lado,
                 height: lado,
@@ -56,6 +70,7 @@ export const Avatar = ({ name, uri, size = "medium" }: AvatarProps) => {
                     onError={() => setFalhou(true)}
                 />
             ) : null}
+            </View>
         </View>
     );
 };

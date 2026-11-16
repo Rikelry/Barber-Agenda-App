@@ -600,8 +600,20 @@ export const componentSizes = {
     skeleton: { line: 16, card: 96 },
     /** barra-busca.md: altura do contêiner. */
     searchBar: { height: 48 },
+    /** tab-bar.md: indicador de fundo da aba ativa. */
+    tabBar: { indicatorWidth: 56, indicatorHeight: 32 },
     /** 06-acessibilidade.md: alvo de toque mínimo. */
     touchTarget: 48,
 } as const;
 
 export type AvatarSize = keyof typeof componentSizes.avatar;
+
+// --- cores de status de agendamento ------------------------------------------
+
+/**
+ * 05-padroes.md, padrão 7: o verde do "Confirmado" (#2E7D32) está documentado como
+ * pendente de token semântico; pendente e cancelado reaproveitam papéis do esquema.
+ */
+export const statusColors = {
+    confirmed: { container: "#2E7D32", content: "#FFFFFF" },
+} as const;

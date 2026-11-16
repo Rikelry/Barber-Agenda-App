@@ -12,3 +12,4 @@ export * from "@/view/components/switch";
 export * from "@/view/components/checkbox";
 export * from "@/view/components/themeProvider";
 export * from "@/view/components/searchBar";
+export * from "@/view/components/tabBar";
