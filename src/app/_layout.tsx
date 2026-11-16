@@ -16,7 +16,18 @@ const StackComTema = () => {
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="barbeiros" options={{ title: "Barbeiros" }} />
-      <Stack.Screen name="barbearia/[id]" options={{ title: "Barbearia" }} />
+      <Stack.Screen name="barbearias" options={{ headerShown: false }} />
+      <Stack.Screen name="agendamento/novo" options={{ headerShown: false }} />
+      <Stack.Screen name="agendamentos" options={{ headerShown: false }} />
+      <Stack.Screen name="minha-agenda" options={{ headerShown: false }} />
+      <Stack.Screen name="indisponibilidades" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/index" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/nova" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/[id]/index" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/[id]/horarios" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/[id]/profissionais" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/[id]/servicos" options={{ headerShown: false }} />
+      <Stack.Screen name="barbearia/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="barbeiro/[id]" options={{ title: "Barbeiro" }} />
       <Stack.Screen name="perfil" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />

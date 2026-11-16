@@ -1,9 +1,10 @@
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
-import { profileUseCases } from "@/di/container";
+import { authUseCases, profileUseCases } from "@/di/container";
 import type { User } from "@/model/entities/user";
 import { DomainError, ValidationError } from "@/model/errors";
+import type { IAuthUseCases } from "@/usecase/iAuthUseCases";
 import type { IProfileUseCases, ProfileField, ProfileForm } from "@/usecase/iProfileUseCases";
 
 export type PerfilStatus = "loading" | "error" | "content";
@@ -19,6 +20,10 @@ export type PerfilState = {
   /** Erro ao carregar ou ao salvar (fora dos campos). */
   errorMessage: string | null;
   successMessage: string | null;
+  /** Dono de barbearia: mostra "Minhas barbearias"; senão, "Cadastrar minha barbearia". */
+  isOwner: boolean;
+  /** Profissional de alguma barbearia: mostra "Minha agenda". */
+  isProfessional: boolean;
 };
 
 export type PerfilActions = {
@@ -27,8 +32,8 @@ export type PerfilActions = {
   toggleShowNewPassword: () => void;
   save: () => void;
   retry: () => void;
-  goHome: () => void;
-  goSearch: () => void;
+  openMyBarbershops: () => void;
+  openMyAgenda: () => void;
 };
 
 const FORM_VAZIO: ProfileForm = { name: "", phone: "", currentPassword: "", newPassword: "" };
@@ -48,7 +53,10 @@ const mensagem = (erro: unknown) =>
 
 export function usePerfilViewModel(
   useCases: IProfileUseCases = profileUseCases,
+  auth: IAuthUseCases = authUseCases,
 ): [PerfilState, PerfilActions] {
+  const isOwner = auth.getSession()?.roles.includes("owner") ?? false;
+  const isProfessional = auth.getSession()?.roles.includes("profissional") ?? false;
   const [status, setStatus] = useState<PerfilStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [form, setForm] = useState<ProfileForm>(FORM_VAZIO);
@@ -111,6 +119,8 @@ export function usePerfilViewModel(
       saving,
       errorMessage,
       successMessage,
+      isOwner,
+      isProfessional,
     },
     {
       setField: (field, value) => {
@@ -121,13 +131,12 @@ export function usePerfilViewModel(
       toggleShowCurrentPassword: () => setShowCurrentPassword((v) => !v),
       toggleShowNewPassword: () => setShowNewPassword((v) => !v),
       save,
+      openMyAgenda: () => router.push("/minha-agenda"),
+      openMyBarbershops: () => router.push(isOwner ? "/minhas-barbearias" : "/minhas-barbearias/nova"),
       retry: () => {
         setStatus("loading");
         carregar();
       },
-      // Aba Início: volta para a Home que já está aberta (ou a abre no lugar do perfil).
-      goHome: () => router.dismissTo("/"),
-      goSearch: () => router.navigate("/barbeiros"),
     },
   ];
 }

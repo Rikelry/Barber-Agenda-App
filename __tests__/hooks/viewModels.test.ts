@@ -29,7 +29,7 @@ const BARBEIRO: Professional = {
 
 const casosFalsos = (): jest.Mocked<IBarbershopUseCases> => ({
   listBarbershops: jest.fn(async () => [BARBEARIA]),
-  getBarbershopDetail: jest.fn(async () => ({ barbershop: BARBEARIA, services: [], professionals: [BARBEIRO] })),
+  getBarbershopDetail: jest.fn(async () => ({ barbershop: BARBEARIA, services: [], professionals: [BARBEIRO], hoursToday: null })),
   listBarbers: jest.fn(async () => [{ professional: BARBEIRO, barbershop: BARBEARIA }]),
   getBarberProfile: jest.fn(async () => ({ professional: BARBEIRO, barbershop: BARBEARIA, services: [] })),
 });

@@ -9,14 +9,15 @@ import { Avatar } from "@/view/components/avatar";
 import { Button } from "@/view/components/button";
 import { Card } from "@/view/components/card";
 import { Chip } from "@/view/components/chip";
+import { formatDayLabel, formatTime } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
-import { TabBar } from "@/view/components/tabBar";
+import { MainTabBar } from "@/view/components/mainTabBar";
+import { STATUS_LABEL, StatusBadge } from "@/view/components/statusBadge";
 import { Typography } from "@/view/components/typography";
-import { statusColors } from "@/view/theme";
 import { useDesignSystem } from "@/view/components/themeProvider";
-import type { Appointment } from "@/model/entities/appointment";
 import type { ServiceCategory } from "@/model/entities/highlight";
 import { useHomeViewModel } from "@/viewmodel/useHomeViewModel";
+import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const CATEGORIAS: { valor: ServiceCategory; rotulo: string }[] = [
   { valor: "cabelo", rotulo: "Cabelo" },
@@ -28,40 +29,13 @@ const CATEGORIAS: { valor: ServiceCategory; rotulo: string }[] = [
 /** Card do carrossel de destaques. */
 const DESTAQUE = { largura: 220, alturaImagem: 120 };
 
-const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-/** "Hoje, 13 Nov", "Amanhã, 14 Nov" ou "Seg, 17 Nov". */
-const rotuloDia = (data: Date) => {
-  const hoje = new Date();
-  const inicio = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  const dias = Math.round((inicio(data) - inicio(hoje)) / 86400000);
-  const dia = dias === 0 ? "Hoje" : dias === 1 ? "Amanhã" : DIAS[data.getDay()];
-  return `${dia}, ${data.getDate()} ${MESES[data.getMonth()]}`;
-};
-
-const hora = (data: Date) =>
-  `${String(data.getHours()).padStart(2, "0")}:${String(data.getMinutes()).padStart(2, "0")}`;
-
-const STATUS = {
-  confirmed: "Confirmado",
-  pending: "Pendente",
-  cancelled: "Cancelado",
-} as const;
-
 const Home = () => {
   const [state, actions] = useHomeViewModel();
+  const tabs = useTabBarViewModel("inicio");
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
   const insets = useSafeAreaInsets();
   const primeiroNome = state.user?.name.split(" ")[0] ?? "";
-
-  const corStatus = (status: Appointment["status"]) =>
-    status === "confirmed"
-      ? { fundo: statusColors.confirmed.container, texto: statusColors.confirmed.content }
-      : status === "pending"
-        ? { fundo: colors.secondaryContainer, texto: colors.onSecondaryContainer }
-        : { fundo: colors.error, texto: colors.onError };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -262,7 +236,7 @@ const Home = () => {
                 <Card
                   variant="outlined"
                   accessible
-                  accessibilityLabel={`${state.nextAppointment.barbershopName}, ${rotuloDia(state.nextAppointment.startsAt)} às ${hora(state.nextAppointment.startsAt)}, ${STATUS[state.nextAppointment.status]}`}
+                  accessibilityLabel={`${state.nextAppointment.barbershopName}, ${formatDayLabel(state.nextAppointment.startsAt)} às ${formatTime(state.nextAppointment.startsAt)}, ${STATUS_LABEL[state.nextAppointment.status]}`}
                   style={{
                     gap: spacing.sm,
                     backgroundColor: colors.primaryContainer,
@@ -273,40 +247,24 @@ const Home = () => {
                     <Typography variant="titleSmall" weight="700" color="onPrimaryContainer" style={{ flex: 1 }}>
                       {state.nextAppointment.barbershopName}
                     </Typography>
-                    <View
-                      style={{
-                        paddingHorizontal: spacing.sm,
-                        paddingVertical: spacing.xs,
-                        borderRadius: theme.shapes.small,
-                        backgroundColor: corStatus(state.nextAppointment.status).fundo,
-                      }}
-                    >
-                      <Typography
-                        variant="labelSmall"
-                        weight="700"
-                        style={{ color: corStatus(state.nextAppointment.status).texto }}
-                      >
-                        {STATUS[state.nextAppointment.status]}
-                      </Typography>
-                    </View>
+                    <StatusBadge status={state.nextAppointment.status} />
                   </View>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.lg }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
                       <Icon name="calendar" size={spacing.lg} color={colors.onPrimaryContainer} />
                       <Typography variant="labelLarge" color="onPrimaryContainer">
-                        {rotuloDia(state.nextAppointment.startsAt)}
+                        {formatDayLabel(state.nextAppointment.startsAt)}
                       </Typography>
                     </View>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
                       <Icon name="clock" size={spacing.lg} color={colors.onPrimaryContainer} />
                       <Typography variant="labelLarge" color="onPrimaryContainer">
-                        {hora(state.nextAppointment.startsAt)}
+                        {formatTime(state.nextAppointment.startsAt)}
                       </Typography>
                     </View>
                   </View>
                   <Typography variant="bodySmall" color="onPrimaryContainer">
-                    Profissional: {state.nextAppointment.professionalName} (
-                    {state.nextAppointment.serviceNames.join(" & ")})
+                    Profissional: {state.nextAppointment.professionalName} ({state.nextAppointment.serviceName})
                   </Typography>
                 </Card>
               ) : (
@@ -319,14 +277,7 @@ const Home = () => {
         )}
       </ScrollView>
 
-      <TabBar
-        items={[
-          { key: "inicio", label: "Início", icon: "⌂", selected: true },
-          { key: "buscar", label: "Buscar", icon: "search", onPress: actions.openSearch },
-          { key: "agendas", label: "Agendas", icon: "calendar", disabled: true },
-          { key: "perfil", label: "Perfil", icon: "person", onPress: actions.goProfile },
-        ]}
-      />
+      <MainTabBar active={tabs[0].active} onNavigate={tabs[1].navigate} />
     </View>
   );
 };

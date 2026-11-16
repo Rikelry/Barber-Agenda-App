@@ -19,6 +19,7 @@ export const authFalso = (): jest.Mocked<IAuthUseCases> => ({
   requestPasswordReset: jest.fn(async () => undefined),
   resetPassword: jest.fn(async () => undefined),
   logout: jest.fn(),
+  refreshSession: jest.fn(async () => SESSAO),
 });
 
 /** Executa uma ação da ViewModel dentro de act (a v14 da Testing Library exige await). */

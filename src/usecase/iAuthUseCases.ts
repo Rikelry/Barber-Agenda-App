@@ -26,4 +26,6 @@ export interface IAuthUseCases {
   requestPasswordReset(email: string): Promise<void>;
   resetPassword(token: string, form: ResetPasswordForm): Promise<void>;
   logout(): void;
+  /** Atualiza token e papéis da sessão atual. */
+  refreshSession(): Promise<Session | null>;
 }

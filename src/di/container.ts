@@ -1,15 +1,22 @@
 // Composição das dependências: único lugar (fora dos testes) que importa @/infra.
 
+import { HttpAppointmentDataSource } from "@/infra/datasources/httpAppointmentDataSource";
+import { HttpProfessionalDataSource } from "@/infra/datasources/httpProfessionalDataSource";
 import { HttpAuthDataSource } from "@/infra/datasources/httpAuthDataSource";
 import { HttpBarbershopDataSource } from "@/infra/datasources/httpBarbershopDataSource";
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
 import { InMemoryUserDataSource } from "@/infra/datasources/inMemoryUserDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
+import { ExpoImagePickerService } from "@/infra/services/expoImagePickerService";
+import { HttpImageStorageService } from "@/infra/services/httpImageStorageService";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
 import { SecureSessionStorageService } from "@/infra/services/secureSessionStorageService";
+import { AppointmentUseCases } from "@/usecase/appointmentUseCases";
 import { AuthUseCases } from "@/usecase/authUseCases";
 import { BarbershopUseCases } from "@/usecase/barbershopUseCases";
 import { HomeUseCases } from "@/usecase/homeUseCases";
+import { OwnerUseCases } from "@/usecase/ownerUseCases";
+import { ProfessionalUseCases } from "@/usecase/professionalUseCases";
 import { ProfileUseCases } from "@/usecase/profileUseCases";
 
 export const authSession = new MemoryAuthSessionService();
@@ -18,6 +25,21 @@ const httpClient = new HttpClient(authSession);
 const barbershopDataSource = new HttpBarbershopDataSource(httpClient);
 
 export const barbershopUseCases = new BarbershopUseCases(barbershopDataSource);
+export const ownerUseCases = new OwnerUseCases(
+  barbershopDataSource,
+  new HttpImageStorageService(httpClient),
+  authSession,
+);
+export const imagePicker = new ExpoImagePickerService();
+export const professionalUseCases = new ProfessionalUseCases(
+  new HttpProfessionalDataSource(httpClient),
+  barbershopDataSource,
+  authSession,
+);
+export const appointmentUseCases = new AppointmentUseCases(
+  new HttpAppointmentDataSource(httpClient),
+  barbershopDataSource,
+);
 export const authUseCases = new AuthUseCases(
   new HttpAuthDataSource(httpClient),
   authSession,

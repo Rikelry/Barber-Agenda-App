@@ -7,7 +7,7 @@ import type { IProfileUseCases } from "@/usecase/iProfileUseCases";
 import { usePerfilViewModel } from "@/viewmodel/usePerfilViewModel";
 
 jest.mock("expo-router", () => ({ router: { navigate: jest.fn() } }));
-jest.mock("@/di/container", () => ({ profileUseCases: {} }));
+jest.mock("@/di/container", () => ({ profileUseCases: {}, authUseCases: { getSession: () => null } }));
 
 const USUARIO: User = {
   id: "u1",

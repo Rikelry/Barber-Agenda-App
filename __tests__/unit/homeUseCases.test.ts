@@ -16,10 +16,15 @@ const destaque = (id: string, rating: number, categories: BarbershopHighlight["c
 
 const agendamento = (id: string, startsAt: Date, status: Appointment["status"]): Appointment => ({
   id,
+  barbershopId: "b1",
   barbershopName: "Central",
+  professionalId: "p1",
   professionalName: "Zé",
-  serviceNames: ["Corte"],
+  serviceId: "s1",
+  serviceName: "Corte",
+  durationMinutes: 30,
   startsAt,
+  endsAt: startsAt,
   status,
 });
 
@@ -43,7 +48,7 @@ describe("HomeUseCases", () => {
       fonte([
         agendamento("passado", new Date(2026, 10, 11, 15), "confirmed"),
         agendamento("cancelado", new Date(2026, 10, 12, 11), "cancelled"),
-        agendamento("depois", new Date(2026, 10, 20, 9), "pending"),
+        agendamento("depois", new Date(2026, 10, 20, 9), "confirmed"),
         agendamento("proximo", new Date(2026, 10, 13, 15), "confirmed"),
       ]),
     );

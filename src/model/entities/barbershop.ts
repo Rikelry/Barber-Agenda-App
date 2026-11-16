@@ -4,4 +4,6 @@ export type Barbershop = {
   address: string;
   phone: string;
   avatarUrl: string | null;
+  /** Dono da barbearia (usuário). */
+  ownerId?: string;
 };

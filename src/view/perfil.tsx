@@ -8,18 +8,20 @@ import { Avatar } from "@/view/components/avatar";
 import { Button } from "@/view/components/button";
 import { Card } from "@/view/components/card";
 import { Icon } from "@/view/components/icon";
+import { MainTabBar } from "@/view/components/mainTabBar";
 import { IconButton } from "@/view/components/iconButton";
-import { TabBar } from "@/view/components/tabBar";
 import { TextField } from "@/view/components/textField";
 import { Typography } from "@/view/components/typography";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { usePerfilViewModel } from "@/viewmodel/usePerfilViewModel";
+import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 const membroDesde = (data: Date) => `Membro desde ${MESES[data.getMonth()]} ${data.getFullYear()}`;
 
 const Perfil = () => {
   const [state, actions] = usePerfilViewModel();
+  const tabs = useTabBarViewModel("perfil");
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
   const { user, form, fieldErrors } = state;
@@ -160,19 +162,56 @@ const Perfil = () => {
               <Button variant="filled" size="medium" fullWidth onPress={actions.save} disabled={state.saving}>
                 {state.saving ? "Salvando..." : "Salvar alterações"}
               </Button>
+
+              {state.isProfessional ? (
+                <Card
+                  variant="outlined"
+                  onPress={actions.openMyAgenda}
+                  accessibilityLabel="Minha agenda"
+                  accessibilityHint="Veja seus horários e bloqueios"
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                    <Icon name="calendar" size={spacing.xxl} color={colors.primary} />
+                    <View style={{ flex: 1, gap: spacing.xs }}>
+                      <Typography variant="titleSmall" weight="700">
+                        Minha agenda
+                      </Typography>
+                      <Typography variant="bodySmall" color="onSurfaceVariant">
+                        Seus horários do dia e as indisponibilidades.
+                      </Typography>
+                    </View>
+                    <Icon name="chevronRight" color={colors.onSurfaceVariant} />
+                  </View>
+                </Card>
+              ) : null}
+
+              <Card
+                variant="outlined"
+                onPress={actions.openMyBarbershops}
+                accessibilityLabel={state.isOwner ? "Minhas barbearias" : "Cadastrar minha barbearia"}
+                accessibilityHint={state.isOwner ? "Gerencie suas barbearias" : "Cadastre sua barbearia no app"}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                  <Icon name="scissors" size={spacing.xxl} color={colors.primary} />
+                  <View style={{ flex: 1, gap: spacing.xs }}>
+                    <Typography variant="titleSmall" weight="700">
+                      {state.isOwner ? "Minhas barbearias" : "Cadastrar minha barbearia"}
+                    </Typography>
+                    <Typography variant="bodySmall" color="onSurfaceVariant">
+                      {state.isOwner
+                        ? "Dados, horários, profissionais e serviços."
+                        : "Tem uma barbearia? Cadastre e receba agendamentos."}
+                    </Typography>
+                  </View>
+                  <Icon name="chevronRight" color={colors.onSurfaceVariant} />
+                </View>
+              </Card>
             </>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <TabBar
-        items={[
-          { key: "inicio", label: "Início", icon: "⌂", onPress: actions.goHome },
-          { key: "buscar", label: "Buscar", icon: "search", onPress: actions.goSearch },
-          { key: "agendas", label: "Agendas", icon: "calendar", disabled: true },
-          { key: "perfil", label: "Perfil", icon: "person", selected: true },
-        ]}
-      />
+      <MainTabBar active={tabs[0].active} onNavigate={tabs[1].navigate} />
     </SafeAreaView>
   );
 };

@@ -18,6 +18,7 @@ const montar = () => {
     register: jest.fn(async () => undefined),
     requestPasswordReset: jest.fn(async () => undefined),
     resetPassword: jest.fn(async () => undefined),
+    refreshToken: jest.fn(async () => ({ ...SESSAO, token: "jwt-novo", roles: ["cliente", "owner"] as Session["roles"] })),
   };
   const sessao = new MemoryAuthSessionService();
   let guardada: Session | null = null;
@@ -57,6 +58,8 @@ describe("AuthUseCases", () => {
     expect((await reaberto.restoreSession())?.token).toBe("jwt");
     expect(reaberto.getSession()?.user.name).toBe("Lucas");
 
+    expect((await reaberto.refreshSession())?.roles).toEqual(["cliente", "owner"]);
+    expect(armazenamento.save).toHaveBeenLastCalledWith(expect.objectContaining({ token: "jwt-novo" }));
     reaberto.logout();
     expect(armazenamento.save).toHaveBeenLastCalledWith(null);
   });

@@ -96,6 +96,14 @@ export class AuthUseCases implements IAuthUseCases {
     await this.dataSource.resetPassword(token, form.newPassword);
   }
 
+  async refreshSession(): Promise<Session | null> {
+    if (!this.session.getSession()) return null;
+    const nova = await this.dataSource.refreshToken();
+    this.session.setSession(nova);
+    await this.storage.save(nova);
+    return nova;
+  }
+
   logout(): void {
     this.session.setSession(null);
     void this.storage.save(null);

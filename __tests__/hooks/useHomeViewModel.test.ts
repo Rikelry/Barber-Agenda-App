@@ -48,6 +48,7 @@ const autenticado = (logado = true): jest.Mocked<IAuthUseCases> => ({
   requestPasswordReset: jest.fn(async () => undefined),
   resetPassword: jest.fn(async () => undefined),
   logout: jest.fn(),
+  refreshSession: jest.fn(async () => null),
 });
 
 describe("useHomeViewModel", () => {
