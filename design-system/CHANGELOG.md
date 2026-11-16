@@ -26,3 +26,15 @@ Versões no formato `MAIOR.MENOR.CORREÇÃO`. Mudança grande = versão nova (ex
   - Distinção explícita entre primitivos brutos de curvatura (`radius-0` a `radius-full`) e papéis semânticos (`radius.none` a `radius.full`), adicionando `field.radius` e `card.radius` aos tokens de componente.
   - Correção da tabela de acessibilidade (`06-acessibilidade.md`) com cálculo reproduzível de luminância e contraste conforme WCAG 2.2 AA, diferenciando requisitos documentados de testes pendentes de homologação em dispositivos reais.
   - Validação e correção do exemplo JSON parcial (W3C DTCG) e eliminação de links quebrados em fluxos (`05-padroes.md`).
+
+## 0.1.3 · 15/11/2026
+
+- Primeira versão do sistema de design do **Barber Agenda**, baseada no Material Design 3 e adaptada à identidade visual do aplicativo.
+- **Responsáveis:** Equipe de desenvolvimento do Barber Agenda.
+- **Mudanças:**
+  - Definição dos princípios de design e da identidade visual.
+  - Criação de tokens de cores, tipografia, espaçamento, formas, elevação e movimento.
+  - Documentação dos fundamentos visuais e das regras de uso.
+  - Definição dos padrões de autenticação e agendamento de serviços.
+  - Documentação dos critérios de acessibilidade, incluindo contraste, áreas de toque, foco e leitores de tela.
+- **Ajustes feitos após o teste com IA:** Revisão da consistência entre os arquivos, padronização dos nomes dos tokens e verificação das combinações de contraste nos modos claro e escuro. Foram documentadas melhorias para manter a navegação simples, os feedbacks claros e os fluxos de agendamento confiáveis.
