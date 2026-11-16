@@ -18,3 +18,7 @@ export * from "@/view/components/passwordField";
 export * from "@/view/components/mainTabBar";
 export * from "@/view/components/weekCalendar";
 export * from "@/view/components/statusBadge";
+export * from "@/view/components/photoPicker";
+export * from "@/view/components/overflowMenu";
+export * from "@/view/components/barbershopFields";
+export * from "@/view/components/screenHeader";
