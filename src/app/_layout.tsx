@@ -20,6 +20,7 @@ const StackComTema = () => {
       <Stack.Screen name="barbeiro/[id]" options={{ title: "Barbeiro" }} />
       <Stack.Screen name="perfil" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="cadastro" options={{ title: "Criar conta" }} />
     </Stack>
   );
 };
