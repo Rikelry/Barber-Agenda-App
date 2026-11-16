@@ -27,6 +27,7 @@ const fallbackSymbols: Record<string, string> = {
     eye: "👁",
     back: "←",
     edit: "✎",
+    trash: "🗑",
 };
 
 export const Icon = ({
