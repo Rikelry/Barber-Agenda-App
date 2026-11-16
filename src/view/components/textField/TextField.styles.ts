@@ -11,6 +11,10 @@ export type TextFieldColorsOptions = {
     disabled: boolean;
 };
 
+type TextFieldContainerOptions = TextFieldColorsOptions & {
+    multiline?: boolean;
+};
+
 export function getTextFieldColors({
     theme,
     variant,
@@ -26,18 +30,40 @@ export function getTextFieldColors({
                 variant === "filled"
                     ? hexToRgba(colors.onSurface, state.disabledContainer)
                     : "transparent",
-            borderColor: hexToRgba(colors.onSurface, state.disabledContainer),
-            textColor: hexToRgba(colors.onSurface, state.disabledContent),
-            labelColor: hexToRgba(colors.onSurface, state.disabledContent),
-            supportingColor: hexToRgba(colors.onSurface, state.disabledContent),
-            indicatorColor: hexToRgba(colors.onSurface, state.disabledContainer),
+
+            borderColor: hexToRgba(
+                colors.onSurface,
+                state.disabledContainer
+            ),
+
+            textColor: hexToRgba(
+                colors.onSurface,
+                state.disabledContent
+            ),
+
+            labelColor: hexToRgba(
+                colors.onSurface,
+                state.disabledContent
+            ),
+
+            supportingColor: hexToRgba(
+                colors.onSurface,
+                state.disabledContent
+            ),
+
+            indicatorColor: hexToRgba(
+                colors.onSurface,
+                state.disabledContent
+            ),
         };
     }
 
     if (hasError) {
         return {
             containerColor:
-                variant === "filled" ? colors.surfaceContainerHighest : "transparent",
+                variant === "filled"
+                    ? colors.surfaceContainerHighest
+                    : "transparent",
             borderColor: colors.error,
             textColor: colors.onSurface,
             labelColor: colors.error,
@@ -49,7 +75,9 @@ export function getTextFieldColors({
     if (isFocused) {
         return {
             containerColor:
-                variant === "filled" ? colors.surfaceContainerHighest : "transparent",
+                variant === "filled"
+                    ? colors.surfaceContainerHighest
+                    : "transparent",
             borderColor: colors.primary,
             textColor: colors.onSurface,
             labelColor: colors.primary,
@@ -60,7 +88,9 @@ export function getTextFieldColors({
 
     return {
         containerColor:
-            variant === "filled" ? colors.surfaceContainerHighest : "transparent",
+            variant === "filled"
+                ? colors.surfaceContainerHighest
+                : "transparent",
         borderColor: colors.outline,
         textColor: colors.onSurface,
         labelColor: colors.onSurfaceVariant,
@@ -75,7 +105,8 @@ export function getTextFieldContainerStyle({
     isFocused,
     hasError,
     disabled,
-}: TextFieldColorsOptions): ViewStyle {
+    multiline = false,
+}: TextFieldContainerOptions): ViewStyle {
     const colors = getTextFieldColors({
         theme,
         variant,
@@ -85,19 +116,36 @@ export function getTextFieldContainerStyle({
     });
 
     const isOutlined = variant === "outlined";
+    const indicatorWidth = isFocused || hasError ? 2 : 1;
 
     return {
-        minHeight: 56,
+        minHeight: multiline ? 112 : 56,
+
         paddingHorizontal: theme.spacing.lg,
-        paddingVertical: theme.spacing.sm,
-        borderRadius: isOutlined ? theme.shapes.extraSmall : theme.shapes.extraSmall,
-        borderCurve: "continuous",
-        backgroundColor: colors.containerColor,
-        borderWidth: isOutlined ? (isFocused || hasError ? 2 : 1) : 0,
-        borderBottomWidth: isOutlined ? (isFocused || hasError ? 2 : 1) : (isFocused || hasError ? 2 : 1),
-        borderColor: colors.borderColor,
+        paddingVertical: multiline ? 12 : 0,
+
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: multiline ? "flex-start" : "center",
         gap: theme.spacing.md,
+
+        backgroundColor: colors.containerColor,
+        borderCurve: "continuous",
+
+        ...(isOutlined
+            ? {
+                borderWidth: indicatorWidth,
+                borderColor: colors.borderColor,
+                borderRadius: theme.shapes.extraSmall,
+            }
+            : {
+                borderBottomWidth: indicatorWidth,
+                borderBottomColor: colors.indicatorColor,
+
+                borderTopLeftRadius: theme.shapes.extraSmall,
+                borderTopRightRadius: theme.shapes.extraSmall,
+
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+            }),
     };
 }
