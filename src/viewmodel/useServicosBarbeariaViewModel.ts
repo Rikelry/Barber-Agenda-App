@@ -1,9 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
-import { ownerUseCases } from "@/di/container";
+import { imagePicker, ownerUseCases } from "@/di/container";
 import type { Service } from "@/model/entities/service";
 import { DomainError, ValidationError } from "@/model/errors";
+import type { LocalFile } from "@/model/services/iApiService";
+import type { IImagePickerService } from "@/model/services/iImagePickerService";
 import type { IOwnerUseCases, ServiceField, ServiceForm } from "@/usecase/iOwnerUseCases";
 
 export type ServicosBarbeariaStatus = "loading" | "error" | "content";
@@ -15,6 +17,8 @@ export type ServicosBarbeariaState = {
   editing: string | null;
   form: ServiceForm;
   fieldErrors: Partial<Record<ServiceField, string>>;
+  /** Foto escolhida agora ou a que o serviço já tem. */
+  photoUri: string | null;
   saving: boolean;
   errorMessage: string | null;
 };
@@ -24,6 +28,7 @@ export type ServicosBarbeariaActions = {
   openEdit: (service: Service) => void;
   closeForm: () => void;
   setField: (field: ServiceField, value: string) => void;
+  pickPhoto: () => void;
   submit: () => void;
   retry: () => void;
   goBack: () => void;
@@ -36,6 +41,7 @@ const mensagem = (erro: unknown) =>
 
 export function useServicosBarbeariaViewModel(
   useCases: IOwnerUseCases = ownerUseCases,
+  picker: IImagePickerService = imagePicker,
 ): [ServicosBarbeariaState, ServicosBarbeariaActions] {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [status, setStatus] = useState<ServicosBarbeariaStatus>("loading");
@@ -43,6 +49,8 @@ export function useServicosBarbeariaViewModel(
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState<ServiceForm>(VAZIO);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<ServiceField, string>>>({});
+  const [photo, setPhoto] = useState<LocalFile | null>(null);
+  const [fotoAtual, setFotoAtual] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -63,8 +71,10 @@ export function useServicosBarbeariaViewModel(
     carregar();
   }, [carregar]);
 
-  const abrir = (alvo: string, dados: ServiceForm) => {
+  const abrir = (alvo: string, dados: ServiceForm, foto: string | null = null) => {
     setEditing(alvo);
+    setPhoto(null);
+    setFotoAtual(foto);
     setForm(dados);
     setFieldErrors({});
     setErrorMessage(null);
@@ -74,7 +84,8 @@ export function useServicosBarbeariaViewModel(
     if (saving || !editing) return;
     setSaving(true);
     setErrorMessage(null);
-    const pedido = editing === "novo" ? useCases.addService(id, form) : useCases.updateService(id, editing, form);
+    const pedido =
+      editing === "novo" ? useCases.addService(id, form, photo) : useCases.updateService(id, editing, form, photo);
     pedido
       .then(
         () => {
@@ -91,7 +102,7 @@ export function useServicosBarbeariaViewModel(
   };
 
   return [
-    { status, services, editing, form, fieldErrors, saving, errorMessage },
+    { status, services, editing, form, fieldErrors, photoUri: photo?.uri ?? fotoAtual, saving, errorMessage },
     {
       openNew: () => abrir("novo", VAZIO),
       openEdit: (s) =>
@@ -100,8 +111,11 @@ export function useServicosBarbeariaViewModel(
           description: s.description ?? "",
           durationMinutes: String(s.durationMinutes),
           price: s.price.toFixed(2).replace(".", ","),
-        }),
+        }, s.imageUrl),
       closeForm: () => setEditing(null),
+      pickPhoto: () => {
+        picker.pickImage().then((foto) => foto && setPhoto(foto), () => undefined);
+      },
       setField: (field, value) => {
         setForm((f) => ({ ...f, [field]: value }));
         setFieldErrors((e) => ({ ...e, [field]: undefined }));

@@ -36,7 +36,8 @@ const montar = () => {
     getBarbershop: jest.fn(async () => ({ ...barbearia("b1", "u1", "Matriz"), address: formatAddress(COMPLETO) })),
     saveBusinessHours: jest.fn(async () => undefined),
     createProfessional: jest.fn(async () => ({})),
-    createService: jest.fn(async () => ({})),
+    createService: jest.fn(async () => ({ id: "s9" })),
+    updateService: jest.fn(async () => ({})),
   } as unknown as jest.Mocked<IBarbershopDataSource>;
   const imagens: jest.Mocked<IImageStorageService> = { upload: jest.fn(async () => "https://cdn/logo.png") };
   const sessao = new MemoryAuthSessionService();
@@ -135,5 +136,7 @@ describe("OwnerUseCases", () => {
     });
     await casos.addService("b1", { name: "Corte", description: "", durationMinutes: "40", price: "50,90" });
     expect(fonte.createService).toHaveBeenCalledWith("b1", { name: "Corte", durationMinutes: 40, price: 50.9 });
+    await casos.addService("b1", { name: "Barba", description: "", durationMinutes: "30", price: "35" }, { uri: "file:///b.jpg", name: "b.jpg", mimeType: "image/jpeg" });
+    expect(fonte.updateService).toHaveBeenLastCalledWith("b1", "s9", { imageUrl: "https://cdn/logo.png" });
   });
 });

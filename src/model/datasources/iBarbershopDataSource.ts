@@ -6,7 +6,13 @@ import type { Service } from "@/model/entities/service";
 export type BarbershopData = { name: string; address: string; phone: string; avatarUrl?: string | null };
 export type ProfessionalData = { name: string; email: string; phone: string; password: string; specialty?: string };
 export type ProfessionalUpdate = { name?: string; phone?: string; specialty?: string };
-export type ServiceData = { name: string; description?: string; durationMinutes: number; price: number };
+export type ServiceData = {
+  name: string;
+  description?: string;
+  durationMinutes: number;
+  price: number;
+  imageUrl?: string | null;
+};
 
 export interface IBarbershopDataSource {
   listBarbershops(): Promise<Barbershop[]>;

@@ -144,6 +144,6 @@ describe("telas do dono", () => {
     );
     expect(srv.current[0].form).toEqual({ name: "Corte", description: "", durationMinutes: "40", price: "50,00" });
     await agir(() => srv.current[1].submit());
-    await waitFor(() => expect(dono.updateService).toHaveBeenCalledWith("b1", "s1", expect.objectContaining({ price: "50,00" })));
+    await waitFor(() => expect(dono.updateService).toHaveBeenCalledWith("b1", "s1", expect.objectContaining({ price: "50,00" }), null));
   });
 });

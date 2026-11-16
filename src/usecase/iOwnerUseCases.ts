@@ -33,6 +33,7 @@ export interface IOwnerUseCases {
   /** Na edição a senha e o e-mail não mudam. */
   updateProfessional(barbershopId: string, professionalId: string, form: ProfessionalForm): Promise<Professional>;
   listServices(barbershopId: string): Promise<Service[]>;
-  addService(barbershopId: string, form: ServiceForm): Promise<Service>;
-  updateService(barbershopId: string, serviceId: string, form: ServiceForm): Promise<Service>;
+  /** Com foto, envia a imagem depois de criar e grava a URL no serviço. */
+  addService(barbershopId: string, form: ServiceForm, photo?: LocalFile | null): Promise<Service>;
+  updateService(barbershopId: string, serviceId: string, form: ServiceForm, photo?: LocalFile | null): Promise<Service>;
 }

@@ -1,7 +1,7 @@
 // Serviços da barbearia: lista com preço e duração, editar e o formulário de novo serviço
 // (padrão 5 de 05-padroes.md, no mesmo modelo de Profissionais).
 
-import { ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "@/view/components/button";
@@ -14,7 +14,9 @@ import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
 import { TextField } from "@/view/components/textField";
 import { useDesignSystem } from "@/view/components/themeProvider";
+import { Thumbnail } from "@/view/components/thumbnail";
 import { Typography } from "@/view/components/typography";
+import { componentSizes } from "@/view/theme";
 import { useServicosBarbeariaViewModel } from "@/viewmodel/useServicosBarbeariaViewModel";
 
 const ServicosBarbearia = () => {
@@ -44,18 +46,38 @@ const ServicosBarbearia = () => {
           state.services.map((s) => (
             <Card key={s.id} variant="outlined">
               <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                <Thumbnail
+                  uri={s.imageUrl}
+                  label={`Foto de ${s.name}`}
+                  width={componentSizes.avatar.medium + spacing.sm}
+                  height={componentSizes.avatar.medium + spacing.sm}
+                />
                 <View style={{ flex: 1, gap: spacing.xs }}>
                   <Typography variant="titleSmall" weight="700">
                     {s.name}
                   </Typography>
                   {s.description ? (
-                    <Typography variant="bodySmall" color="onSurfaceVariant" numberOfLines={2}>
+                    <Typography variant="bodySmall" color="onSurfaceVariant" numberOfLines={1}>
                       {s.description}
                     </Typography>
                   ) : null}
-                  <Typography variant="bodySmall" color="onSurfaceVariant">
-                    Duração: {formatDuration(s.durationMinutes)} • {formatPrice(s.price)}
-                  </Typography>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                    <View
+                      style={{
+                        paddingHorizontal: spacing.sm,
+                        paddingVertical: spacing.xs / 2,
+                        borderRadius: theme.shapes.extraSmall,
+                        backgroundColor: colors.surfaceContainerHighest,
+                      }}
+                    >
+                      <Typography variant="labelSmall" color="onSurfaceVariant">
+                        {formatDuration(s.durationMinutes)}
+                      </Typography>
+                    </View>
+                    <Typography variant="labelLarge" weight="700" color="primary">
+                      {formatPrice(s.price)}
+                    </Typography>
+                  </View>
                 </View>
                 <IconButton
                   accessibilityLabel={`Editar ${s.name}`}
@@ -71,14 +93,30 @@ const ServicosBarbearia = () => {
           <Card variant="filled" style={{ gap: spacing.md, marginTop: spacing.md }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Typography variant="titleSmall" weight="700" accessibilityRole="header" style={{ flex: 1 }}>
-                {novo ? "Novo Serviço" : "Editar Serviço"}
+                {novo ? "Adicionar Novo Serviço" : "Editar Serviço"}
               </Typography>
               <IconButton accessibilityLabel="Fechar formulário" onPress={actions.closeForm} icon={(cor) => <Icon name="close" color={cor} />} />
             </View>
+            <Pressable
+              onPress={actions.pickPhoto}
+              accessibilityRole="button"
+              accessibilityLabel={state.photoUri ? "Trocar foto do serviço" : "Fazer upload de foto do serviço"}
+              style={{ flexDirection: "row", alignItems: "center", gap: spacing.md, minHeight: componentSizes.touchTarget }}
+            >
+              <Thumbnail
+                uri={state.photoUri}
+                label="Foto do serviço"
+                width={componentSizes.avatar.medium}
+                height={componentSizes.avatar.medium}
+              />
+              <Typography variant="labelLarge" color="primary">
+                {state.photoUri ? "Trocar foto do serviço" : "Fazer upload de foto do serviço"}
+              </Typography>
+            </Pressable>
             <TextField
               labelBackgroundColor={colors.surfaceContainerHighest}
               label="Nome do serviço"
-              placeholder="Ex: Corte de Cabelo Masculino"
+              placeholder="Ex: Cabelo & Barba Premium"
               labelAlwaysFloating
               value={form.name}
               onChangeText={(t) => actions.setField("name", t)}
@@ -86,8 +124,8 @@ const ServicosBarbearia = () => {
             />
             <TextField
               labelBackgroundColor={colors.surfaceContainerHighest}
-              label="Descrição (opcional)"
-              placeholder="Ex: Tesoura e máquina, com lavagem"
+              label="Descrição"
+              placeholder="Descreva brevemente o serviço..."
               labelAlwaysFloating
               value={form.description}
               onChangeText={(t) => actions.setField("description", t)}
@@ -96,8 +134,8 @@ const ServicosBarbearia = () => {
               <View style={{ flex: 1 }}>
                 <TextField
                   labelBackgroundColor={colors.surfaceContainerHighest}
-                  label="Duração (min)"
-                  placeholder="40"
+                  label="Duração (minutos)"
+                  placeholder="e.g. 45"
                   labelAlwaysFloating
                   keyboardType="number-pad"
                   value={form.durationMinutes}
@@ -108,8 +146,8 @@ const ServicosBarbearia = () => {
               <View style={{ flex: 1 }}>
                 <TextField
                   labelBackgroundColor={colors.surfaceContainerHighest}
-                  label="Preço (R$)"
-                  placeholder="50,00"
+                  label="Valor (R$)"
+                  placeholder="e.g. 80,00"
                   labelAlwaysFloating
                   keyboardType="decimal-pad"
                   value={form.price}
@@ -124,7 +162,7 @@ const ServicosBarbearia = () => {
               </Typography>
             ) : null}
             <Button variant="filled" size="medium" fullWidth onPress={actions.submit} disabled={state.saving}>
-              {state.saving ? "Salvando..." : novo ? "Adicionar" : "Salvar"}
+              {state.saving ? "Salvando..." : "Salvar Serviço"}
             </Button>
           </Card>
         ) : null}

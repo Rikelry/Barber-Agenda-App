@@ -230,23 +230,28 @@ export class OwnerUseCases implements IOwnerUseCases {
     return this.barbershops.listServices(barbershopId);
   }
 
-  async addService(barbershopId: string, form: ServiceForm): Promise<Service> {
+  async addService(barbershopId: string, form: ServiceForm, photo?: LocalFile | null): Promise<Service> {
     const { duracao, preco } = validarServico(form);
-    return this.barbershops.createService(barbershopId, {
+    const criado = await this.barbershops.createService(barbershopId, {
       name: form.name.trim(),
       durationMinutes: duracao,
       price: preco,
       ...(form.description.trim() && { description: form.description.trim() }),
     });
+    if (!photo) return criado;
+    const url = await this.images.upload(photo, "services", criado.id);
+    return this.barbershops.updateService(barbershopId, criado.id, { imageUrl: url });
   }
 
-  async updateService(barbershopId: string, serviceId: string, form: ServiceForm): Promise<Service> {
+  async updateService(barbershopId: string, serviceId: string, form: ServiceForm, photo?: LocalFile | null): Promise<Service> {
     const { duracao, preco } = validarServico(form);
+    const url = photo ? await this.images.upload(photo, "services", serviceId) : null;
     return this.barbershops.updateService(barbershopId, serviceId, {
       name: form.name.trim(),
       durationMinutes: duracao,
       price: preco,
       description: form.description.trim(),
+      ...(url && { imageUrl: url }),
     });
   }
 }
