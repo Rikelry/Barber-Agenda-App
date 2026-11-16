@@ -22,6 +22,8 @@ export type PerfilState = {
   successMessage: string | null;
   /** Dono de barbearia: mostra "Minhas barbearias"; senão, "Cadastrar minha barbearia". */
   isOwner: boolean;
+  /** Profissional de alguma barbearia: mostra "Minha agenda". */
+  isProfessional: boolean;
 };
 
 export type PerfilActions = {
@@ -31,6 +33,7 @@ export type PerfilActions = {
   save: () => void;
   retry: () => void;
   openMyBarbershops: () => void;
+  openMyAgenda: () => void;
 };
 
 const FORM_VAZIO: ProfileForm = { name: "", phone: "", currentPassword: "", newPassword: "" };
@@ -53,6 +56,7 @@ export function usePerfilViewModel(
   auth: IAuthUseCases = authUseCases,
 ): [PerfilState, PerfilActions] {
   const isOwner = auth.getSession()?.roles.includes("owner") ?? false;
+  const isProfessional = auth.getSession()?.roles.includes("profissional") ?? false;
   const [status, setStatus] = useState<PerfilStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [form, setForm] = useState<ProfileForm>(FORM_VAZIO);
@@ -116,6 +120,7 @@ export function usePerfilViewModel(
       errorMessage,
       successMessage,
       isOwner,
+      isProfessional,
     },
     {
       setField: (field, value) => {
@@ -126,6 +131,7 @@ export function usePerfilViewModel(
       toggleShowCurrentPassword: () => setShowCurrentPassword((v) => !v),
       toggleShowNewPassword: () => setShowNewPassword((v) => !v),
       save,
+      openMyAgenda: () => router.push("/minha-agenda"),
       openMyBarbershops: () => router.push(isOwner ? "/minhas-barbearias" : "/minhas-barbearias/nova"),
       retry: () => {
         setStatus("loading");

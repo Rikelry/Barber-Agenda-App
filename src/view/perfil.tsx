@@ -163,6 +163,28 @@ const Perfil = () => {
                 {state.saving ? "Salvando..." : "Salvar alterações"}
               </Button>
 
+              {state.isProfessional ? (
+                <Card
+                  variant="outlined"
+                  onPress={actions.openMyAgenda}
+                  accessibilityLabel="Minha agenda"
+                  accessibilityHint="Veja seus horários e bloqueios"
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                    <Icon name="calendar" size={spacing.xxl} color={colors.primary} />
+                    <View style={{ flex: 1, gap: spacing.xs }}>
+                      <Typography variant="titleSmall" weight="700">
+                        Minha agenda
+                      </Typography>
+                      <Typography variant="bodySmall" color="onSurfaceVariant">
+                        Seus horários do dia e as indisponibilidades.
+                      </Typography>
+                    </View>
+                    <Icon name="chevronRight" color={colors.onSurfaceVariant} />
+                  </View>
+                </Card>
+              ) : null}
+
               <Card
                 variant="outlined"
                 onPress={actions.openMyBarbershops}
