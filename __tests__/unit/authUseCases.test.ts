@@ -107,4 +107,10 @@ describe("AuthUseCases", () => {
     await casos.resetPassword("tk", { newPassword: "senhaForte1", confirmPassword: "senhaForte1" });
     expect(fonte.resetPassword).toHaveBeenCalledWith("tk", "senhaForte1");
   });
+
+  it("renovar sessão sem usuário logado devolve null sem chamar a API", async () => {
+    const { fonte, casos } = montar();
+    expect(await casos.refreshSession()).toBeNull();
+    expect(fonte.refreshToken).not.toHaveBeenCalled();
+  });
 });
