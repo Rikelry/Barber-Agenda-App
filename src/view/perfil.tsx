@@ -162,6 +162,28 @@ const Perfil = () => {
               <Button variant="filled" size="medium" fullWidth onPress={actions.save} disabled={state.saving}>
                 {state.saving ? "Salvando..." : "Salvar alterações"}
               </Button>
+
+              <Card
+                variant="outlined"
+                onPress={actions.openMyBarbershops}
+                accessibilityLabel={state.isOwner ? "Minhas barbearias" : "Cadastrar minha barbearia"}
+                accessibilityHint={state.isOwner ? "Gerencie suas barbearias" : "Cadastre sua barbearia no app"}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                  <Icon name="scissors" size={spacing.xxl} color={colors.primary} />
+                  <View style={{ flex: 1, gap: spacing.xs }}>
+                    <Typography variant="titleSmall" weight="700">
+                      {state.isOwner ? "Minhas barbearias" : "Cadastrar minha barbearia"}
+                    </Typography>
+                    <Typography variant="bodySmall" color="onSurfaceVariant">
+                      {state.isOwner
+                        ? "Dados, horários, profissionais e serviços."
+                        : "Tem uma barbearia? Cadastre e receba agendamentos."}
+                    </Typography>
+                  </View>
+                  <Icon name="chevronRight" color={colors.onSurfaceVariant} />
+                </View>
+              </Card>
             </>
           )}
         </ScrollView>
