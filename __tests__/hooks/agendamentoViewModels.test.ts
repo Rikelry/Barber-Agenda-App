@@ -28,6 +28,7 @@ jest.mock("expo-router", () => ({
     back: jest.fn(),
   },
   useLocalSearchParams: () => mockParams,
+  useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
 }));
 jest.mock("@/di/container", () => ({ appointmentUseCases: {}, barbershopUseCases: {} }));
 
@@ -111,7 +112,7 @@ describe("useNovoAgendamentoViewModel", () => {
 
     await agir(() => result.current[1].selectTime("15:00"));
     await agir(() => result.current[1].confirm());
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/agendamentos"));
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/agendamentos"));
     expect(agendamentos.book).toHaveBeenCalledWith({
       barbershopId: "b1",
       serviceId: "s1",
@@ -131,7 +132,7 @@ describe("useNovoAgendamentoViewModel", () => {
     expect(result.current[0].professionalId).toBe("p1");
     await agir(() => result.current[1].confirm());
     await waitFor(() => expect(result.current[0].fieldErrors.time).toBe("Escolha um horário."));
-    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockDismissTo).not.toHaveBeenCalled();
   });
 
   it("reagendar parte do agendamento existente e usa reschedule", async () => {

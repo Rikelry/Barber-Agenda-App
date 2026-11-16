@@ -182,7 +182,7 @@ export function useNovoAgendamentoViewModel(
       : agendamentos.book({ barbershopId: barbershop.id, serviceId: service.id, professionalId, date, time });
     pedido
       .then(
-        () => router.replace("/agendamentos"),
+        () => router.dismissTo("/agendamentos"),
         (erro: unknown) => {
           if (erro instanceof ValidationError) setFieldErrors(erro.fields);
           else setErrorMessage(mensagem(erro));

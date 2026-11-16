@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 
 import { appointmentUseCases } from "@/di/container";
 import type { Appointment } from "@/model/entities/appointment";
@@ -58,9 +58,12 @@ export function useAgendamentosViewModel(
     );
   }, [useCases]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  // Recarrega sempre que a tela volta a aparecer (ex.: depois de agendar ou reagendar).
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar]),
+  );
 
   const confirmCancel = () => {
     const id = confirmingCancelId;
