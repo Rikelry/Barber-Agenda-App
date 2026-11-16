@@ -26,3 +26,13 @@ Versões no formato `MAIOR.MENOR.CORREÇÃO`. Mudança grande = versão nova (ex
   - Distinção explícita entre primitivos brutos de curvatura (`radius-0` a `radius-full`) e papéis semânticos (`radius.none` a `radius.full`), adicionando `field.radius` e `card.radius` aos tokens de componente.
   - Correção da tabela de acessibilidade (`06-acessibilidade.md`) com cálculo reproduzível de luminância e contraste conforme WCAG 2.2 AA, diferenciando requisitos documentados de testes pendentes de homologação em dispositivos reais.
   - Validação e correção do exemplo JSON parcial (W3C DTCG) e eliminação de links quebrados em fluxos (`05-padroes.md`).
+
+## 0.2.0 · 12/11/26
+
+- Fixação do esquema de cor a partir da marca.
+- **Responsáveis:** @jose2gabriel
+- **Mudanças:**
+  - `brand.source.primary` confirmado como `orange-500` (`#FF8500`).
+  - Papéis semânticos de cor (claro e escuro) gerados com `SchemeFidelity` do Material e aplicados em `src/view/theme.ts`, substituindo o roxo padrão do M3.
+  - Contraste dos pares texto/fundo principais medido e registrado no `02-tokens.md` (todos acima de 4,5:1).
+  - `color.focus` continua pendente de definição.
