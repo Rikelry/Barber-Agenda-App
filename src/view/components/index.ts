@@ -13,3 +13,5 @@ export * from "@/view/components/checkbox";
 export * from "@/view/components/themeProvider";
 export * from "@/view/components/searchBar";
 export * from "@/view/components/tabBar";
+export * from "@/view/components/formScreen";
+export * from "@/view/components/passwordField";

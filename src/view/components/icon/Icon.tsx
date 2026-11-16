@@ -22,6 +22,10 @@ const fallbackSymbols: Record<string, string> = {
     bell: "🔔",
     location: "📍",
     phone: "📞",
+    lock: "🔒",
+    upload: "⤒",
+    eye: "👁",
+    back: "←",
 };
 
 export const Icon = ({
