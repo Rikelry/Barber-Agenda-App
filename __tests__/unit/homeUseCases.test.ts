@@ -55,4 +55,11 @@ describe("HomeUseCases", () => {
     expect((await casos.getNextAppointment(AGORA))?.id).toBe("proximo");
     expect(await new HomeUseCases(fonte([])).getNextAppointment(AGORA)).toBeNull();
   });
+
+  it("sem dados cadastrados, destaques e próximo agendamento ficam vazios", async () => {
+    const vazio: IHomeDataSource = { listHighlights: async () => [], listMyAppointments: async () => [] };
+    const casos = new HomeUseCases(vazio);
+    expect(await casos.getHighlights()).toEqual([]);
+    expect(await casos.getNextAppointment(AGORA)).toBeNull();
+  });
 });

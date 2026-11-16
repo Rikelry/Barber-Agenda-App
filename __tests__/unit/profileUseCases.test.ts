@@ -30,4 +30,8 @@ describe("ProfileUseCases", () => {
     expect(erro).toBeInstanceOf(ValidationError);
     expect((erro as ValidationError).fields).toEqual({ currentPassword: "A senha atual não confere." });
   });
+
+  it("troca de senha válida passa na validação", () => {
+    expect(validateProfile({ ...FORM_OK, currentPassword: "atual1234", newPassword: "novaSenha123" })).toEqual({});
+  });
 });

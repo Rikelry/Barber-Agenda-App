@@ -86,4 +86,9 @@ describe("AppointmentUseCases", () => {
     await casos.cancel("a1");
     expect(agendamentos.cancel).toHaveBeenCalledWith("a1");
   });
+
+  it("sem agendamentos futuros, o próximo é nulo", async () => {
+    const { casos } = montar([agendamento("passado", new Date(2026, 10, 10, 9), "completed")]);
+    expect(await casos.getNextAppointment(AGORA)).toBeNull();
+  });
 });

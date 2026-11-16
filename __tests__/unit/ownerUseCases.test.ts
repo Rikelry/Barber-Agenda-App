@@ -139,4 +139,9 @@ describe("OwnerUseCases", () => {
     await casos.addService("b1", { name: "Barba", description: "", durationMinutes: "30", price: "35" }, { uri: "file:///b.jpg", name: "b.jpg", mimeType: "image/jpeg" });
     expect(fonte.updateService).toHaveBeenLastCalledWith("b1", "s9", { imageUrl: "https://cdn/logo.png" });
   });
+
+  it("busca sem correspondência devolve lista vazia", async () => {
+    const { casos } = montar();
+    expect(await casos.listMyBarbershops("inexistente", new Date(2026, 10, 16, 10))).toEqual([]);
+  });
 });
