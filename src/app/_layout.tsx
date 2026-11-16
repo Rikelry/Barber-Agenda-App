@@ -24,6 +24,7 @@ const StackComTema = () => {
       <Stack.Screen name="minhas-barbearias/[id]/index" options={{ headerShown: false }} />
       <Stack.Screen name="minhas-barbearias/[id]/horarios" options={{ headerShown: false }} />
       <Stack.Screen name="minhas-barbearias/[id]/profissionais" options={{ headerShown: false }} />
+      <Stack.Screen name="minhas-barbearias/[id]/servicos" options={{ headerShown: false }} />
       <Stack.Screen name="barbearia/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="barbeiro/[id]" options={{ title: "Barbeiro" }} />
       <Stack.Screen name="perfil" options={{ headerShown: false }} />
