@@ -47,7 +47,7 @@ const fonteFalsa = (): jest.Mocked<IBarbershopDataSource> => ({
   listProfessionals: jest.fn(async (id: string) => PROFISSIONAIS[id] ?? []),
   getProfessional: jest.fn(async (b: string, p: string) => PROFISSIONAIS[b]!.find((x) => x.id === p)!),
   listServices: jest.fn(async () => SERVICOS),
-  listBusinessHours: jest.fn(async () => []),
+  listBusinessHours: jest.fn(async () => [{ dayOfWeek: 1, openTime: "09:00", closeTime: "20:00" }]),
 });
 
 describe("BarbershopUseCases", () => {
@@ -63,7 +63,11 @@ describe("BarbershopUseCases", () => {
   });
 
   it("detalhe traz serviços do mais barato ao mais caro e barbeiros em ordem", async () => {
-    const detalhe = await new BarbershopUseCases(fonteFalsa()).getBarbershopDetail("b1");
+    const segunda = new Date(2026, 10, 16, 10);
+    const detalhe = await new BarbershopUseCases(fonteFalsa()).getBarbershopDetail("b1", segunda);
+    expect(detalhe.hoursToday).toEqual({ dayOfWeek: 1, openTime: "09:00", closeTime: "20:00" });
+    const domingo = await new BarbershopUseCases(fonteFalsa()).getBarbershopDetail("b1", new Date(2026, 10, 15, 10));
+    expect(domingo.hoursToday).toBeNull();
     expect(detalhe.barbershop.name).toBe("Barbearia Central");
     expect(detalhe.services.map((s) => s.name)).toEqual(["Corte", "Combo"]);
     expect(detalhe.professionals.map((p) => p.name)).toEqual(["André Lima", "Zé Tesoura"]);

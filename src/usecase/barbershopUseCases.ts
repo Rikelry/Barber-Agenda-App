@@ -33,14 +33,17 @@ export class BarbershopUseCases implements IBarbershopUseCases {
       .sort((a, b) => byName(a.name, b.name));
   }
 
-  async getBarbershopDetail(barbershopId: string): Promise<BarbershopDetail> {
-    const [barbershop, services, professionals] = await Promise.all([
+  async getBarbershopDetail(barbershopId: string, now: Date = new Date()): Promise<BarbershopDetail> {
+    const [barbershop, services, professionals, hours] = await Promise.all([
       this.dataSource.getBarbershop(barbershopId),
       this.dataSource.listServices(barbershopId),
       this.dataSource.listProfessionals(barbershopId),
+      // Sem horários cadastrados a tela ainda mostra a barbearia.
+      this.dataSource.listBusinessHours(barbershopId).catch(() => []),
     ]);
     return {
       barbershop,
+      hoursToday: hours.find((h) => h.dayOfWeek === now.getDay()) ?? null,
       services: [...services].sort((a, b) => a.price - b.price),
       professionals: [...professionals].sort((a, b) => byName(a.name, b.name)),
     };
