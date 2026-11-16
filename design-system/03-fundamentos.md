@@ -4,42 +4,72 @@
 
 ## Cor
 
-- Use `color.primary` somente para destacar a ação principal da tela (substituindo o termo legado `color.action`). (Adaptado)
-- Nunca use cor como única forma de comunicar um estado. Acrescente texto, ícone ou outro indicador visual. (Herdado)
-- Use os tokens semânticos de cor definidos em `02-tokens.md`, sem aplicar valores hexadecimais diretamente nos componentes. (Novo)
-- Garanta contraste adequado nos temas claro e escuro antes de considerar a paleta validada. (Adaptado)
+- Utilize `color.action` somente para destacar a ação principal da tela. (Adaptado)
+- Utilize `color.secondary` para ações secundárias e elementos de apoio. (Adaptado)
+- Utilize `color.surface` como fundo principal das telas. (Herdado)
+- Utilize `color.surface-container` para cards, painéis e agrupamentos de conteúdo. (Adaptado)
+- Utilize `color.on-surface` para textos principais e `color.on-surface-variant` para informações secundárias. (Adaptado)
+- Utilize `color.error` para erros, alertas críticos e ações destrutivas. (Herdado)
+- Nunca utilize cores como única forma de comunicar um estado. Acrescente texto ou ícone. (Herdado)
+- Mantenha contraste mínimo de 4,5:1 para textos comuns. (Herdado)
+- Preserve a identidade castanha nos modos claro e escuro. (Adaptado)
 
 ## Tipografia
 
-- Use `font.headline-small` ou `font.title-large` para títulos de tela e seções, e `font.body-large` ou `font.body-medium` para textos corridos (substituindo os termos legados `font.title` e `font.body`). (Adaptado)
-- Respeite o tamanho de fonte escolhido pelo usuário no sistema, considerando Dynamic Type no iOS e a escala de fonte no Android. (Herdado)
-- Use os estilos tipográficos definidos em `02-tokens.md` e evite criar tamanhos isolados sem necessidade. (Adaptado)
-- Destaque informações essenciais do agendamento, como serviço, profissional, data, horário e preço, sem depender somente da cor. (Novo)
+- Utilize `font.title` para títulos de tela e `font.subtitle` para subtítulos. (Herdado)
+- Utilize `font.body` para textos corridos e `font.caption` para informações auxiliares. (Herdado)
+- Utilize `font.label` para rótulos de botões e campos. (Herdado)
+- Utilize exclusivamente a família Roboto. (Herdado)
+- Respeite a escala de fonte configurada pelo usuário no Android. (Herdado)
+- Permita a ampliação dos textos sem cortar informações ou sobrepor componentes. (Herdado)
+- Evite utilizar muitos tamanhos e pesos tipográficos na mesma tela. (Adaptado)
 
 ## Espaçamento
 
-- Use múltiplos de 8 dp para margens, alturas e espaçamentos, ou múltiplos de 4 dp para ajustes finos. (Herdado)
-- Use `space.md` como margem lateral padrão das telas. (Adaptado)
-- Use os tokens de espaçamento de `02-tokens.md` de forma consistente entre telas e componentes. (Adaptado)
-- Preserve espaço suficiente entre horários, botões e controles para facilitar a interação por toque. (Novo)
+- Utilize múltiplos de 8 dp como padrão e múltiplos de 4 dp para ajustes finos. (Herdado)
+- Utilize `space.md` como margem lateral padrão das telas. (Adaptado)
+- Utilize `space.sm` entre elementos relacionados. (Herdado)
+- Utilize `space.lg` para separar grupos de informações. (Herdado)
+- Utilize `space.xl` para separar seções independentes. (Herdado)
+- Mantenha espaçamentos consistentes entre componentes equivalentes. (Herdado)
+- Evite ajustar margens individualmente sem necessidade. (Adaptado)
 
 ## Ícones
 
-- Use Material Symbols como conjunto de ícones padrão do aplicativo, mantendo consistência de estilo e tamanho. (Novo)
-- Prefira ícones de 24 dp em botões e ações comuns, salvo quando a especificação do componente indicar outro tamanho. (Adaptado)
-- Adicione um rótulo acessível aos botões que contenham somente ícones. (Herdado)
-- Use ícones acompanhados de texto quando o significado ou a ação não forem evidentes. (Adaptado)
+- Utilize Material Symbols como conjunto oficial de ícones. (Herdado)
+- Utilize ícones de 24 dp como tamanho padrão. (Herdado)
+- Utilize ícones de 20 dp para elementos compactos e de 32 dp para destaques. (Adaptado)
+- Utilize ícones preenchidos para indicar seleção ou estado ativo quando houver correspondência no conjunto adotado. (Herdado)
+- Utilize rótulos textuais em ações cuja finalidade não seja imediatamente reconhecível. (Herdado)
+- Forneça descrição acessível para ícones informativos e rótulos para ícones interativos. (Herdado)
+- Oculte ícones puramente decorativos dos leitores de tela. (Herdado)
+- Evite misturar bibliotecas de ícones diferentes. (Adaptado)
 
 ## Elevação
 
-- Use `elevation.card` para destacar cards que precisem se separar visualmente do fundo. (Adaptado)
-- Prefira contraste de superfície ou bordas quando a elevação não acrescentar hierarquia visual. (Novo)
-- Reserve elevações maiores para elementos que apareçam acima do conteúdo, como menus e diálogos, conforme a escala definida em `02-tokens.md`. (Adaptado)
-- Evite usar sombras diferentes sem uma necessidade funcional clara. (Novo)
+- Utilize `elevation.card` para cards que precisam se destacar da superfície. (Herdado)
+- Utilize `elevation.dialog` para diálogos e elementos temporários sobrepostos. (Herdado)
+- Utilize contraste de cor ou bordas para separar elementos que não precisam de elevação. (Adaptado)
+- Preserve a hierarquia visual entre superfície, cards e diálogos. (Herdado)
+- Evite sombras excessivas e elevação em elementos que não representam camadas independentes. (Adaptado)
 
 ## Movimento
 
-- Use animações curtas para confirmar ações, indicar mudanças de estado ou acompanhar transições entre contextos. (Adaptado)
-- Evite animações decorativas frequentes, movimentos que distraiam e transições que atrasem o agendamento. (Novo)
-- Respeite a opção de reduzir movimento do sistema, mantendo as informações e funcionalidades disponíveis. (Herdado)
-- Não use animações como única forma de comunicar carregamento, sucesso, erro ou indisponibilidade de horários. (Novo)
+- Utilize `motion.duration.short` para feedback de toque e pequenas mudanças de estado. (Herdado)
+- Utilize `motion.duration.medium` para transições entre telas e mudanças de contexto. (Adaptado)
+- Utilize `motion.duration.long` para abertura de diálogos e painéis. (Adaptado)
+- Utilize `motion.easing.standard` como curva padrão das animações. (Herdado)
+- Utilize `motion.easing.decelerate` para a entrada de elementos na interface. (Herdado)
+- Respeite a configuração de redução de movimento do Android. (Herdado)
+- Remova animações não essenciais quando a opção de redução de movimento estiver ativa. (Adaptado)
+- Utilize animações somente quando ajudarem a indicar uma mudança de estado, fornecer feedback ou orientar a navegação. (Herdado)
+- Evite animações contínuas, excessivas ou que atrasem o acesso às funcionalidades. (Adaptado)
+
+## Responsividade e plataforma
+
+- Utilize unidades dp para dimensões e espaçamentos no React Native. (Herdado)
+- Utilize `SafeAreaView` para respeitar as áreas seguras do dispositivo. (Herdado)
+- Mantenha os componentes adaptáveis a diferentes tamanhos de tela. (Herdado)
+- Preserve os comportamentos de navegação esperados do Android. (Herdado)
+- Utilize alvos de toque de pelo menos 48 dp para elementos interativos. (Herdado)
+- Evite posicionamentos fixos que provoquem cortes em telas menores ou com texto ampliado. (Adaptado)
