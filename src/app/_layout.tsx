@@ -21,6 +21,7 @@ const StackComTema = () => {
       <Stack.Screen name="perfil" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="cadastro" options={{ title: "Criar conta" }} />
+      <Stack.Screen name="recuperar-senha" options={{ title: "Recuperar senha" }} />
     </Stack>
   );
 };
