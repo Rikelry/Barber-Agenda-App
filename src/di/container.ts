@@ -1,6 +1,7 @@
 // Composição das dependências: único lugar (fora dos testes) que importa @/infra.
 
 import { HttpAppointmentDataSource } from "@/infra/datasources/httpAppointmentDataSource";
+import { HttpProfessionalDataSource } from "@/infra/datasources/httpProfessionalDataSource";
 import { HttpAuthDataSource } from "@/infra/datasources/httpAuthDataSource";
 import { HttpBarbershopDataSource } from "@/infra/datasources/httpBarbershopDataSource";
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
@@ -15,6 +16,7 @@ import { AuthUseCases } from "@/usecase/authUseCases";
 import { BarbershopUseCases } from "@/usecase/barbershopUseCases";
 import { HomeUseCases } from "@/usecase/homeUseCases";
 import { OwnerUseCases } from "@/usecase/ownerUseCases";
+import { ProfessionalUseCases } from "@/usecase/professionalUseCases";
 import { ProfileUseCases } from "@/usecase/profileUseCases";
 
 export const authSession = new MemoryAuthSessionService();
@@ -29,6 +31,11 @@ export const ownerUseCases = new OwnerUseCases(
   authSession,
 );
 export const imagePicker = new ExpoImagePickerService();
+export const professionalUseCases = new ProfessionalUseCases(
+  new HttpProfessionalDataSource(httpClient),
+  barbershopDataSource,
+  authSession,
+);
 export const appointmentUseCases = new AppointmentUseCases(
   new HttpAppointmentDataSource(httpClient),
   barbershopDataSource,
