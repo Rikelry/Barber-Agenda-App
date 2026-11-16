@@ -1,21 +1,19 @@
 // Home: saudação com foto, busca, acesso rápido por categoria, destaques da semana, próximo
-// agendamento e a barra de navegação inferior. Usa os componentes de src/design-system.
+// agendamento e a barra de navegação inferior. Usa os componentes de src/view/components.
 
 import { Image } from "expo-image";
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  Avatar,
-  Button,
-  Card,
-  Chip,
-  Icon,
-  TabBar,
-  Typography,
-  statusColors,
-  useDesignSystem,
-} from "@/design-system";
+import { Avatar } from "@/view/components/avatar";
+import { Button } from "@/view/components/button";
+import { Card } from "@/view/components/card";
+import { Chip } from "@/view/components/chip";
+import { Icon } from "@/view/components/icon";
+import { TabBar } from "@/view/components/tabBar";
+import { Typography } from "@/view/components/typography";
+import { statusColors } from "@/view/theme";
+import { useDesignSystem } from "@/view/components/themeProvider";
 import type { Appointment } from "@/model/entities/appointment";
 import type { ServiceCategory } from "@/model/entities/highlight";
 import { useHomeViewModel } from "@/viewmodel/useHomeViewModel";

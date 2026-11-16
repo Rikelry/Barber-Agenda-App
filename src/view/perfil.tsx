@@ -1,20 +1,18 @@
 // Meu perfil: foto, nome e "membro desde", dados pessoais (e-mail só leitura), troca de senha,
-// salvar alterações e a barra de navegação inferior. Usa os componentes de src/design-system.
+// salvar alterações e a barra de navegação inferior. Usa os componentes de src/view/components.
 
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  Avatar,
-  Button,
-  Card,
-  Icon,
-  IconButton,
-  TabBar,
-  TextField,
-  Typography,
-  useDesignSystem,
-} from "@/design-system";
+import { Avatar } from "@/view/components/avatar";
+import { Button } from "@/view/components/button";
+import { Card } from "@/view/components/card";
+import { Icon } from "@/view/components/icon";
+import { IconButton } from "@/view/components/iconButton";
+import { TabBar } from "@/view/components/tabBar";
+import { TextField } from "@/view/components/textField";
+import { Typography } from "@/view/components/typography";
+import { useDesignSystem } from "@/view/components/themeProvider";
 import { usePerfilViewModel } from "@/viewmodel/usePerfilViewModel";
 
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];

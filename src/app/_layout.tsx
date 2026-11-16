@@ -1,6 +1,5 @@
 import { Stack } from "expo-router";
 
-import { DesignSystemProvider as DesignSystemSrcProvider } from "@/design-system";
 import { DesignSystemProvider, useDesignSystem } from "@/view/components/themeProvider";
 
 const StackComTema = () => {
@@ -26,10 +25,7 @@ const StackComTema = () => {
 
 const RootLayout = () => (
   <DesignSystemProvider>
-    {/* A tela de perfil usa os componentes de src/design-system, que têm o próprio provider. */}
-    <DesignSystemSrcProvider>
-      <StackComTema />
-    </DesignSystemSrcProvider>
+    <StackComTema />
   </DesignSystemProvider>
 );
 
