@@ -1,11 +1,11 @@
 // Composição das dependências: único lugar (fora dos testes) que importa @/infra.
 
 import { HttpAppointmentDataSource } from "@/infra/datasources/httpAppointmentDataSource";
+import { HttpUserDataSource } from "@/infra/datasources/httpUserDataSource";
 import { HttpProfessionalDataSource } from "@/infra/datasources/httpProfessionalDataSource";
 import { HttpAuthDataSource } from "@/infra/datasources/httpAuthDataSource";
 import { HttpBarbershopDataSource } from "@/infra/datasources/httpBarbershopDataSource";
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
-import { InMemoryUserDataSource } from "@/infra/datasources/inMemoryUserDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
 import { ExpoImagePickerService } from "@/infra/services/expoImagePickerService";
 import { HttpImageStorageService } from "@/infra/services/httpImageStorageService";
@@ -46,8 +46,7 @@ export const authUseCases = new AuthUseCases(
   new SecureSessionStorageService(),
 );
 
-// Perfil: usuário de exemplo em memória até a tela de login existir.
-export const profileUseCases = new ProfileUseCases(new InMemoryUserDataSource());
+export const profileUseCases = new ProfileUseCases(new HttpUserDataSource(httpClient));
 
 // Home: destaques e agendamentos de exemplo em memória.
 export const homeUseCases = new HomeUseCases(new InMemoryHomeDataSource());

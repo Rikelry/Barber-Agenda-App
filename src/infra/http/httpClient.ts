@@ -110,6 +110,9 @@ export class HttpClient implements IApiService {
     if (response.status === 400 && error === "VALIDATION_ERROR") {
       throw new ValidationError(fieldsFrom(body));
     }
+    if (response.status === 401 && error === "INVALID_CURRENT_PASSWORD") {
+      throw new ValidationError({ currentPassword: messageFrom(body) ?? "Senha atual incorreta." });
+    }
     if (response.status === 401) {
       throw new DomainError(
         error === "INVALID_CREDENTIALS" ? (messageFrom(body) ?? "E-mail ou senha inválidos.") : "Entre na sua conta para continuar.",

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 
 import { HttpAuthDataSource } from "@/infra/datasources/httpAuthDataSource";
+import { HttpUserDataSource } from "@/infra/datasources/httpUserDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
 import { ValidationError } from "@/model/errors";
@@ -54,5 +55,20 @@ describe("HttpAuthDataSource", () => {
   it("token de redefinição expirado vira mensagem do backend", async () => {
     fetchMock.mockResolvedValue(resposta({ error: "INVALID_RESET_TOKEN", message: "Token inválido ou expirado." }, 400));
     await expect(fonte().resetPassword("velho", "segredo12")).rejects.toMatchObject({ message: "Token inválido ou expirado." });
+  });
+});
+
+describe("HttpUserDataSource", () => {
+  it("lê e atualiza /users/me; senha atual errada vira erro no campo", async () => {
+    const usuario = { id: "up1", name: "Alessandro", email: "a@mail.com", phone: "11991234567", createdAt: "2024-01-15T10:00:00Z" };
+    fetchMock.mockResolvedValueOnce(resposta({ usuario })).mockResolvedValueOnce(resposta({ usuario: { ...usuario, name: "Alê" } }));
+    const fonte = new HttpUserDataSource(new HttpClient(new MemoryAuthSessionService(), "http://api.teste/api/v1"));
+    expect((await fonte.getCurrentUser()).name).toBe("Alessandro");
+    expect((await fonte.updateProfile({ name: "Alê", phone: "11991234567" })).name).toBe("Alê");
+    expect(fetchMock.mock.calls[1]![1].method).toBe("PATCH");
+
+    fetchMock.mockResolvedValueOnce(resposta({ error: "INVALID_CURRENT_PASSWORD", message: "Senha atual incorreta." }, 401));
+    const erro = await fonte.changePassword("errada", "novaSenha1").catch((e: unknown) => e);
+    expect((erro as ValidationError).fields).toEqual({ currentPassword: "Senha atual incorreta." });
   });
 });
