@@ -18,6 +18,8 @@ export type ResetPasswordField = keyof ResetPasswordForm;
 export interface IAuthUseCases {
   /** Sessão atual ou null quando ninguém entrou. */
   getSession(): Session | null;
+  /** Ao abrir o app: recupera a sessão guardada no aparelho, se houver. */
+  restoreSession(): Promise<Session | null>;
   login(form: LoginForm): Promise<Session>;
   /** Cria a conta e já entra nela. */
   register(form: RegisterForm): Promise<Session>;

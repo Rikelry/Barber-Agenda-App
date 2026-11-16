@@ -38,6 +38,7 @@ const DESTAQUE: BarbershopHighlight = {
 
 const autenticado = (logado = true): jest.Mocked<IAuthUseCases> => ({
   getSession: jest.fn(() => (logado ? { token: "jwt", user: USUARIO, roles: ["cliente" as const] } : null)),
+  restoreSession: jest.fn(async () => (logado ? { token: "jwt", user: USUARIO, roles: ["cliente" as const] } : null)),
   login: jest.fn(async () => {
     throw new Error("não usado");
   }),
@@ -56,7 +57,7 @@ describe("useHomeViewModel", () => {
       getNextAppointment: jest.fn(async () => null),
     };
     await renderHook(() => useHomeViewModel(home, autenticado(false)));
-    expect(mockReplace).toHaveBeenCalledWith("/login");
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/login"));
     expect(home.getHighlights).not.toHaveBeenCalled();
   });
 

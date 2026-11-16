@@ -2,6 +2,7 @@ import type { IAuthDataSource } from "@/model/datasources/iAuthDataSource";
 import type { Session } from "@/model/entities/session";
 import { DomainError, ValidationError } from "@/model/errors";
 import type { IAuthSessionService } from "@/model/services/iAuthSessionService";
+import type { ISessionStorageService } from "@/model/services/iSessionStorageService";
 import type {
   IAuthUseCases,
   LoginField,
@@ -34,10 +35,19 @@ export class AuthUseCases implements IAuthUseCases {
   constructor(
     private readonly dataSource: IAuthDataSource,
     private readonly session: IAuthSessionService,
+    private readonly storage: ISessionStorageService,
   ) {}
 
   getSession(): Session | null {
     return this.session.getSession();
+  }
+
+  async restoreSession(): Promise<Session | null> {
+    const atual = this.session.getSession();
+    if (atual) return atual;
+    const salva = await this.storage.load();
+    if (salva) this.session.setSession(salva);
+    return salva;
   }
 
   async login(form: LoginForm): Promise<Session> {
@@ -48,6 +58,7 @@ export class AuthUseCases implements IAuthUseCases {
 
     const sessao = await this.dataSource.login(form.email.trim().toLowerCase(), form.password);
     this.session.setSession(sessao);
+    await this.storage.save(sessao);
     return sessao;
   }
 
@@ -87,5 +98,6 @@ export class AuthUseCases implements IAuthUseCases {
 
   logout(): void {
     this.session.setSession(null);
+    void this.storage.save(null);
   }
 }

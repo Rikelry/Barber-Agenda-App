@@ -20,7 +20,14 @@ const montar = () => {
     resetPassword: jest.fn(async () => undefined),
   };
   const sessao = new MemoryAuthSessionService();
-  return { fonte, sessao, casos: new AuthUseCases(fonte, sessao) };
+  let guardada: Session | null = null;
+  const armazenamento = {
+    load: jest.fn(async () => guardada),
+    save: jest.fn(async (s: Session | null) => {
+      guardada = s;
+    }),
+  };
+  return { fonte, sessao, armazenamento, casos: new AuthUseCases(fonte, sessao, armazenamento) };
 };
 
 const campos = async (p: Promise<unknown>) => ((await p.catch((e: unknown) => e)) as ValidationError).fields;
@@ -38,6 +45,20 @@ describe("AuthUseCases", () => {
     expect(casos.getSession()?.user.name).toBe("Lucas");
     casos.logout();
     expect(sessao.getToken()).toBeNull();
+  });
+
+  it("guarda a sessão ao entrar e a recupera ao abrir o app; sair apaga", async () => {
+    const { armazenamento, casos } = montar();
+    expect(await casos.restoreSession()).toBeNull();
+    await casos.login({ email: "lucas@mail.com", password: "12345678" });
+    expect(armazenamento.save).toHaveBeenLastCalledWith(SESSAO);
+
+    const reaberto = new AuthUseCases(montar().fonte, new MemoryAuthSessionService(), armazenamento);
+    expect((await reaberto.restoreSession())?.token).toBe("jwt");
+    expect(reaberto.getSession()?.user.name).toBe("Lucas");
+
+    reaberto.logout();
+    expect(armazenamento.save).toHaveBeenLastCalledWith(null);
   });
 
   it("cadastro valida os campos, envia o telefone só com dígitos e entra na conta", async () => {

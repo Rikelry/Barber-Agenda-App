@@ -13,6 +13,7 @@ export const SESSAO: Session = {
 /** AuthUseCases falso: tudo dá certo, a não ser que o teste mude o mock. */
 export const authFalso = (): jest.Mocked<IAuthUseCases> => ({
   getSession: jest.fn(() => null),
+  restoreSession: jest.fn(async () => null),
   login: jest.fn(async () => SESSAO),
   register: jest.fn(async () => SESSAO),
   requestPasswordReset: jest.fn(async () => undefined),

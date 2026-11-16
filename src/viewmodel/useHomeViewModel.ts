@@ -46,25 +46,26 @@ export function useHomeViewModel(
 
   const carregar = useCallback(
     (categoria: ServiceCategory | null) => {
-      const sessao = auth.getSession();
-      // Padrão 1 de 05-padroes.md: sem conta entrada, o app abre no login.
-      if (!sessao) {
-        router.replace("/login");
-        return;
-      }
-      Promise.all([home.getHighlights(categoria), home.getNextAppointment()]).then(
-        ([destaques, proximo]) => {
-          setUser(sessao.user);
-          setHighlights(destaques);
-          setNextAppointment(proximo);
-          setErrorMessage(null);
-          setStatus("content");
-        },
-        (erro: unknown) => {
-          setErrorMessage(mensagem(erro));
-          setStatus("error");
-        },
-      );
+      auth.restoreSession().then((sessao) => {
+        // Padrão 1 de 05-padroes.md: sem conta entrada, o app abre no login.
+        if (!sessao) {
+          router.replace("/login");
+          return;
+        }
+        setUser(sessao.user);
+        Promise.all([home.getHighlights(categoria), home.getNextAppointment()]).then(
+          ([destaques, proximo]) => {
+            setHighlights(destaques);
+            setNextAppointment(proximo);
+            setErrorMessage(null);
+            setStatus("content");
+          },
+          (erro: unknown) => {
+            setErrorMessage(mensagem(erro));
+            setStatus("error");
+          },
+        );
+      });
     },
     [home, auth],
   );

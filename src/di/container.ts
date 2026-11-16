@@ -6,6 +6,7 @@ import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSour
 import { InMemoryUserDataSource } from "@/infra/datasources/inMemoryUserDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
+import { SecureSessionStorageService } from "@/infra/services/secureSessionStorageService";
 import { AuthUseCases } from "@/usecase/authUseCases";
 import { BarbershopUseCases } from "@/usecase/barbershopUseCases";
 import { HomeUseCases } from "@/usecase/homeUseCases";
@@ -17,7 +18,11 @@ const httpClient = new HttpClient(authSession);
 const barbershopDataSource = new HttpBarbershopDataSource(httpClient);
 
 export const barbershopUseCases = new BarbershopUseCases(barbershopDataSource);
-export const authUseCases = new AuthUseCases(new HttpAuthDataSource(httpClient), authSession);
+export const authUseCases = new AuthUseCases(
+  new HttpAuthDataSource(httpClient),
+  authSession,
+  new SecureSessionStorageService(),
+);
 
 // Perfil: usuário de exemplo em memória até a tela de login existir.
 export const profileUseCases = new ProfileUseCases(new InMemoryUserDataSource());
