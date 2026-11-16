@@ -15,3 +15,4 @@ export * from "@/view/components/searchBar";
 export * from "@/view/components/tabBar";
 export * from "@/view/components/formScreen";
 export * from "@/view/components/passwordField";
+export * from "@/view/components/mainTabBar";

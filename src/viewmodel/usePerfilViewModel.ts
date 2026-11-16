@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
 import { profileUseCases } from "@/di/container";
@@ -27,8 +26,6 @@ export type PerfilActions = {
   toggleShowNewPassword: () => void;
   save: () => void;
   retry: () => void;
-  goHome: () => void;
-  goSearch: () => void;
 };
 
 const FORM_VAZIO: ProfileForm = { name: "", phone: "", currentPassword: "", newPassword: "" };
@@ -125,9 +122,6 @@ export function usePerfilViewModel(
         setStatus("loading");
         carregar();
       },
-      // Aba Início: volta para a Home que já está aberta (ou a abre no lugar do perfil).
-      goHome: () => router.dismissTo("/"),
-      goSearch: () => router.navigate("/barbeiros"),
     },
   ];
 }

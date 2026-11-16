@@ -8,18 +8,20 @@ import { Avatar } from "@/view/components/avatar";
 import { Button } from "@/view/components/button";
 import { Card } from "@/view/components/card";
 import { Icon } from "@/view/components/icon";
+import { MainTabBar } from "@/view/components/mainTabBar";
 import { IconButton } from "@/view/components/iconButton";
-import { TabBar } from "@/view/components/tabBar";
 import { TextField } from "@/view/components/textField";
 import { Typography } from "@/view/components/typography";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { usePerfilViewModel } from "@/viewmodel/usePerfilViewModel";
+import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 const membroDesde = (data: Date) => `Membro desde ${MESES[data.getMonth()]} ${data.getFullYear()}`;
 
 const Perfil = () => {
   const [state, actions] = usePerfilViewModel();
+  const tabs = useTabBarViewModel("perfil");
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
   const { user, form, fieldErrors } = state;
@@ -165,14 +167,7 @@ const Perfil = () => {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <TabBar
-        items={[
-          { key: "inicio", label: "Início", icon: "⌂", onPress: actions.goHome },
-          { key: "buscar", label: "Buscar", icon: "search", onPress: actions.goSearch },
-          { key: "agendas", label: "Agendas", icon: "calendar", disabled: true },
-          { key: "perfil", label: "Perfil", icon: "person", selected: true },
-        ]}
-      />
+      <MainTabBar active={tabs[0].active} onNavigate={tabs[1].navigate} />
     </SafeAreaView>
   );
 };
