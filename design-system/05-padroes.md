@@ -2,135 +2,67 @@
 
 <!-- Camada 4 da aula: fluxos. Mínimo de 2 padrões do app (login, busca, formulário, lista com detalhe, etc.). -->
 
-## Padrão 1: Autenticação (Login e Cadastro)
+## Padrão 1: Autenticação e acesso
 
-- **Objetivo do usuário:** Acessar sua conta pessoal ou criar uma nova para gerenciar agendamentos.
-- **Componentes usados:** [Botão](04-componentes/botao.md), [Campo de Texto](04-componentes/campo-de-texto.md), Links de navegação.
+- **Objetivo do usuário:** Acessar o aplicativo ou criar uma conta para utilizar os serviços do Barber Agenda.
+- **Componentes usados:** Campo de texto (`input.bg`, `input.label`, `input.border`), botão (`button.bg`, `button.label`), texto auxiliar (`font.body`, `font.caption`) e indicador de carregamento (`color.action`).
+
 - **Passos:**
-  1. O usuário abre o app e visualiza a tela de Login.
-  2. Insere e-mail e senha.
-  3. Caso não tenha conta, navega para a tela de Cadastro.
-  4. Preenche os dados solicitados (Nome, E-mail, Telefone e Senha).
-  5. Confirma a criação da conta e é redirecionado para a Home.
+  1. O usuário abre o aplicativo e visualiza a tela de acesso.
+  2. Informa e-mail e senha nos campos correspondentes.
+  3. Seleciona o botão de entrar.
+  4. O sistema valida os dados e realiza a autenticação pela API.
+  5. Em caso de sucesso, direciona o usuário à área correspondente ao seu perfil: cliente, profissional ou proprietário.
+  6. Caso não possua conta, pode acessar a opção de cadastro e preencher os dados solicitados.
+
 - **Estados que precisam de tela:**
 
 | Situação | O que o usuário vê | Componentes e tokens |
 | --- | --- | --- |
-| Carregando | Spinner de carregamento no botão ou sobreposição | `color.primary` |
-| Erro | Mensagem de erro abaixo dos campos ou Toast | `color.error`, `font.label-large` |
-| Sucesso | Feedback visual momentâneo antes do redirecionamento | `color.primary` |
+| Carregando | Indicador de progresso e botão temporariamente desabilitado durante a autenticação. | `button.bg-disabled`, `color.action`, `font.body` |
+| Erro | Mensagem informando credenciais inválidas, falha de conexão ou campos obrigatórios não preenchidos. | `color.error`, `input.error`, `font.caption` |
+| Vazio | Campos de e-mail e senha vazios, com orientações para preenchimento. | `input.bg`, `input.label`, `input.border` |
+| Sucesso | Confirmação do acesso e redirecionamento para a área correspondente ao perfil. | `color.action`, `color.on-action`, `font.body` |
 
-- **Faça:** Forneça feedback claro caso a senha esteja incorreta ou o e-mail já exista.
-- **Evite:** Formulários muito extensos em uma única tela; use feedback de validação em tempo real.
+- **Faça:** Utilize rótulos claros, valide os campos e informe especificamente os erros encontrados. Preserve os dados já preenchidos quando ocorrer uma falha.
+- **Evite:** Exibir mensagens genéricas, apagar todos os campos após um erro ou permitir múltiplos envios durante o carregamento.
 
-## Padrão 2: Agendamento de Serviço
+## Padrão 2: Agendamento de serviços
 
-- **Objetivo do usuário:** Encontrar uma barbearia, escolher um serviço e reservar um horário disponível.
-- **Componentes usados:** [Card](04-componentes/card.md), [Botão](04-componentes/botao.md), Calendário de seleção, Chips de horários.
+- **Objetivo do usuário:** Encontrar uma barbearia, escolher um serviço e profissional, selecionar um horário disponível e confirmar um agendamento.
+- **Componentes usados:** Campo de busca (`input.bg`, `input.label`), cards de barbearia e serviço (`card.bg`, `card.radius`, `card.elevation`), lista de profissionais, seletor de data e horário, botão (`button.bg`, `button.label`) e mensagens de estado (`color.error`, `font.body`, `font.caption`).
+
 - **Passos:**
-  1. O usuário busca uma barbearia na tela inicial ou na lista de barbearias.
-  2. Seleciona a barbearia para ver os detalhes (serviços e profissionais).
-  3. Escolhe o serviço e o profissional desejado.
-  4. Seleciona a data no calendário e um dos horários disponíveis.
-  5. Revisa as informações no resumo do agendamento e clica em "Confirmar Agendamento".
+  1. O cliente acessa a área de agendamentos.
+  2. Pesquisa ou seleciona uma barbearia disponível.
+  3. Visualiza os serviços oferecidos, incluindo descrição, duração e preço.
+  4. Escolhe o serviço desejado.
+  5. Seleciona um profissional disponível ou utiliza a opção de escolha automática, caso oferecida pela barbearia.
+  6. Escolhe uma data e consulta os horários disponíveis.
+  7. Seleciona um horário e revisa os dados do agendamento.
+  8. Confirma a solicitação.
+  9. O sistema verifica a disponibilidade pela API e registra o agendamento.
+  10. O cliente visualiza a confirmação com os detalhes do serviço, profissional, data e horário.
+
 - **Estados que precisam de tela:**
 
 | Situação | O que o usuário vê | Componentes e tokens |
 | --- | --- | --- |
-| Carregando | Esqueleto (Skeleton) da lista ou detalhes | `color.surface-container-low` |
-| Erro | Mensagem informando que o horário não está mais disponível | `color.error` |
-| Vazio | Mensagem informando que não há barbearias ou horários | `color.on-surface-variant` |
-| Sucesso | Tela ou Modal de confirmação com resumo do agendamento | `color.primary`, `font.title-large` |
+| Carregando | Indicador de progresso enquanto barbearias, serviços ou horários são consultados. | `color.action`, `font.body`, `card.bg` |
+| Erro | Mensagem informando falha na consulta, indisponibilidade do horário ou erro ao confirmar o agendamento. | `color.error`, `font.caption`, `button.bg` |
+| Vazio | Mensagem informando que nenhuma barbearia, serviço ou horário está disponível para os filtros selecionados. | `color.on-surface-variant`, `font.body`, `font.caption` |
+| Sucesso | Confirmação do agendamento com identificação da barbearia, serviço, profissional, data e horário. | `color.action`, `color.on-action`, `card.bg`, `font.body` |
 
-- **Faça:** Mostre claramente o preço e a duração do serviço antes da confirmação final.
-- **Evite:** Permitir a seleção de datas passadas ou horários que já foram ocupados.
+- **Faça:** Apresente as informações essenciais antes da confirmação. Atualize os horários conforme a disponibilidade retornada pela API e impeça a confirmação de horários indisponíveis.
+- **Evite:** Permitir agendamentos duplicados, ocultar preços ou duração dos serviços e confirmar uma reserva antes da resposta positiva do servidor.
 
-## Padrão 3: Recuperação de Senha
+## Regras gerais dos padrões
 
-- **Objetivo do usuário:** Recuperar o acesso à conta caso tenha esquecido a senha.
-- **Componentes usados:** [Campo de Texto](04-componentes/campo-de-texto.md), [Botão](04-componentes/botao.md).
-- **Passos:**
-  1. Na tela de Login, o usuário clica em "Esqueceu a senha?".
-  2. Insere o e-mail cadastrado na tela de "Recuperar senha".
-  3. Recebe um link ou código (simulado no fluxo de UI).
-  4. Navega para a tela de "Redefinir senha".
-  5. Insere a nova senha e confirma.
-- **Estados que precisam de tela:**
-
-| Situação | O que o usuário vê | Componentes e tokens |
-| --- | --- | --- |
-| Erro | E-mail não encontrado ou senhas não coincidem | `color.error` |
-| Sucesso | Mensagem confirmando o envio do link ou a troca da senha | `color.primary` |
-
-## Padrão 4: Gestão de Perfil do Usuário
-
-- **Objetivo do usuário:** Atualizar dados pessoais, trocar senha ou visualizar histórico de agendamentos.
-- **Componentes usados:** [Avatar](04-componentes/avatar.md), [Campo de Texto](04-componentes/campo-de-texto.md), [Botão](04-componentes/botao.md).
-- **Passos:**
-  1. O usuário acessa a aba "Perfil" no menu inferior.
-  2. Visualiza seus dados atuais (Nome, E-mail, Telefone).
-  3. Edita as informações desejadas ou preenche os campos de "Trocar Senha".
-  4. Clica em "Salvar alterações".
-- **Faça:** Peça a senha atual para confirmar mudanças sensíveis como e-mail ou nova senha.
-
-## Padrão 5: Gestão de Barbearia (Fluxo do Proprietário)
-
-- **Objetivo do usuário:** Cadastrar, editar e gerenciar informações da sua barbearia (serviços, profissionais, horários).
-- **Componentes usados:** [Lista](04-componentes/lista.md), [Card](04-componentes/card.md), [Botão Flutuante](04-componentes/fab.md).
-- **Passos:**
-  1. O proprietário acessa "Minhas Barbearias".
-  2. Seleciona uma barbearia para editar ou clica no botão "+" para criar uma nova.
-  3. Gerencia a lista de profissionais vinculados.
-  4. Define os serviços oferecidos e seus respectivos preços/duração.
-  5. Configura o horário de funcionamento para cada dia da semana.
-- **Faça:** Utilize botões de alternância (Switches) para ativar/desativar dias de funcionamento rapidamente.
-
-## Padrão 6: Gestão de Agenda (Fluxo do Profissional)
-
-- **Objetivo do usuário:** Visualizar compromissos do dia e marcar períodos de indisponibilidade.
-- **Componentes usados:** [Agenda/Calendário](04-componentes/calendario.md), [Lista de Tarefas](04-componentes/lista.md).
-- **Passos:**
-  1. O profissional acessa "Minha Agenda".
-  2. Visualiza os horários ocupados por clientes (com status: confirmado, pendente, etc.).
-  3. Acessa a tela de "Indisponibilidades" para bloquear horários (almoço, folga, compromisso pessoal).
-  4. Define se o bloqueio é recorrente ou pontual.
-- **Faça:** Use cores diferentes para distinguir agendamentos de clientes de bloqueios manuais.
-- **Evite:** Deixar o profissional sobrepor um bloqueio manual a um agendamento já confirmado sem aviso.
-
-## Padrão 7: Gestão de Agendamentos (Cliente)
-
-- **Objetivo do usuário:** Acompanhar agendamentos futuros, reagendar ou cancelar compromissos.
-- **Componentes usados:** [Card](04-componentes/card.md), [Badge/Etiqueta](04-componentes/badge.md), [Botão](04-componentes/botao.md).
-- **Passos:**
-  1. O usuário acessa a aba "Agendas" no menu inferior.
-  2. Visualiza a lista de "Próximos" agendamentos.
-  3. Seleciona um agendamento para ver detalhes ou realizar ações.
-  4. Clica em "Reagendar" para escolher uma nova data/horário ou "Cancelar" para desistir do serviço.
-- **Estados que precisam de tela:**
-
-| Situação | O que o usuário vê | Componentes e tokens |
-| --- | --- | --- |
-| Confirmado | Badge verde indicando sucesso | `neutral.white` sobre fundo `#2E7D32` (pendente de token semântico de status) |
-| Pendente | Badge amarelo indicando espera | `color.secondary-container`, `color.on-secondary-container` |
-| Cancelado | Badge vermelho ou texto riscado | `color.error`, `color.on-error` |
-
-## Padrão 8: Onboarding de Parceiro (Cadastro de Barbearia)
-
-- **Objetivo do usuário:** Criar uma conta já vinculada a uma nova barbearia no sistema.
-- **Componentes usados:** [Campo de Texto](04-componentes/campo-de-texto.md), [Upload de Imagem](04-componentes/upload-imagem.md), [Botão](04-componentes/botao.md).
-- **Passos:**
-  1. O usuário escolhe a opção de se cadastrar como barbearia.
-  2. Preenche a "Seção 1: Seus dados pessoais".
-  3. Preenche a "Seção 2: Sua barbearia" (Nome, Telefone, Endereço e Logo).
-  4. Finaliza o cadastro e acessa o painel de gestão.
-  - **Faça:** Divida o formulário em seções claras para não sobrecarregar o usuário.
-
-## Padrão 9: Busca e Filtragem
-
-- **Objetivo do usuário:** Encontrar rapidamente barbearias ou serviços específicos.
-- **Componentes usados:** [Barra de Busca](04-componentes/barra-busca.md), [Chips de Filtro](04-componentes/chips.md).
-- **Passos:**
-  1. Na Home ou na lista de barbearias, o usuário clica na barra de busca.
-  2. Digita o nome da barbearia ou serviço.
-  3. Utiliza os filtros rápidos (Cabelo, Barba, Combo) para refinar os resultados.
-- **Faça:** Mostre sugestões de busca enquanto o usuário digita.
+- Utilize os mesmos componentes e tokens em todos os fluxos.
+- Apresente feedback visual para toda ação iniciada pelo usuário.
+- Preserve os dados preenchidos durante falhas recuperáveis.
+- Diferencie claramente estados de carregamento, erro, vazio e sucesso.
+- Utilize mensagens objetivas e compreensíveis.
+- Respeite os alvos de toque mínimos de 48 dp.
+- Adapte as cores semânticas automaticamente ao modo claro ou escuro.
+- Nunca apresente um agendamento como confirmado antes da confirmação da API.
