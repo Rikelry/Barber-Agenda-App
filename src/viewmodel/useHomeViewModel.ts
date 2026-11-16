@@ -93,7 +93,7 @@ export function useHomeViewModel(
         setStatus("loading");
         carregar(category);
       },
-      openSearch: () => router.navigate("/barbeiros"),
+      openSearch: () => router.navigate("/barbearias"),
       openHighlight: (barbershopId) =>
         router.push({ pathname: "/barbearia/[id]", params: { id: barbershopId } }),
       goProfile: () => router.navigate("/perfil"),
