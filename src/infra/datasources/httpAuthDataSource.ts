@@ -56,4 +56,8 @@ export class HttpAuthDataSource implements IAuthDataSource {
   async resetPassword(token: string, newPassword: string): Promise<void> {
     await this.api.patch("/auth/reset-password", { token, newPassword });
   }
+
+  async refreshToken(): Promise<Session> {
+    return toSession(await this.api.post<LoginDto>("/auth/refresh-token"));
+  }
 }

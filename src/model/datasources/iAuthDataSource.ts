@@ -16,4 +16,6 @@ export interface IAuthDataSource {
   /** Envia por e-mail o link para redefinir a senha. */
   requestPasswordReset(email: string): Promise<void>;
   resetPassword(token: string, newPassword: string): Promise<void>;
+  /** Novo token com os papéis atualizados (ex.: depois de criar a primeira barbearia). */
+  refreshToken(): Promise<Session>;
 }

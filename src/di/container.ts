@@ -6,12 +6,15 @@ import { HttpBarbershopDataSource } from "@/infra/datasources/httpBarbershopData
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
 import { InMemoryUserDataSource } from "@/infra/datasources/inMemoryUserDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
+import { ExpoImagePickerService } from "@/infra/services/expoImagePickerService";
+import { HttpImageStorageService } from "@/infra/services/httpImageStorageService";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
 import { SecureSessionStorageService } from "@/infra/services/secureSessionStorageService";
 import { AppointmentUseCases } from "@/usecase/appointmentUseCases";
 import { AuthUseCases } from "@/usecase/authUseCases";
 import { BarbershopUseCases } from "@/usecase/barbershopUseCases";
 import { HomeUseCases } from "@/usecase/homeUseCases";
+import { OwnerUseCases } from "@/usecase/ownerUseCases";
 import { ProfileUseCases } from "@/usecase/profileUseCases";
 
 export const authSession = new MemoryAuthSessionService();
@@ -20,6 +23,12 @@ const httpClient = new HttpClient(authSession);
 const barbershopDataSource = new HttpBarbershopDataSource(httpClient);
 
 export const barbershopUseCases = new BarbershopUseCases(barbershopDataSource);
+export const ownerUseCases = new OwnerUseCases(
+  barbershopDataSource,
+  new HttpImageStorageService(httpClient),
+  authSession,
+);
+export const imagePicker = new ExpoImagePickerService();
 export const appointmentUseCases = new AppointmentUseCases(
   new HttpAppointmentDataSource(httpClient),
   barbershopDataSource,

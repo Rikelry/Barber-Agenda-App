@@ -3,7 +3,7 @@
 // mensagem pronta para a tela.
 
 import { DomainError, ValidationError } from "@/model/errors";
-import type { IApiService } from "@/model/services/iApiService";
+import type { IApiService, LocalFile } from "@/model/services/iApiService";
 import type { IAuthSessionService } from "@/model/services/iAuthSessionService";
 
 /** Base da API. Configure EXPO_PUBLIC_API_URL no .env (no celular, use o IP da máquina). */
@@ -53,9 +53,29 @@ export class HttpClient implements IApiService {
     return this.request<T>("PATCH", path, body);
   }
 
+  delete<T>(path: string): Promise<T> {
+    return this.request<T>("DELETE", path);
+  }
+
+  async upload<T>(path: string, file: LocalFile, fields: Record<string, string> = {}): Promise<T> {
+    const form = new FormData();
+    for (const [chave, valor] of Object.entries(fields)) form.append(chave, valor);
+    if (file.uri.startsWith("blob:") || file.uri.startsWith("data:")) {
+      // Web: o seletor devolve um blob; o fetch precisa do arquivo em si.
+      const blob = await (await fetch(file.uri)).blob();
+      form.append("file", blob, file.name);
+    } else {
+      // Android/iOS: o React Native lê o arquivo a partir da uri.
+      form.append("file", { uri: file.uri, name: file.name, type: file.mimeType } as unknown as Blob);
+    }
+    return this.request<T>("POST", path, form);
+  }
+
   private async request<T>(method: string, path: string, payload?: unknown): Promise<T> {
     const headers: Record<string, string> = { Accept: "application/json" };
-    if (payload !== undefined) headers["Content-Type"] = "application/json";
+    const multipart = payload instanceof FormData;
+    // Com FormData o fetch define o Content-Type com o boundary sozinho.
+    if (payload !== undefined && !multipart) headers["Content-Type"] = "application/json";
     const token = this.session.getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -64,7 +84,7 @@ export class HttpClient implements IApiService {
       response = await fetch(`${this.baseUrl}${path}`, {
         method,
         headers,
-        ...(payload !== undefined && { body: JSON.stringify(payload) }),
+        ...(payload !== undefined && { body: multipart ? payload : JSON.stringify(payload) }),
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
     } catch {
@@ -95,6 +115,9 @@ export class HttpClient implements IApiService {
         error === "INVALID_CREDENTIALS" ? (messageFrom(body) ?? "E-mail ou senha inválidos.") : "Entre na sua conta para continuar.",
         "UNAUTHORIZED",
       );
+    }
+    if (response.status === 403) {
+      throw new DomainError(messageFrom(body) ?? "Você não tem permissão para fazer isso.", "UNAUTHORIZED");
     }
     if (response.status === 404) {
       throw new DomainError(messageFrom(body) ?? "Não encontramos o que você procurou.", "NOT_FOUND");

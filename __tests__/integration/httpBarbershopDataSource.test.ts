@@ -27,7 +27,7 @@ describe("HttpBarbershopDataSource", () => {
       resposta([{ id: "b1", name: "Central", address: "Rua A", phone: "1", ownerId: "o", createdAt: "", updatedAt: "" }]),
     );
     const lista = await montar().listBarbershops();
-    expect(lista).toEqual([{ id: "b1", name: "Central", address: "Rua A", phone: "1", avatarUrl: null }]);
+    expect(lista).toEqual([{ id: "b1", name: "Central", address: "Rua A", phone: "1", avatarUrl: null, ownerId: "o" }]);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe("http://api.teste/api/v1/barbershops");
     expect(init.headers.Authorization).toBe("Bearer jwt-teste");

@@ -1,7 +1,13 @@
 // Barbearias, profissionais e serviços da API (/barbershops/...). Converte os DTOs do backend
 // (backend/src/*/adapters/dtos) nas entidades do domínio.
 
-import type { IBarbershopDataSource } from "@/model/datasources/iBarbershopDataSource";
+import type {
+  BarbershopData,
+  IBarbershopDataSource,
+  ProfessionalData,
+  ProfessionalUpdate,
+  ServiceData,
+} from "@/model/datasources/iBarbershopDataSource";
 import type { Barbershop } from "@/model/entities/barbershop";
 import type { BusinessHours } from "@/model/entities/businessHours";
 import type { Professional } from "@/model/entities/professional";
@@ -11,6 +17,7 @@ import type { IApiService } from "@/model/services/iApiService";
 
 type BarbershopDto = {
   id: string;
+  ownerId?: string;
   name: string;
   address: string;
   phone: string;
@@ -49,6 +56,7 @@ export const toBarbershop = (dto: BarbershopDto): Barbershop => ({
   address: dto.address,
   phone: dto.phone,
   avatarUrl: dto.avatarUrl ?? null,
+  ...(dto.ownerId && { ownerId: dto.ownerId }),
 });
 
 export const toProfessional = (dto: ProfessionalDto): Professional => ({
@@ -110,5 +118,41 @@ export class HttpBarbershopDataSource implements IBarbershopDataSource {
       openTime: h.openTime.slice(0, 5),
       closeTime: h.closeTime.slice(0, 5),
     }));
+  }
+
+  async createBarbershop(data: BarbershopData): Promise<Barbershop> {
+    return toBarbershop(await this.http.post<BarbershopDto>("/barbershops", data));
+  }
+
+  async updateBarbershop(id: string, data: Partial<BarbershopData>): Promise<Barbershop> {
+    return toBarbershop(await this.http.patch<BarbershopDto>(`/barbershops/${segment(id)}`, data));
+  }
+
+  async saveBusinessHours(barbershopId: string, hours: BusinessHours): Promise<void> {
+    // O schema do backend (CriarHorarioSchema) também pede o barbershopId no corpo.
+    await this.http.post(`/barbershops/${segment(barbershopId)}/hours`, { barbershopId, ...hours });
+  }
+
+  async createProfessional(barbershopId: string, data: ProfessionalData): Promise<Professional> {
+    return toProfessional(await this.http.post<ProfessionalDto>(`/barbershops/${segment(barbershopId)}/professionals`, data));
+  }
+
+  async updateProfessional(barbershopId: string, professionalId: string, data: ProfessionalUpdate): Promise<Professional> {
+    return toProfessional(
+      await this.http.patch<ProfessionalDto>(
+        `/barbershops/${segment(barbershopId)}/professionals/${segment(professionalId)}`,
+        data,
+      ),
+    );
+  }
+
+  async createService(barbershopId: string, data: ServiceData): Promise<Service> {
+    return toService(await this.http.post<ServiceDto>(`/barbershops/${segment(barbershopId)}/services`, data));
+  }
+
+  async updateService(barbershopId: string, serviceId: string, data: Partial<ServiceData>): Promise<Service> {
+    return toService(
+      await this.http.patch<ServiceDto>(`/barbershops/${segment(barbershopId)}/services/${segment(serviceId)}`, data),
+    );
   }
 }

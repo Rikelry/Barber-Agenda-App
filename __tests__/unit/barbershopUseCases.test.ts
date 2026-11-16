@@ -42,6 +42,7 @@ const PROFISSIONAIS: Record<string, Professional[]> = {
 const SERVICOS = [servico("s2", "b1", "Combo", 70), servico("s1", "b1", "Corte", 40)];
 
 const fonteFalsa = (): jest.Mocked<IBarbershopDataSource> => ({
+  ...({} as jest.Mocked<IBarbershopDataSource>),
   listBarbershops: jest.fn(async () => BARBEARIAS),
   getBarbershop: jest.fn(async (id: string) => BARBEARIAS.find((b) => b.id === id)!),
   listProfessionals: jest.fn(async (id: string) => PROFISSIONAIS[id] ?? []),
