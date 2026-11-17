@@ -38,3 +38,13 @@ Versões no formato `MAIOR.MENOR.CORREÇÃO`. Mudança grande = versão nova (ex
   - Definição dos padrões de autenticação e agendamento de serviços.
   - Documentação dos critérios de acessibilidade, incluindo contraste, áreas de toque, foco e leitores de tela.
 - **Ajustes feitos após o teste com IA:** Revisão da consistência entre os arquivos, padronização dos nomes dos tokens e verificação das combinações de contraste nos modos claro e escuro. Foram documentadas melhorias para manter a navegação simples, os feedbacks claros e os fluxos de agendamento confiáveis.
+
+## 0.2.0 · 12/11/26
+
+- Fixação do esquema de cor a partir da marca.
+- **Responsáveis:** @jose2gabriel
+- **Mudanças:**
+  - `brand.source.primary` confirmado como `orange-500` (`#FF8500`).
+  - Papéis semânticos de cor (claro e escuro) gerados com `SchemeFidelity` do Material e aplicados em `src/view/theme.ts`, substituindo o roxo padrão do M3.
+  - Contraste dos pares texto/fundo principais medido e registrado no `02-tokens.md` (todos acima de 4,5:1).
+  - `color.focus` continua pendente de definição.

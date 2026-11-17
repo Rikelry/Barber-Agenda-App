@@ -202,7 +202,8 @@ function applyViewRules(files) {
       if (/export\s+default\b/.test(content)) {
         add("CMP-01", rel, 1, "Componente em view/components/ usa export default.", "Use export nomeado (ex.: export const Button = () => {...}).", "docs/harness/02-convencoes-de-codigo.md");
       }
-      if (!/export\s+(const|function|class)\s+[A-Za-z_$]/.test(content) && !/export\s*\{/.test(content)) {
+      // Arquivos só de tipos (X.types.ts) e barris (index.ts com export *) também exportam por nome.
+      if (!/export\s+(const|function|class|type|interface)\s+[A-Za-z_$]/.test(content) && !/export\s*(\{|\*)/.test(content)) {
         add("CMP-01", rel, 1, "Componente em view/components/ não tem export nomeado.", "Exporte o componente por nome.", "docs/harness/02-convencoes-de-codigo.md");
       }
       if (/@\/viewmodel/.test(content) || /use\w+ViewModel\s*\(/.test(content)) {
@@ -277,8 +278,9 @@ function applyUseCaseRules(files) {
     // Contrato (iXUseCases.ts) declara a interface; só a classe (xUseCases.ts) exige implements.
     const isContract = /^i[A-Z]/.test(base);
     for (const { m, line } of eachMatch(content, /from\s+['"]([^'"]+)['"]/g)) {
-      if (!m[1].startsWith("@/model")) {
-        add("UC-01", rel, line, `Use Case importa "${m[1]}" (só pode importar @/model).`, "Mova a dependência para o domínio (model) e injete pelo construtor.", "docs/harness/01-arquitetura-mvvm.md");
+      // Além do domínio, a classe pode importar o próprio contrato (@/usecase/iXUseCases).
+      if (!m[1].startsWith("@/model") && !/^@\/usecase\/i[A-Z]\w*UseCases$/.test(m[1])) {
+        add("UC-01", rel, line, `Use Case importa "${m[1]}" (só pode importar @/model ou um contrato @/usecase/iXUseCases).`, "Mova a dependência para o domínio (model) e injete pelo construtor.", "docs/harness/01-arquitetura-mvvm.md");
       }
     }
     if (isContract) {
