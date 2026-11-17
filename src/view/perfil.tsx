@@ -185,6 +185,28 @@ const Perfil = () => {
                 </Card>
               ) : null}
 
+              {state.isProfessional ? (
+                <Card
+                  variant="outlined"
+                  onPress={actions.openWorkplace}
+                  accessibilityLabel="Meu perfil profissional"
+                  accessibilityHint="Especialidade, barbearia e horário de funcionamento"
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                    <Icon name="person" size={spacing.xxl} color={colors.primary} />
+                    <View style={{ flex: 1, gap: spacing.xs }}>
+                      <Typography variant="titleSmall" weight="700">
+                        Meu perfil profissional
+                      </Typography>
+                      <Typography variant="bodySmall" color="onSurfaceVariant">
+                        Especialidade, barbearia e horário de funcionamento.
+                      </Typography>
+                    </View>
+                    <Icon name="chevronRight" color={colors.onSurfaceVariant} />
+                  </View>
+                </Card>
+              ) : null}
+
               <Card
                 variant="outlined"
                 onPress={actions.openMyBarbershops}

@@ -21,6 +21,7 @@ const StackComTema = () => {
       <Stack.Screen name="agendamentos" options={{ headerShown: false }} />
       <Stack.Screen name="minha-agenda" options={{ headerShown: false }} />
       <Stack.Screen name="indisponibilidades" options={{ headerShown: false }} />
+      <Stack.Screen name="meu-trabalho" options={{ headerShown: false }} />
       <Stack.Screen name="minhas-barbearias/index" options={{ headerShown: false }} />
       <Stack.Screen name="minhas-barbearias/nova" options={{ headerShown: false }} />
       <Stack.Screen name="minhas-barbearias/[id]/index" options={{ headerShown: false }} />

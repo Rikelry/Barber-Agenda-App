@@ -34,6 +34,7 @@ export type PerfilActions = {
   retry: () => void;
   openMyBarbershops: () => void;
   openMyAgenda: () => void;
+  openWorkplace: () => void;
 };
 
 const FORM_VAZIO: ProfileForm = { name: "", phone: "", currentPassword: "", newPassword: "" };
@@ -132,6 +133,7 @@ export function usePerfilViewModel(
       toggleShowNewPassword: () => setShowNewPassword((v) => !v),
       save,
       openMyAgenda: () => router.push("/minha-agenda"),
+      openWorkplace: () => router.push("/meu-trabalho"),
       openMyBarbershops: () => router.push(isOwner ? "/minhas-barbearias" : "/minhas-barbearias/nova"),
       retry: () => {
         setStatus("loading");
