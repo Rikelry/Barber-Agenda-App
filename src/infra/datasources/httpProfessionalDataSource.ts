@@ -47,11 +47,11 @@ export class HttpProfessionalDataSource implements IProfessionalDataSource {
   constructor(private readonly api: IApiService) {}
 
   async getMe(): Promise<ProfessionalIdentity> {
-    const eu = await this.api.get<{ id?: string; barbershopId?: string }>("/professionals/me");
+    const eu = await this.api.get<{ id?: string; barbershopId?: string; specialty?: string | null }>("/professionals/me");
     if (!eu?.id || !eu.barbershopId) {
       throw new DomainError("Sua conta não está vinculada a uma barbearia como profissional.", "NOT_FOUND");
     }
-    return { professionalId: eu.id, barbershopId: eu.barbershopId };
+    return { professionalId: eu.id, barbershopId: eu.barbershopId, specialty: eu.specialty ?? null };
   }
 
   async listMyAgenda(): Promise<AgendaAppointmentData[]> {
@@ -62,6 +62,14 @@ export class HttpProfessionalDataSource implements IProfessionalDataSource {
       endsAt: dataHora(a.date, a.endTime),
       status: STATUS[a.status] ?? "confirmed",
     }));
+  }
+
+  async completeAppointment(appointmentId: string): Promise<void> {
+    await this.api.patch(`/agendamentos/${encodeURIComponent(appointmentId)}/concluir`);
+  }
+
+  async cancelAppointment(appointmentId: string): Promise<void> {
+    await this.api.patch(`/agendamentos/${encodeURIComponent(appointmentId)}/cancelar`);
   }
 
   async listUnavailabilities(who: ProfessionalIdentity): Promise<Unavailability[]> {

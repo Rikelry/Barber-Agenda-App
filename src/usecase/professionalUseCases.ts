@@ -1,6 +1,6 @@
 import type { IBarbershopDataSource } from "@/model/datasources/iBarbershopDataSource";
 import type { IProfessionalDataSource, ProfessionalIdentity } from "@/model/datasources/iProfessionalDataSource";
-import { ValidationError } from "@/model/errors";
+import { DomainError, ValidationError } from "@/model/errors";
 import type { IAuthSessionService } from "@/model/services/iAuthSessionService";
 import type {
   AgendaItem,
@@ -11,6 +11,7 @@ import type {
   OneOffForm,
   RecurringBlock,
   RecurringForm,
+  Workplace,
 } from "@/usecase/iProfessionalUseCases";
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -52,6 +53,36 @@ export class ProfessionalUseCases implements IProfessionalUseCases {
       this.identidade = { usuarioId, promessa };
     }
     return this.identidade.promessa;
+  }
+
+  async getWorkplace(): Promise<Workplace> {
+    const eu = await this.eu();
+    const [barbershop, horarios, services] = await Promise.all([
+      this.barbershops.getBarbershop(eu.barbershopId),
+      this.barbershops.listBusinessHours(eu.barbershopId).catch(() => []),
+      this.barbershops.listServices(eu.barbershopId).catch(() => []),
+    ]);
+    return {
+      barbershop,
+      specialty: eu.specialty ?? null,
+      week: [1, 2, 3, 4, 5, 6, 0].map((dia) => {
+        const h = horarios.find((x) => x.dayOfWeek === dia);
+        return { dayOfWeek: dia, hours: h ? { openTime: h.openTime, closeTime: h.closeTime } : null };
+      }),
+      services: [...services].sort((a, b) => a.price - b.price),
+    };
+  }
+
+  async completeAppointment(appointmentId: string, startsAt: Date, now: Date = new Date()): Promise<void> {
+    // Concluir antes do horário seria marcar um atendimento que ainda não aconteceu.
+    if (startsAt.getTime() > now.getTime()) {
+      throw new DomainError("Só dá para concluir depois do horário de início.", "INVALID_DATA");
+    }
+    await this.professionals.completeAppointment(appointmentId);
+  }
+
+  async cancelAppointment(appointmentId: string): Promise<void> {
+    await this.professionals.cancelAppointment(appointmentId);
   }
 
   async getDayAgenda(date: string): Promise<DayAgenda> {

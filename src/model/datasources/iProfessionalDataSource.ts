@@ -2,7 +2,7 @@ import type { AppointmentStatus } from "@/model/entities/appointment";
 import type { RecurringUnavailability, Unavailability } from "@/model/entities/unavailability";
 
 /** Quem é o profissional logado e em qual barbearia trabalha. */
-export type ProfessionalIdentity = { professionalId: string; barbershopId: string };
+export type ProfessionalIdentity = { professionalId: string; barbershopId: string; specialty?: string | null };
 
 /** Agendamento da agenda do profissional; a API não manda o nome do cliente nem do serviço. */
 export type AgendaAppointmentData = {
@@ -16,6 +16,8 @@ export type AgendaAppointmentData = {
 export interface IProfessionalDataSource {
   getMe(): Promise<ProfessionalIdentity>;
   listMyAgenda(): Promise<AgendaAppointmentData[]>;
+  completeAppointment(appointmentId: string): Promise<void>;
+  cancelAppointment(appointmentId: string): Promise<void>;
   listUnavailabilities(who: ProfessionalIdentity): Promise<Unavailability[]>;
   addUnavailability(who: ProfessionalIdentity, startsAt: Date, endsAt: Date, reason?: string): Promise<void>;
   removeUnavailability(who: ProfessionalIdentity, id: string): Promise<void>;

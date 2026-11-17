@@ -16,8 +16,10 @@ const ag = (id: string, ini: [number, number], fim: [number, number], status: Ag
 
 const montar = (agenda: AgendaAppointmentData[]) => {
   const pro = {
-    getMe: jest.fn(async () => ({ professionalId: "p1", barbershopId: "b1" })),
+    getMe: jest.fn(async () => ({ professionalId: "p1", barbershopId: "b1", specialty: "Degradê" })),
     listMyAgenda: jest.fn(async () => agenda),
+    completeAppointment: jest.fn(async () => undefined),
+    cancelAppointment: jest.fn(async () => undefined),
     listUnavailabilities: jest.fn(async () => [
       { id: "u-velho", startsAt: new Date(2026, 9, 1, 14), endsAt: new Date(2026, 9, 1, 16), reason: null },
       { id: "u1", startsAt: new Date(2026, 10, 20, 14), endsAt: new Date(2026, 10, 20, 16), reason: "Exame médico" },
@@ -33,6 +35,7 @@ const montar = (agenda: AgendaAppointmentData[]) => {
   const barbearias = {
     listServices: jest.fn(async () => [{ id: "s1", barbershopId: "b1", name: "Corte Degradê", description: null, durationMinutes: 30, price: 40, imageUrl: null }]),
     listBusinessHours: jest.fn(async () => [{ dayOfWeek: 1, openTime: "09:00", closeTime: "12:00" }]),
+    getBarbershop: jest.fn(async () => ({ id: "b1", name: "Don Corleone", address: "Rua A", phone: "11999990000", avatarUrl: null })),
   } as unknown as jest.Mocked<IBarbershopDataSource>;
   const sessao = new MemoryAuthSessionService();
   sessao.setSession({ token: "t", roles: ["profissional"], user: { id: "u1", name: "Zé", email: "", phone: "", avatarUrl: null, memberSince: new Date() } });
@@ -97,5 +100,28 @@ describe("ProfessionalUseCases", () => {
     sessao.setSession({ token: "t2", roles: ["profissional"], user: { id: "u2", name: "Outro", email: "", phone: "", avatarUrl: null, memberSince: new Date() } });
     await casos.listMyBlocks();
     expect(pro.getMe).toHaveBeenCalledTimes(2);
+  });
+
+  it("local de trabalho: barbearia, especialidade e a semana de segunda a domingo", async () => {
+    const { casos } = montar([]);
+    const w = await casos.getWorkplace();
+    expect(w.barbershop.name).toBe("Don Corleone");
+    expect(w.specialty).toBe("Degradê");
+    expect(w.week.map((d) => d.dayOfWeek)).toEqual([1, 2, 3, 4, 5, 6, 0]);
+    expect(w.week[0]?.hours).toEqual({ openTime: "09:00", closeTime: "12:00" });
+    expect(w.week[1]?.hours).toBeNull();
+    expect(w.services[0]?.name).toBe("Corte Degradê");
+  });
+
+  it("concluir só depois do início; cancelar repassa", async () => {
+    const { pro, casos } = montar([]);
+    const agora = new Date(2026, 10, 16, 10);
+    await expect(casos.completeAppointment("a1", new Date(2026, 10, 16, 11), agora)).rejects.toThrow(
+      "Só dá para concluir depois do horário de início.",
+    );
+    await casos.completeAppointment("a1", new Date(2026, 10, 16, 9), agora);
+    expect(pro.completeAppointment).toHaveBeenCalledWith("a1");
+    await casos.cancelAppointment("a2");
+    expect(pro.cancelAppointment).toHaveBeenCalledWith("a2");
   });
 });
