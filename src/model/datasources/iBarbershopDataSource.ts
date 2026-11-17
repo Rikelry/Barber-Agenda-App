@@ -27,6 +27,7 @@ export interface IBarbershopDataSource {
   saveBusinessHours(barbershopId: string, hours: BusinessHours): Promise<void>;
   createProfessional(barbershopId: string, data: ProfessionalData): Promise<Professional>;
   updateProfessional(barbershopId: string, professionalId: string, data: ProfessionalUpdate): Promise<Professional>;
+  removeProfessional(barbershopId: string, professionalId: string): Promise<void>;
   createService(barbershopId: string, data: ServiceData): Promise<Service>;
   updateService(barbershopId: string, serviceId: string, data: Partial<ServiceData>): Promise<Service>;
 }

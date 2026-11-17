@@ -16,6 +16,8 @@ export type ProfissionaisBarbeariaState = {
   form: ProfessionalForm;
   fieldErrors: Partial<Record<ProfessionalField, string>>;
   saving: boolean;
+  /** Profissional com a confirmação de remover aberta. */
+  confirmingRemoveId: string | null;
   errorMessage: string | null;
 };
 
@@ -25,6 +27,9 @@ export type ProfissionaisBarbeariaActions = {
   closeForm: () => void;
   setField: (field: ProfessionalField, value: string) => void;
   submit: () => void;
+  askRemove: (professionalId: string) => void;
+  dismissRemove: () => void;
+  confirmRemove: () => void;
   retry: () => void;
   goBack: () => void;
 };
@@ -44,6 +49,7 @@ export function useProfissionaisBarbeariaViewModel(
   const [form, setForm] = useState<ProfessionalForm>(VAZIO);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<ProfessionalField, string>>>({});
   const [saving, setSaving] = useState(false);
+  const [confirmingRemoveId, setConfirmingRemoveId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const carregar = useCallback(() => {
@@ -92,7 +98,7 @@ export function useProfissionaisBarbeariaViewModel(
   };
 
   return [
-    { status, professionals, editing, form, fieldErrors, saving, errorMessage },
+    { status, professionals, editing, form, fieldErrors, saving, confirmingRemoveId, errorMessage },
     {
       openNew: () => abrir("novo", VAZIO),
       openEdit: (p) =>
@@ -103,6 +109,25 @@ export function useProfissionaisBarbeariaViewModel(
         setFieldErrors((e) => ({ ...e, [field]: undefined }));
       },
       submit,
+      askRemove: (pid) => {
+        setErrorMessage(null);
+        setConfirmingRemoveId(pid);
+      },
+      dismissRemove: () => setConfirmingRemoveId(null),
+      confirmRemove: () => {
+        if (!confirmingRemoveId || saving) return;
+        setSaving(true);
+        useCases
+          .removeProfessional(id, confirmingRemoveId)
+          .then(
+            () => {
+              setConfirmingRemoveId(null);
+              carregar();
+            },
+            (erro: unknown) => setErrorMessage(mensagem(erro)),
+          )
+          .finally(() => setSaving(false));
+      },
       retry: () => {
         setStatus("loading");
         carregar();

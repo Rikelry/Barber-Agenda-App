@@ -226,6 +226,10 @@ export class OwnerUseCases implements IOwnerUseCases {
     });
   }
 
+  removeProfessional(barbershopId: string, professionalId: string): Promise<void> {
+    return this.barbershops.removeProfessional(barbershopId, professionalId);
+  }
+
   listServices(barbershopId: string): Promise<Service[]> {
     return this.barbershops.listServices(barbershopId);
   }

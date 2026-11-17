@@ -46,6 +46,7 @@ const donoFalso = (): jest.Mocked<IOwnerUseCases> => ({
   listProfessionals: jest.fn(async () => []),
   addProfessional: jest.fn(async () => ({}) as never),
   updateProfessional: jest.fn(async () => ({}) as never),
+  removeProfessional: jest.fn(async () => undefined),
   listServices: jest.fn(async () => []),
   addService: jest.fn(async () => ({}) as never),
   updateService: jest.fn(async () => ({}) as never),
@@ -136,6 +137,11 @@ describe("telas do dono", () => {
     await waitFor(() => expect(pro.current[0].editing).toBeNull());
     expect(dono.addProfessional).toHaveBeenCalledWith("b1", expect.objectContaining({ name: "Junior" }));
     expect(dono.listProfessionals).toHaveBeenCalledTimes(2);
+    await agir(() => pro.current[1].askRemove("p9"));
+    expect(pro.current[0].confirmingRemoveId).toBe("p9");
+    await agir(() => pro.current[1].confirmRemove());
+    await waitFor(() => expect(pro.current[0].confirmingRemoveId).toBeNull());
+    expect(dono.removeProfessional).toHaveBeenCalledWith("b1", "p9");
 
     const { result: srv } = await renderHook(() => useServicosBarbeariaViewModel(dono));
     await waitFor(() => expect(srv.current[0].status).toBe("content"));

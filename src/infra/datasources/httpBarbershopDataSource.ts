@@ -146,6 +146,10 @@ export class HttpBarbershopDataSource implements IBarbershopDataSource {
     );
   }
 
+  async removeProfessional(barbershopId: string, professionalId: string): Promise<void> {
+    await this.http.delete(`/barbershops/${segment(barbershopId)}/professionals/${segment(professionalId)}`);
+  }
+
   async createService(barbershopId: string, data: ServiceData): Promise<Service> {
     return toService(await this.http.post<ServiceDto>(`/barbershops/${segment(barbershopId)}/services`, data));
   }

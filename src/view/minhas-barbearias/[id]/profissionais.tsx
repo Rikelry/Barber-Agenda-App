@@ -75,7 +75,35 @@ const ProfissionaisBarbearia = () => {
                   onPress={() => actions.openEdit(p)}
                   icon={(cor) => <Icon name="edit" color={cor} />}
                 />
+                <IconButton
+                  accessibilityLabel={`Remover ${p.name}`}
+                  onPress={() => actions.askRemove(p.id)}
+                  icon={() => <Icon name="trash" color={colors.error} />}
+                />
               </View>
+              {state.confirmingRemoveId === p.id ? (
+                <View style={{ gap: spacing.sm, marginTop: spacing.md }} accessibilityLiveRegion="polite">
+                  <Typography variant="bodyMedium" weight="700">
+                    Remover {p.name} da barbearia?
+                  </Typography>
+                  <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                    <Button variant="text" size="small" style={{ flex: 1 }} onPress={actions.dismissRemove}>
+                      Voltar
+                    </Button>
+                    <Button
+                      variant="filled"
+                      size="small"
+                      style={{ flex: 1, backgroundColor: colors.error }}
+                      onPress={actions.confirmRemove}
+                      disabled={state.saving}
+                    >
+                      <Typography variant="labelLarge" color="onError">
+                        {state.saving ? "Removendo..." : "Sim, remover"}
+                      </Typography>
+                    </Button>
+                  </View>
+                </View>
+              ) : null}
             </Card>
           ))
         )}
