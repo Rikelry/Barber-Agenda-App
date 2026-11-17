@@ -1,102 +1,117 @@
 # Acessibilidade
 
-<!-- A acessibilidade é embutida nos componentes.
-     Referência normativa: WCAG 2.2 Nível AA.
-     Critério 1.4.3: Contraste mínimo de 4,5:1 para texto normal (< 18 pt / 24 px ou < 14 pt / 18,66 px em negrito).
-     Critério 1.4.3: Contraste mínimo de 3,0:1 para texto grande (≥ 18 pt / 24 px ou ≥ 14 pt / 18,66 px em negrito).
-     Critério 1.4.11: Contraste mínimo de 3,0:1 para elementos gráficos, contornos e indicadores de foco.
-     Fórmula de contraste: Razão = (L1 + 0,05) / (L2 + 0,05), onde L1 é a luminância relativa da cor mais clara e L2 a da mais escura. -->
+<!-- A acessibilidade é embutida nos componentes. Contraste mínimo de 4,5:1 para texto comum (WCAG).
+     Razão de contraste = (L1 + 0,05) / (L2 + 0,05), com L1 a luminância relativa da cor mais clara e L2 a da mais escura.
+     Use uma calculadora de contraste e registre o resultado. -->
 
-## 1. Contraste dos pares de cor
+## Contraste dos pares de cor
 
-Os pares de cores utilizam exclusivamente os nomes de tokens canônicos definidos em `02-tokens.md`. As razões calculadas utilizam a fórmula matemática de luminância relativa do padrão WCAG 2.2 AA.
+| Par (texto sobre fundo) | Modo | Cores | Razão | Mínimo | Resultado |
+| --- | --- | --- | --- | --- | --- |
+| `color.on-action` sobre `color.action` | Claro | `#FFFFFF` sobre `#63452C` | 8,68:1 | 4,5:1 | Aprovado |
+| `color.on-action` sobre `color.action` | Escuro | `#241A14` sobre `#CDAB8F` | 7,96:1 | 4,5:1 | Aprovado |
+| `color.on-surface` sobre `color.surface` | Claro | `#241A14` sobre `#FFF8F3` | 16,20:1 | 4,5:1 | Aprovado |
+| `color.on-surface` sobre `color.surface` | Escuro | `#F5EDE6` sobre `#1D1712` | 15,33:1 | 4,5:1 | Aprovado |
+| `color.on-surface-variant` sobre `color.surface` | Claro | `#865E3C` sobre `#FFF8F3` | 5,43:1 | 4,5:1 | Aprovado |
+| `color.on-surface-variant` sobre `color.surface` | Escuro | `#CDAB8F` sobre `#1D1712` | 8,30:1 | 4,5:1 | Aprovado |
+| `color.error` sobre `color.surface` | Claro | `#BA1A1A` sobre `#FFF8F3` | 6,14:1 | 4,5:1 | Aprovado |
+| `color.error` sobre `color.surface` | Escuro | `#FFB4AB` sobre `#1D1712` | 10,45:1 | 4,5:1 | Aprovado |
 
-Para pares cujos valores finais dependem da exportação da paleta tonal no Material Theme Builder a partir das fontes de marca da equipe, o resultado é mantido explicitamente como **Pendente de geração no MTB**, documentando exatamente qual informação falta para a validação.
+**Critério de cálculo:** a razão de contraste segue a fórmula WCAG `(L1 + 0,05) / (L2 + 0,05)`, considerando a luminância relativa das cores. Os cálculos utilizam os valores hexadecimais definidos em `02-tokens.md`.
 
-### Tabela de validação de contraste
+**Consistência com os tokens:** no modo escuro, `color.on-action` utiliza `neutral-900` (`#241A14`) sobre `color.action` (`brown-1`, `#CDAB8F`). Essa combinação apresenta contraste de 7,96:1 e atende ao mínimo de 4,5:1. Não utilize `brown-5` sobre `brown-1` para textos comuns.
 
-| Primeiro plano (token) | Fundo (token) | Tema | Valores reais (hex) | Razão calculada | Critério WCAG 2.2 AA | Resultado e estado |
-| --- | --- | --- | --- | --- | --- | --- |
-| `color.on-primary` (`button.label`) | `color.primary` (`button.bg`) | Claro | `#332E29` sobre `#FF8500` (proposta de marca da equipe) | **5,50:1** | Texto normal (≥ 4,5:1) | **Aprovado (proposta)** — *Atenção: texto branco `#FFFFFF` sobre `#FF8500` atinge apenas 2,44:1 (Reprovado). Uso obrigatório de tom escuro sobre o primário.* |
-| `color.on-primary` (`button.label`) | `color.primary` (`button.bg`) | Escuro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer geração do esquema tonal escuro no MTB |
-| `color.on-surface` | `color.surface` | Claro | `#1C1B1F` sobre `#FFFFFF` | **17,13:1** | Texto normal (≥ 4,5:1) | **Aprovado** (base M3 / WCAG AAA) |
-| `color.on-surface` | `color.surface` | Escuro | `#E6E1E5` sobre `#1C1B1F` | **13,27:1** | Texto normal (≥ 4,5:1) | **Aprovado** (base M3 / WCAG AAA) |
-| `color.on-surface-variant` | `color.surface` | Claro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer tom `onSurfaceVariant` exportado do MTB |
-| `color.on-surface-variant` | `color.surface` | Escuro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer tom `onSurfaceVariant` exportado do MTB |
-| `color.error` | `color.surface` | Claro | `#B3261E` sobre `#FFFFFF` | **6,54:1** | Texto normal (≥ 4,5:1) | **Aprovado** (base M3) |
-| `color.error` | `color.surface` | Escuro | `#F2B8B5` sobre `#1C1B1F` | **10,03:1** | Texto normal (≥ 4,5:1) | **Aprovado** (base M3 / WCAG AAA) |
-| `color.on-error-container` | `color.error-container` | Claro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer contêiner de erro exportado do MTB |
-| `color.on-error-container` | `color.error-container` | Escuro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer contêiner de erro exportado do MTB |
-| `color.on-primary-container` | `color.primary-container` | Claro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer contêiner primário exportado do MTB |
-| `color.on-primary-container` | `color.primary-container` | Escuro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer contêiner primário exportado do MTB |
-| `color.on-secondary-container` | `color.secondary-container` | Claro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer contêiner secundário exportado do MTB |
-| `color.on-secondary-container` | `color.secondary-container` | Escuro | Pendente de exportação do MTB | Pendente | Texto normal (≥ 4,5:1) | **Pendente** — Requer contêiner secundário exportado do MTB |
-| Texto de badge sucesso (`neutral.white`) | Fundo de badge sucesso (`#2E7D32`) | Ambos | `#FFFFFF` sobre `#2E7D32` | **5,13:1** | Texto normal em negrito (≥ 4,5:1) | **Aprovado (especificação local)** — Requer criação de token semântico oficial de sucesso |
-| `color.focus` | `color.surface` | Claro | Pendente de exportação do MTB | Pendente | Indicador de foco (≥ 3,0:1) | **Pendente** — Requer anel de foco visível com contraste ≥ 3:1 |
-| `color.focus` | `color.surface` | Escuro | Pendente de exportação do MTB | Pendente | Indicador de foco (≥ 3,0:1) | **Pendente** — Requer validação no fundo escuro |
-| `color.outline` | `color.surface` | Claro | Pendente de exportação do MTB | Pendente | Componentes gráficos (≥ 3,0:1) | **Pendente** — Requer tom de borda/campo exportado do MTB |
-| `hair.white` (amostra de domínio) | `color.surface` | Claro | `#F2F2F0` sobre `#FFFFFF` | **1,12:1** | Elementos gráficos (≥ 3,0:1) | **Reprovado sem borda** — *Regra obrigatória: amostras visuais de cabelo claro devem ter contorno com `color.outline`.* |
+## Alvos de toque
 
-### Memória de cálculo reproduzível
+- Utilize alvos de toque com tamanho mínimo de 48 dp em todos os elementos interativos.
+- Aplique o requisito a botões, campos, ícones interativos, seletores de horário, itens de navegação e controles de formulário.
+- Utilize `space-8` para separar elementos interativos próximos.
+- Amplie a área clicável de ícones pequenos sem necessariamente aumentar o desenho do ícone.
+- Não utilize apenas a aparência visual para indicar que um elemento é interativo.
+- Verifique o tamanho dos alvos em todas as telas e componentes antes da entrega.
 
-A luminância relativa $L$ de uma cor no espaço sRGB é calculada normalizando os canais $R, G, B \in [0, 255]$:
-- Se $C_{srgb} \le 0{,}04045$, então $c = C_{srgb} / 12{,}92$.
-- Senão, $c = ((C_{srgb} + 0{,}055) / 1{,}055)^{2{,}4}$.
-- $L = 0{,}2126 \cdot r + 0{,}7152 \cdot g + 0{,}0722 \cdot b$.
+**Verificação por componente:**
 
-A razão de contraste entre duas luminâncias $L_1$ (mais clara) e $L_2$ (mais escura) é:
-$$\text{Razão} = \frac{L_1 + 0{,}05}{L_2 + 0{,}05}$$
+| Componente | Requisito |
+| --- | --- |
+| Botões | Mínimo de 48 × 48 dp |
+| Campos de texto | Mínimo de 48 dp de altura |
+| Ícones interativos | Área clicável mínima de 48 × 48 dp |
+| Navegação inferior | Área clicável mínima de 48 × 48 dp por item |
+| Seletores de data e horário | Área clicável mínima de 48 × 48 dp |
+| Cards interativos | Área de interação mínima de 48 × 48 dp |
 
-Valores de luminância relativa calculados para as cores do projeto:
-- `#FFFFFF` (`neutral.white` / superfície clara): $L = 1{,}0000$
-- `#E6E1E5` (`color.on-surface` escuro): $L = 0{,}7633$
-- `#F2F2F0` (`hair.white`): $L = 0{,}8867$
-- `#F2B8B5` (`color.error` escuro): $L = 0{,}5649$
-- `#FF8500` (`orange-500` / primário proposto): $L = 0{,}3804$
-- `#2E7D32` (verde badge sucesso): $L = 0{,}1548$
-- `#B3261E` (`color.error` claro): $L = 0{,}1106$
-- `#332E29` (`brown-900` / on-primary proposto): $L = 0{,}0282$
-- `#1C1B1F` (`color.surface` escuro / `color.on-surface` claro): $L = 0{,}0113$
-- `#000000` (`neutral.black`): $L = 0{,}0000$
+## Foco
 
-## 2. Alvos de toque
+- Utilize `color.focus` para indicar visualmente o elemento que recebeu foco.
+- Apresente um contorno de foco visível com espessura mínima de 2 dp.
+- Mantenha contraste suficiente entre o indicador de foco e as cores adjacentes.
+- Preserve uma ordem de foco lógica, seguindo a sequência visual e funcional da tela.
+- Permita navegação por teclado externo, incluindo Tab, Shift + Tab e Enter quando aplicável.
+- Não remova o indicador de foco padrão sem fornecer uma alternativa visível.
+- Direcione o foco para mensagens de erro ou resultados importantes quando necessário.
+- Diferencie visualmente os estados focado, selecionado e pressionado.
 
-### Requisitos documentados
-- Mínimo de 48 dp (Material) ou 44 pt (HIG) em todo elemento tocável. Priorizar alvos de pelo menos 48 dp nos componentes do aplicativo.
-- Aplicar a botões, campos de texto, chips, abas, controles do calendário e horários disponíveis para agendamento.
-- Quando um ícone for visualmente pequeno (ex.: 24 dp), estender a área clicável com preenchimento interno (`padding` mínimo) até atingir pelo menos 48 × 48 dp.
+## Leitor de tela
 
-### Estado dos testes
-- **Pendente de execução física:** Os tamanhos de alvos de toque foram definidos na especificação de componentes (`04-componentes/`), mas a medição em tela real com as ferramentas de acessibilidade da plataforma (Accessibility Scanner no Android e Accessibility Inspector no iOS) está pendente da implementação das telas.
+- Utilize `accessibilityLabel` para identificar a finalidade de botões, campos e elementos interativos.
+- Utilize `accessibilityRole` para informar corretamente o tipo de elemento.
+- Utilize `accessibilityHint` quando uma ação precisar de explicação adicional.
+- Utilize `accessibilityState` para comunicar estados como selecionado, desabilitado e marcado.
+- Identifique botões compostos somente por ícones com rótulos descritivos.
+- Associe mensagens de erro aos respectivos campos de formulário.
+- Utilize `accessibilityLiveRegion` para anunciar mensagens importantes e atualizações de estado no Android.
+- Oculte elementos puramente decorativos da árvore de acessibilidade.
+- Não utilize somente cores ou ícones para transmitir informações.
+- Mantenha a ordem de leitura compatível com a disposição visual dos elementos.
 
-## 3. Foco
+**Exemplos de identificação acessível:**
 
-### Requisitos documentados
-- Usar o token `color.focus` para indicar o anel de foco visível, com contraste mínimo de 3,0:1 em relação à superfície subjacente (WCAG 1.4.11).
-- Manter ordem de foco lógica, acompanhando a sequência linear de leitura e interação da tela.
-- Não depender exclusivamente da cor para comunicar o estado de foco; utilizar borda de espessura destacada ou duplo indicador visual.
+| Elemento | Rótulo anunciado |
+| --- | --- |
+| Botão de voltar | Voltar |
+| Botão de agendamento | Confirmar agendamento |
+| Campo de e-mail | Digite seu e-mail |
+| Campo de senha | Digite sua senha |
+| Horário selecionado | 14 horas, selecionado |
+| Botão desabilitado | Confirmar agendamento, indisponível |
+| Mensagem de erro | Não foi possível realizar o agendamento |
 
-### Estado dos testes
-- **Pendente de execução física:** A navegação assistida por teclado físico e controles direcionais (D-pad) está documentada como diretriz arquitetural, pendente de validação nos componentes compilados.
+## Texto ampliado e movimento
 
-## 4. Leitor de tela
+### Texto ampliado
 
-### Requisitos documentados
-- Botões que exibem somente ícones devem obrigatoriamente possuir `accessibilityLabel` descritivo da ação (ex.: "Voltar para tela anterior", "Fechar diálogo").
-- Campos de texto devem possuir rótulos acessíveis associados, mensagens de ajuda e anúncio imediato de erros via `accessibilityLiveRegion` ou atributos equivalentes.
-- Indicar semanticamente os estados selecionado (`accessibilityState={{ selected: true }}`), desabilitado (`disabled: true`) e ocupado/carregando.
-- No calendário de agendamento, comunicar a data selecionada e a disponibilidade dos horários por texto acessível audível (ex.: "14 horas, horário disponível").
-- Nas confirmações de agendamento, agrupar e anunciar de forma contígua serviço, profissional, data, horário e valor.
+- Respeite a escala de fonte configurada pelo usuário no Android.
+- Utilize a propriedade `allowFontScaling` nos componentes de texto do React Native.
+- Evite alturas fixas em elementos que contenham texto.
+- Permita que botões, cards e campos aumentem de altura conforme necessário.
+- Utilize quebra automática de linha para textos extensos.
+- Preserve a legibilidade e a hierarquia tipográfica durante a ampliação.
+- Não corte informações importantes quando o usuário aumentar o tamanho da fonte.
+- Teste as telas com diferentes níveis de ampliação de texto.
 
-### Estado dos testes
-- **Pendente de homologação manual:** Os requisitos semânticos estão documentados nos componentes, mas as sessões de teste interativo com VoiceOver (iOS) e TalkBack (Android) em aparelhos físicos ainda não foram realizadas.
+### Redução de movimento
 
-## 5. Texto ampliado e movimento reduzido
+- Respeite a configuração de redução de movimento do sistema quando disponível.
+- Remova animações decorativas quando a redução de movimento estiver ativa.
+- Preserve apenas transições essenciais para comunicar mudanças de estado.
+- Substitua animações complexas por mudanças visuais simples.
+- Nunca dependa exclusivamente de animações para transmitir informações.
+- Mantenha os tempos de animação definidos pelos tokens de movimento quando a animação estiver habilitada.
 
-### Requisitos documentados
-- Respeitar as configurações de acessibilidade do sistema: Dynamic Type no iOS e escala de fonte no Android (até 200% sem perda de conteúdo).
-- Evitar alturas fixas em contêineres que contenham texto, prevenindo truncamento ou sobreposição.
-- Respeitar a preferência de redução de movimento do sistema (`prefers-reduced-motion`), desativando transições supérfluas e mantendo confirmações instantâneas.
+## Verificação final
 
-### Estado dos testes
-- **Pendente de homologação em dispositivos:** Testes com aumento de fonte até 200% e ativação da opção de movimento reduzido no sistema operacional estão pendentes de execução após a montagem das telas.
+Antes de considerar uma tela acessível, verifique:
+
+- [ ] Todos os textos comuns possuem contraste mínimo de 4,5:1.
+- [ ] Todos os elementos interativos possuem alvos de pelo menos 48 dp.
+- [ ] O foco é visível e segue uma ordem lógica.
+- [ ] Botões e campos possuem identificação acessível.
+- [ ] Estados de erro, seleção e desabilitação são anunciados.
+- [ ] O texto pode ser ampliado sem perda de conteúdo.
+- [ ] A interface respeita a redução de movimento.
+- [ ] As cores funcionam nos modos claro e escuro.
+- [ ] A navegação pode ser realizada com leitor de tela.
+- [ ] As telas foram verificadas em diferentes tamanhos de dispositivos.
+
+**Referências:** WCAG 2.2 nível AA, Material Design 3 e documentação de acessibilidade do React Native e Android.
