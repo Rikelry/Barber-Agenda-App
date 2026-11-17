@@ -16,6 +16,11 @@ export type MinhaAgendaState = {
   date: string;
   closed: boolean;
   items: AgendaItem[];
+  /** Agendamento tocado: mostra as ações Concluir e Cancelar. */
+  selectedId: string | null;
+  confirmingCancel: boolean;
+  acting: boolean;
+  actionMessage: string | null;
   errorMessage: string | null;
 };
 
@@ -24,6 +29,12 @@ export type MinhaAgendaActions = {
   retry: () => void;
   goBack: () => void;
   openBlocks: () => void;
+  openWorkplace: () => void;
+  select: (appointmentId: string) => void;
+  complete: () => void;
+  askCancel: () => void;
+  dismissCancel: () => void;
+  confirmCancel: () => void;
 };
 
 /** Segunda a domingo da semana atual, como no layout. */
@@ -41,6 +52,10 @@ export function useMinhaAgendaViewModel(
   const [closed, setClosed] = useState(false);
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [acting, setActing] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
   const pedido = useRef(0);
   const diaAtual = useRef(hoje);
 
@@ -77,11 +92,32 @@ export function useMinhaAgendaViewModel(
     return { iso, date: d, selected: iso === date, today: iso === hoje };
   });
 
+  const agir = (acao: Promise<void>, sucesso: string) => {
+    setActing(true);
+    setActionMessage(null);
+    acao
+      .then(
+        () => {
+          setSelectedId(null);
+          setConfirmingCancel(false);
+          setActionMessage(sucesso);
+          carregar(diaAtual.current);
+        },
+        (erro: unknown) =>
+          setActionMessage(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo."),
+      )
+      .finally(() => setActing(false));
+  };
+
+  const selecionado = items.find((i) => i.kind === "appointment" && i.id === selectedId);
+
   return [
-    { status, week, date, closed, items, errorMessage },
+    { status, week, date, closed, items, selectedId, confirmingCancel, acting, actionMessage, errorMessage },
     {
       selectDate: (iso) => {
         setDate(iso);
+        setSelectedId(null);
+        setActionMessage(null);
         diaAtual.current = iso;
         setStatus("loading");
         carregar(iso);
@@ -92,6 +128,24 @@ export function useMinhaAgendaViewModel(
       },
       goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
       openBlocks: () => router.push("/indisponibilidades"),
+      openWorkplace: () => router.push("/meu-trabalho"),
+      select: (id) => {
+        setSelectedId((atual) => (atual === id ? null : id));
+        setConfirmingCancel(false);
+        setActionMessage(null);
+      },
+      complete: () => {
+        if (selecionado?.kind === "appointment" && !acting) {
+          agir(useCases.completeAppointment(selecionado.id, selecionado.startsAt), "Atendimento concluído.");
+        }
+      },
+      askCancel: () => setConfirmingCancel(true),
+      dismissCancel: () => setConfirmingCancel(false),
+      confirmCancel: () => {
+        if (selecionado?.kind === "appointment" && !acting) {
+          agir(useCases.cancelAppointment(selecionado.id), "Agendamento cancelado.");
+        }
+      },
     },
   ];
 }

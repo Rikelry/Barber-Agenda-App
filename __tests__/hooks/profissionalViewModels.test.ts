@@ -4,23 +4,41 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import { ValidationError } from "@/model/errors";
 import type { IProfessionalUseCases, RecurringBlock } from "@/usecase/iProfessionalUseCases";
 import { useIndisponibilidadesViewModel } from "@/viewmodel/useIndisponibilidadesViewModel";
+import { useMeuTrabalhoViewModel } from "@/viewmodel/useMeuTrabalhoViewModel";
 import { useMinhaAgendaViewModel } from "@/viewmodel/useMinhaAgendaViewModel";
 
-import { agir } from "../helpers/authFalso";
+import { agir, authFalso } from "../helpers/authFalso";
 
 const mockPush = jest.fn();
 jest.mock("expo-router", () => ({
   router: { push: (...a: unknown[]) => mockPush(...a), canGoBack: () => true, back: jest.fn(), replace: jest.fn() },
   useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
 }));
-jest.mock("@/di/container", () => ({ professionalUseCases: {} }));
+jest.mock("@/di/container", () => ({ professionalUseCases: {}, authUseCases: {} }));
 
 const BLOCO: RecurringBlock = { key: "k", ids: ["r1", "r2"], days: [1, 2], startTime: "12:00", endTime: "13:00", reason: "Almoço" };
 
+const ATENDIMENTO = {
+  kind: "appointment" as const,
+  id: "a1",
+  serviceName: "Corte",
+  startsAt: new Date(2026, 10, 16, 9),
+  endsAt: new Date(2026, 10, 16, 9, 30),
+  status: "confirmed" as const,
+};
+
 const falso = (): jest.Mocked<IProfessionalUseCases> => ({
+  getWorkplace: jest.fn(async () => ({
+    barbershop: { id: "b1", name: "Don Corleone", address: "Rua A", phone: "1", avatarUrl: null },
+    specialty: "Degradê",
+    week: [],
+    services: [],
+  })),
+  completeAppointment: jest.fn(async () => undefined),
+  cancelAppointment: jest.fn(async () => undefined),
   getDayAgenda: jest.fn(async () => ({
     closed: false,
-    items: [{ kind: "free" as const, startsAt: new Date(2026, 10, 16, 9), endsAt: new Date(2026, 10, 16, 10) }],
+    items: [ATENDIMENTO, { kind: "free" as const, startsAt: new Date(2026, 10, 16, 9, 30), endsAt: new Date(2026, 10, 16, 10) }],
   })),
   listMyBlocks: jest.fn(async () => ({ recurring: [BLOCO], oneOff: [] })),
   addRecurringBlock: jest.fn(async () => undefined),
@@ -46,6 +64,38 @@ describe("useMinhaAgendaViewModel", () => {
     await waitFor(() => expect(casos.getDayAgenda).toHaveBeenLastCalledWith(outro));
     await agir(() => result.current[1].openBlocks());
     expect(mockPush).toHaveBeenCalledWith("/indisponibilidades");
+  });
+});
+
+describe("ações na agenda", () => {
+  it("tocar no agendamento abre Concluir e Cancelar; cancelar pede confirmação", async () => {
+    const casos = falso();
+    const { result } = await renderHook(() => useMinhaAgendaViewModel(casos));
+    await waitFor(() => expect(result.current[0].status).toBe("content"));
+    await agir(() => result.current[1].select("a1"));
+    expect(result.current[0].selectedId).toBe("a1");
+    await agir(() => result.current[1].complete());
+    await waitFor(() => expect(result.current[0].actionMessage).toBe("Atendimento concluído."));
+    expect(casos.completeAppointment).toHaveBeenCalledWith("a1", ATENDIMENTO.startsAt);
+    expect(result.current[0].selectedId).toBeNull();
+
+    await agir(() => result.current[1].select("a1"));
+    await agir(() => result.current[1].askCancel());
+    expect(result.current[0].confirmingCancel).toBe(true);
+    expect(casos.cancelAppointment).not.toHaveBeenCalled();
+    await agir(() => result.current[1].confirmCancel());
+    await waitFor(() => expect(result.current[0].actionMessage).toBe("Agendamento cancelado."));
+    expect(casos.cancelAppointment).toHaveBeenCalledWith("a1");
+
+    await agir(() => result.current[1].openWorkplace());
+    expect(mockPush).toHaveBeenCalledWith("/meu-trabalho");
+  });
+
+  it("meu perfil profissional carrega o local de trabalho", async () => {
+    const casos = falso();
+    const { result } = await renderHook(() => useMeuTrabalhoViewModel(casos, authFalso()));
+    await waitFor(() => expect(result.current[0].status).toBe("content"));
+    expect(result.current[0].workplace?.specialty).toBe("Degradê");
   });
 });
 
