@@ -6,9 +6,15 @@ import { IServicoRepository } from '../../services/domain/interfaces/IServicoRep
 import { IUsuarioRepository } from '../../usuarios/domain/interfaces/IUsuarioRepository'
 import { IBusinessHoursRepository } from '../../barbershops/domain/interfaces/IBusinessHoursRepository'
 import { IVerificarBloqueioUseCase } from '../../unavailabilities/domain/interfaces/IVerificarBloqueioUseCase'
+import { IBarbeariaRepository } from '../../barbershops/domain/interfaces/IBarbeariaRepository'
 import { AppError } from '../../shared/errors/AppError'
 import { somarMinutos, dataNoPassado, diaDaSemana } from '../../shared/utils/dateUtils'
 
+/**
+ * RF009 — Reagendamento.
+ * Quem pode reagendar: o cliente dono do agendamento, o profissional vinculado
+ * a ele ou o owner da barbearia — a mesma regra do cancelamento (RF008).
+ */
 export class ReagendarAgendamentoUseCase implements IReagendarAgendamentoUseCase {
   constructor(
     private readonly agendamentoRepository: IAgendamentoRepository,
@@ -16,14 +22,31 @@ export class ReagendarAgendamentoUseCase implements IReagendarAgendamentoUseCase
     private readonly servicoRepository: IServicoRepository,
     private readonly usuarioRepository: IUsuarioRepository,
     private readonly businessHoursRepository: IBusinessHoursRepository,
-    private readonly verificarBloqueioUseCase: IVerificarBloqueioUseCase
+    private readonly verificarBloqueioUseCase: IVerificarBloqueioUseCase,
+    private readonly barbeariaRepository: IBarbeariaRepository
   ) {}
 
-  async executar(id: string, dados: ReagendarAgendamentoDTO): Promise<AgendamentoResponseDTO> {
+  async executar(id: string, dados: ReagendarAgendamentoDTO, userId: string): Promise<AgendamentoResponseDTO> {
     const agendamento = await this.agendamentoRepository.buscarPorId(id)
 
     if (!agendamento) {
       throw new AppError('Agendamento não encontrado.', 404, 'APPOINTMENT_NOT_FOUND')
+    }
+
+    let autorizado = agendamento.clientId === userId
+
+    if (!autorizado) {
+      const vinculado = await this.profissionalRepository.buscarPorIdGlobal(agendamento.professionalId)
+      autorizado = vinculado?.userId === userId
+    }
+
+    if (!autorizado) {
+      const barbearia = await this.barbeariaRepository.buscarPorId(agendamento.barbershopId)
+      autorizado = barbearia?.ownerId === userId
+    }
+
+    if (!autorizado) {
+      throw new AppError('Não autorizado para reagendar este agendamento.', 403, 'UNAUTHORIZED')
     }
 
     if (agendamento.status === 'cancelado' || agendamento.status === 'concluido') {

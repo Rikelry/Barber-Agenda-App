@@ -269,7 +269,8 @@ const reagendarAgendamentoUseCase = new ReagendarAgendamentoUseCase(
   servicoRepository,
   usuarioRepository,
   businessHoursRepository,
-  verificarBloqueioUseCase
+  verificarBloqueioUseCase,
+  barbeariaRepository
 )
 const agendamentoController = new AgendamentoController(
   listarAgendaProfissionalUseCase,

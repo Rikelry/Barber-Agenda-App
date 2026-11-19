@@ -123,10 +123,11 @@ export class AgendamentoController {
       const id = req.params.id as string
       const { date, time } = req.body
 
-      const agendamento = await this.reagendarAgendamentoUseCase.executar(id, {
-        date,
-        time,
-      })
+      const agendamento = await this.reagendarAgendamentoUseCase.executar(
+        id,
+        { date, time },
+        req.usuario.id
+      )
 
       return res.status(200).json(agendamento)
     } catch (err) {
