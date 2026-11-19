@@ -16,6 +16,7 @@ export type PerfilBarbeiroState = {
 export type PerfilBarbeiroActions = {
   retry: () => void;
   openBarbershop: () => void;
+  goBack: () => void;
 };
 
 export function usePerfilBarbeiroViewModel(
@@ -65,6 +66,7 @@ export function usePerfilBarbeiroViewModel(
       openBarbershop: () => {
         if (barbershopId) router.push({ pathname: "/barbearia/[id]", params: { id: barbershopId } });
       },
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/barbearias")),
     },
   ];
 }

@@ -1,3 +1,3 @@
-import Perfil from "@/view/perfil";
+import Perfil from "@/view/(tabs)/perfil";
 
 export default Perfil;

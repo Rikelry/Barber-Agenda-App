@@ -19,7 +19,6 @@ export type MinhasBarbeariasActions = {
   retry: () => void;
   open: (barbershopId: string) => void;
   create: () => void;
-  goBack: () => void;
 };
 
 const ATRASO_BUSCA_MS = 300;
@@ -78,7 +77,6 @@ export function useMinhasBarbeariasViewModel(
       },
       open: (id) => router.push({ pathname: "/minhas-barbearias/[id]", params: { id } }),
       create: () => router.push("/minhas-barbearias/nova"),
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
     },
   ];
 }

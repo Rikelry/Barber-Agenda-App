@@ -19,9 +19,6 @@ export type TextFieldProps = Omit<TextInputProps, "style"> & {
     trailingIcon?: ReactNode | ((color: string) => ReactNode);
 
     disabled?: boolean;
-    labelAlwaysFloating?: boolean;
-    /** Fundo do rótulo flutuante no variant outlined; use a cor da superfície onde o campo está. */
-    labelBackgroundColor?: string;
 
     containerStyle?: StyleProp<ViewStyle>;
     inputStyle?: StyleProp<TextStyle>;

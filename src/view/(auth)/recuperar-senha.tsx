@@ -2,8 +2,11 @@
 
 import { View } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Button } from "@/view/components/button";
 import { FormScreen } from "@/view/components/formScreen";
+import { ScreenHeader } from "@/view/components/screenHeader";
 import { Icon } from "@/view/components/icon";
 import { TextField } from "@/view/components/textField";
 import { useDesignSystem } from "@/view/components/themeProvider";
@@ -17,6 +20,8 @@ const RecuperarSenha = () => {
   const { colors, spacing } = theme;
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <ScreenHeader title="Recuperar senha" onBack={actions.backToLogin} />
     <FormScreen
       footer={
         <>
@@ -75,7 +80,6 @@ const RecuperarSenha = () => {
           <TextField
             label="E-mail"
             placeholder="Digite seu e-mail cadastrado"
-            labelAlwaysFloating
             value={state.email}
             onChangeText={actions.setEmail}
             errorText={state.emailError ?? undefined}
@@ -88,6 +92,7 @@ const RecuperarSenha = () => {
         </>
       )}
     </FormScreen>
+    </SafeAreaView>
   );
 };
 

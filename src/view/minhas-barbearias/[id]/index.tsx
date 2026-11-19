@@ -22,7 +22,7 @@ const EditarBarbearia = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScreenHeader
-        title="Editar Barbearia"
+        title="Editar barbearia"
         onBack={actions.goBack}
         right={
           state.status === "content" ? (
@@ -61,7 +61,7 @@ const EditarBarbearia = () => {
                 </Typography>
               ) : null}
               <Button variant="filled" size="medium" fullWidth onPress={actions.save} disabled={state.saving}>
-                {state.saving ? "Salvando..." : "Salvar Alterações"}
+                {state.saving ? "Salvando..." : "Salvar alterações"}
               </Button>
             </>
           }

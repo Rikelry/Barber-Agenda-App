@@ -1,3 +1,3 @@
-import MinhaAgenda from "@/view/minha-agenda";
+import MinhaAgenda from "@/view/(tabs)/agenda";
 
 export default MinhaAgenda;

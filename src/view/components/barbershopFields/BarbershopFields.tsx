@@ -36,7 +36,6 @@ export const BarbershopFields = ({ values, errors, onChange, full = false }: Bar
         <TextField
             label={label}
             placeholder={placeholder}
-            labelAlwaysFloating
             value={values[field]}
             onChangeText={(t) => onChange(field, t)}
             errorText={errors[field]}

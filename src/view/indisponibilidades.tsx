@@ -41,7 +41,6 @@ const Indisponibilidades = () => {
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
   const recorrente = state.tab === "recorrente";
-  const fundoCampo = colors.surfaceContainerHighest;
 
   // Semana da data escolhida, de domingo a sábado, para o calendário do bloqueio pontual.
   const escolhida = deIso(state.date);
@@ -164,7 +163,6 @@ const Indisponibilidades = () => {
           <View style={{ flexDirection: "row", gap: spacing.md }}>
             <View style={{ flex: 1 }}>
               <TextField
-                labelBackgroundColor={fundoCampo}
                 label="Horário Inicial"
                 value={state.startTime}
                 onChangeText={actions.setStartTime}
@@ -175,7 +173,6 @@ const Indisponibilidades = () => {
             </View>
             <View style={{ flex: 1 }}>
               <TextField
-                labelBackgroundColor={fundoCampo}
                 label="Horário Final"
                 value={state.endTime}
                 onChangeText={actions.setEndTime}
@@ -186,10 +183,8 @@ const Indisponibilidades = () => {
             </View>
           </View>
           <TextField
-            labelBackgroundColor={fundoCampo}
             label="Motivo (opcional)"
             placeholder={recorrente ? "Ex: Almoço com a equipe" : "Ex: Exame médico"}
-            labelAlwaysFloating
             value={state.reason}
             onChangeText={actions.setReason}
             maxLength={255}

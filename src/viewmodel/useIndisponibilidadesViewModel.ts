@@ -171,7 +171,7 @@ export function useIndisponibilidadesViewModel(
         setStatus("loading");
         carregar();
       },
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/minha-agenda")),
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/agenda")),
     },
   ];
 }

@@ -113,7 +113,7 @@ export function useEditarBarbeariaViewModel(
         setStatus("loading");
         carregar();
       },
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/minhas-barbearias")),
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/gestao")),
       openHours: () => abrir("horarios"),
       openProfessionals: () => abrir("profissionais"),
       openServices: () => abrir("servicos"),

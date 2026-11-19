@@ -1,3 +1,3 @@
-import Cadastro from "@/view/cadastro";
+import Cadastro from "@/view/(auth)/cadastro";
 
 export default Cadastro;

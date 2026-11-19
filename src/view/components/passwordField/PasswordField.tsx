@@ -25,7 +25,7 @@ export const PasswordField = ({ fieldName = "senha", label, ...props }: Password
                 <IconButton
                     accessibilityLabel={visivel ? `Esconder ${fieldName}` : `Mostrar ${fieldName}`}
                     onPress={() => setVisivel((v) => !v)}
-                    icon={(cor) => <Icon name={visivel ? "close" : "eye"} color={cor} />}
+                    icon={(cor) => <Icon name={visivel ? "eyeOff" : "eye"} color={cor} />}
                 />
             }
         />

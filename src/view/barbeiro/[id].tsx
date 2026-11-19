@@ -1,12 +1,14 @@
 // Perfil do barbeiro: foto, especialidade, barbearia onde trabalha, contato e serviços.
 
 import { ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/view/components/avatar";
 import { Card } from "@/view/components/card";
 import { Divider } from "@/view/components/divider";
 import { formatDuration, formatPhone, formatPrice } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
+import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Thumbnail } from "@/view/components/thumbnail";
@@ -21,9 +23,11 @@ const PerfilBarbeiro = () => {
   const perfil = state.status === "content" ? state.profile : null;
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <ScreenHeader title="Barbeiro" onBack={actions.goBack} />
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ padding: spacing.lg, gap: spacing.xxl }}
+      style={{ flex: 1 }}
+      contentContainerStyle={{ padding: spacing.lg, paddingTop: spacing.sm, gap: spacing.xxl }}
     >
       {!perfil ? (
         <ScreenState
@@ -37,14 +41,14 @@ const PerfilBarbeiro = () => {
         <>
           <View style={{ alignItems: "center", gap: spacing.sm }}>
             <Avatar name={perfil.professional.name} uri={perfil.professional.avatarUrl} size="large" />
-            <Typography variant="headlineSmall" align="center" accessibilityRole="header">
+            <Typography variant="titleLarge" weight="500" align="center" accessibilityRole="header">
               {perfil.professional.name}
             </Typography>
             <View
               style={{
                 paddingHorizontal: spacing.md,
                 paddingVertical: spacing.xs,
-                borderRadius: theme.shapes.full,
+                borderRadius: theme.shapes.extraSmall,
                 backgroundColor: colors.secondaryContainer,
               }}
             >
@@ -126,6 +130,7 @@ const PerfilBarbeiro = () => {
         </>
       )}
     </ScrollView>
+    </SafeAreaView>
   );
 };
 

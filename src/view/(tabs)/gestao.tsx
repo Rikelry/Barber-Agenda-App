@@ -7,23 +7,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "@/view/components/card";
 import { FAB } from "@/view/components/fab";
 import { Icon } from "@/view/components/icon";
+import { MainTabBar } from "@/view/components/mainTabBar";
 import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
+import { OpenBadge } from "@/view/components/statusBadge";
 import { SearchBar } from "@/view/components/searchBar";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Thumbnail } from "@/view/components/thumbnail";
 import { Typography } from "@/view/components/typography";
-import { componentSizes, statusColors } from "@/view/theme";
+import { componentSizes } from "@/view/theme";
 import { useMinhasBarbeariasViewModel } from "@/viewmodel/useMinhasBarbeariasViewModel";
+import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const MinhasBarbearias = () => {
   const [state, actions] = useMinhasBarbeariasViewModel();
+  const tabs = useTabBarViewModel("gestao");
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScreenHeader title="Minhas Barbearias" onBack={actions.goBack} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
+      <ScreenHeader title="Minhas barbearias" />
+      <View style={{ flex: 1 }}>
       <FlatList
         data={state.status === "content" ? state.barbershops : []}
         keyExtractor={(b) => b.barbershop.id}
@@ -63,27 +68,12 @@ const MinhasBarbearias = () => {
             />
             <View style={{ gap: spacing.xs, padding: spacing.md }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                <Typography variant="titleSmall" weight="700" numberOfLines={1} style={{ flex: 1 }}>
+                <Typography variant="titleMedium" weight="700" numberOfLines={1} style={{ flex: 1 }}>
                   {barbershop.name}
                 </Typography>
-                <View
-                  style={{
-                    paddingHorizontal: spacing.sm,
-                    paddingVertical: spacing.xs,
-                    borderRadius: theme.shapes.small,
-                    backgroundColor: openNow ? statusColors.confirmed.container : colors.inverseSurface,
-                  }}
-                >
-                  <Typography
-                    variant="labelSmall"
-                    weight="700"
-                    style={{ color: openNow ? statusColors.confirmed.content : colors.inverseOnSurface }}
-                  >
-                    {openNow ? "Aberta" : "Fechada"}
-                  </Typography>
-                </View>
+                <OpenBadge open={openNow} />
               </View>
-              <Typography variant="bodySmall" color="onSurfaceVariant" numberOfLines={2}>
+              <Typography variant="bodyMedium" color="onSurfaceVariant" numberOfLines={2}>
                 {barbershop.address}
               </Typography>
             </View>
@@ -96,6 +86,8 @@ const MinhasBarbearias = () => {
         icon={(cor) => <Icon name="plus" color={cor} />}
         style={{ position: "absolute", right: spacing.lg, bottom: spacing.xxl }}
       />
+      </View>
+      <MainTabBar active={tabs[0].active} tabs={tabs[0].tabs} onNavigate={tabs[1].navigate} />
     </SafeAreaView>
   );
 };

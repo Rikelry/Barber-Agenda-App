@@ -114,29 +114,23 @@ const ServicosBarbearia = () => {
               </Typography>
             </Pressable>
             <TextField
-              labelBackgroundColor={colors.surfaceContainerHighest}
               label="Nome do serviço"
               placeholder="Ex: Cabelo & Barba Premium"
-              labelAlwaysFloating
               value={form.name}
               onChangeText={(t) => actions.setField("name", t)}
               errorText={fieldErrors.name}
             />
             <TextField
-              labelBackgroundColor={colors.surfaceContainerHighest}
               label="Descrição"
               placeholder="Descreva brevemente o serviço..."
-              labelAlwaysFloating
               value={form.description}
               onChangeText={(t) => actions.setField("description", t)}
             />
             <View style={{ flexDirection: "row", gap: spacing.md }}>
               <View style={{ flex: 1 }}>
                 <TextField
-                  labelBackgroundColor={colors.surfaceContainerHighest}
                   label="Duração (minutos)"
                   placeholder="e.g. 45"
-                  labelAlwaysFloating
                   keyboardType="number-pad"
                   value={form.durationMinutes}
                   onChangeText={(t) => actions.setField("durationMinutes", t)}
@@ -145,10 +139,8 @@ const ServicosBarbearia = () => {
               </View>
               <View style={{ flex: 1 }}>
                 <TextField
-                  labelBackgroundColor={colors.surfaceContainerHighest}
                   label="Valor (R$)"
                   placeholder="e.g. 80,00"
-                  labelAlwaysFloating
                   keyboardType="decimal-pad"
                   value={form.price}
                   onChangeText={(t) => actions.setField("price", t)}

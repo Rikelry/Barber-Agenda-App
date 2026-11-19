@@ -148,7 +148,7 @@ export function getButtonStyle({
     const borderRadius =
         shape === "square"
             ? theme.shapes.expressive.square[size]
-            : theme.shapes.expressive.round[size];
+            : theme.shapes.small; // button.radius = radius.md (8 dp), 02-tokens.md
 
     const elevationStyle =
         variant === "elevated" && !disabled

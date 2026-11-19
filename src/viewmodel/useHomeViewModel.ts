@@ -27,6 +27,8 @@ export type HomeActions = {
   openSearch: () => void;
   openHighlight: (barbershopId: string) => void;
   goProfile: () => void;
+  /** Toque no card do próximo agendamento: abre a aba Agendas. */
+  openAppointments: () => void;
 };
 
 const mensagem = (erro: unknown) =>
@@ -97,6 +99,7 @@ export function useHomeViewModel(
       openHighlight: (barbershopId) =>
         router.push({ pathname: "/barbearia/[id]", params: { id: barbershopId } }),
       goProfile: () => router.navigate("/perfil"),
+      openAppointments: () => router.navigate("/agendamentos"),
     },
   ];
 }

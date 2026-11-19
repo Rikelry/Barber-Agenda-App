@@ -55,7 +55,7 @@ export function useNovaBarbeariaViewModel(
       // Criar a primeira barbearia torna o usuário dono: atualiza os papéis da sessão.
       .then(() => auth.refreshSession().catch(() => null))
       .then(
-        () => router.dismissTo("/minhas-barbearias"),
+        () => router.dismissTo("/gestao"),
         (erro: unknown) => {
           if (erro instanceof ValidationError) setFieldErrors(erro.fields);
           else setErrorMessage(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo.");
@@ -75,7 +75,7 @@ export function useNovaBarbeariaViewModel(
         picker.pickImage().then((foto) => foto && setLogo(foto), () => undefined);
       },
       submit,
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/minhas-barbearias")),
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
     },
   ];
 }

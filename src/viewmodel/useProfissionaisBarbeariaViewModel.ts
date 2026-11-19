@@ -132,7 +132,7 @@ export function useProfissionaisBarbeariaViewModel(
         setStatus("loading");
         carregar();
       },
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/minhas-barbearias")),
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/gestao")),
     },
   ];
 }

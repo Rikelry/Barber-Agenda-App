@@ -23,7 +23,7 @@ const HorariosBarbearia = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScreenHeader title="Horário de Funcionamento" onBack={actions.goBack} />
+      <ScreenHeader title="Horário de funcionamento" onBack={actions.goBack} />
       {state.status !== "content" ? (
         <View style={{ padding: spacing.lg }}>
           <ScreenState

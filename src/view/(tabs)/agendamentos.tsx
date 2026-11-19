@@ -9,6 +9,7 @@ import { Card } from "@/view/components/card";
 import { formatDayLabel, formatTime } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
 import { MainTabBar } from "@/view/components/mainTabBar";
+import { Tabs } from "@/view/components/tabs";
 import { ScreenState } from "@/view/components/screenState";
 import { STATUS_LABEL, StatusBadge } from "@/view/components/statusBadge";
 import { useDesignSystem } from "@/view/components/themeProvider";
@@ -24,46 +25,26 @@ const Agendamentos = () => {
   const proximos = state.tab === "proximos";
   const lista = proximos ? state.appointments.upcoming : state.appointments.history;
 
-  const aba = (valor: "proximos" | "historico", rotulo: string) => {
-    const ativa = state.tab === valor;
-    return (
-      <Button
-        variant={ativa ? "elevated" : "text"}
-        size="small"
-        onPress={() => actions.setTab(valor)}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: ativa }}
-        style={{ flex: 1 }}
-      >
-        {rotulo}
-      </Button>
-    );
-  };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
       <FlatList
         data={state.status === "content" ? lista : []}
         keyExtractor={(a) => a.id}
-        contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, gap: spacing.md }}
         ListHeaderComponent={
-          <View style={{ gap: spacing.lg, paddingBottom: spacing.xs }}>
-            <Typography variant="headlineSmall" accessibilityRole="header">
-              Meus Agendamentos
+          <View style={{ gap: spacing.md, paddingTop: spacing.xl }}>
+            <Typography variant="headlineSmall" weight="700" accessibilityRole="header">
+              Meus agendamentos
             </Typography>
-            <View
-              accessibilityRole="tablist"
-              style={{
-                flexDirection: "row",
-                gap: spacing.xs,
-                padding: spacing.xs,
-                borderRadius: theme.shapes.medium,
-                backgroundColor: colors.surfaceContainerHigh,
-              }}
-            >
-              {aba("proximos", "Próximos")}
-              {aba("historico", "Histórico")}
-            </View>
+            <Tabs
+              variant="segmented"
+              items={[
+                { key: "proximos", label: "Próximos" },
+                { key: "historico", label: "Histórico" },
+              ]}
+              selected={state.tab}
+              onSelect={actions.setTab}
+            />
             {state.status !== "content" ? (
               <ScreenState
                 status={state.status}
@@ -94,30 +75,27 @@ const Agendamentos = () => {
         renderItem={({ item }) => {
           const confirmando = state.confirmingCancelId === item.id;
           return (
-            <Card variant="outlined" style={{ gap: spacing.sm }}>
+            <Card variant="outlined" style={{ gap: spacing.sm, padding: spacing.lg }}>
               <View
                 accessible
                 accessibilityLabel={`${item.barbershopName}, ${item.serviceName} com ${item.professionalName}, ${formatDayLabel(item.startsAt)} às ${formatTime(item.startsAt)}, ${STATUS_LABEL[item.status]}`}
-                style={{ gap: spacing.xs }}
+                style={{ gap: spacing.sm }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                  <Typography variant="titleSmall" weight="700" style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                  <Typography variant="titleMedium" style={{ flex: 1 }}>
                     {item.barbershopName}
                   </Typography>
                   <StatusBadge status={item.status} />
                 </View>
-                <Typography variant="bodySmall" color="onSurfaceVariant">
-                  Serviço: {item.serviceName}
-                </Typography>
-                <Typography variant="bodySmall" color="onSurfaceVariant">
-                  Profissional: {item.professionalName}
-                </Typography>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
-                  <Icon name="calendar" size={spacing.lg} color={colors.primary} />
-                  <Typography variant="labelLarge" color="primary">
-                    {formatDayLabel(item.startsAt)} às {formatTime(item.startsAt)}
+                  <Icon name="calendar" size={spacing.lg + spacing.xs / 2} color={colors.onSurfaceVariant} />
+                  <Typography variant="bodyMedium" color="onSurfaceVariant">
+                    {formatDayLabel(item.startsAt)} · {formatTime(item.startsAt)}
                   </Typography>
                 </View>
+                <Typography variant="bodyMedium" color="onSurfaceVariant">
+                  {item.serviceName} com {item.professionalName}
+                </Typography>
               </View>
 
               {proximos && !confirmando && (
@@ -165,8 +143,29 @@ const Agendamentos = () => {
             </Card>
           );
         }}
+        ListFooterComponent={
+          state.status === "content" && proximos && lista.length > 0 ? (
+            <Card
+              variant="filled"
+              onPress={actions.findBarbershop}
+              accessibilityLabel="Quer agendar outro? Encontre uma barbearia"
+              style={{ backgroundColor: colors.surfaceContainer }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                <Icon name="search" color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Typography variant="labelLarge">Quer agendar outro?</Typography>
+                  <Typography variant="bodyMedium" color="onSurfaceVariant">
+                    Encontre uma barbearia.
+                  </Typography>
+                </View>
+                <Icon name="chevronRight" size={spacing.xl} color={colors.onSurfaceVariant} />
+              </View>
+            </Card>
+          ) : undefined
+        }
       />
-      <MainTabBar active={tabs[0].active} onNavigate={tabs[1].navigate} />
+      <MainTabBar active={tabs[0].active} tabs={tabs[0].tabs} onNavigate={tabs[1].navigate} />
     </SafeAreaView>
   );
 };

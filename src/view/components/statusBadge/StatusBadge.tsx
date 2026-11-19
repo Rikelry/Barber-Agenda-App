@@ -30,14 +30,42 @@ export const StatusBadge = ({ status }: StatusBadgeProps) => {
     return (
         <View
             style={{
-                paddingHorizontal: spacing.sm,
+                alignSelf: "flex-start",
+                paddingHorizontal: spacing.md,
                 paddingVertical: spacing.xs,
-                borderRadius: theme.shapes.small,
+                borderRadius: theme.shapes.extraSmall,
                 backgroundColor: cores.fundo,
             }}
         >
             <Typography variant="labelSmall" weight="700" style={{ color: cores.texto }}>
                 {STATUS_LABEL[status]}
+            </Typography>
+        </View>
+    );
+};
+
+export type OpenBadgeProps = { open: boolean };
+
+/** Selo Aberta/Fechada da barbearia (canvas de telas): verde quando aberta, tonal quando fechada. */
+export const OpenBadge = ({ open }: OpenBadgeProps) => {
+    const { theme } = useDesignSystem();
+    const { colors, spacing } = theme;
+    return (
+        <View
+            style={{
+                alignSelf: "flex-start",
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.xs,
+                borderRadius: theme.shapes.extraSmall,
+                backgroundColor: open ? statusColors.confirmed.container : colors.primaryContainer,
+            }}
+        >
+            <Typography
+                variant="labelSmall"
+                weight="700"
+                style={{ color: open ? statusColors.confirmed.content : colors.onPrimaryContainer }}
+            >
+                {open ? "Aberta" : "Fechada"}
             </Typography>
         </View>
     );

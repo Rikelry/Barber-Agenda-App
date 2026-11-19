@@ -3,8 +3,11 @@
 
 import { View } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Button } from "@/view/components/button";
 import { FormScreen } from "@/view/components/formScreen";
+import { ScreenHeader } from "@/view/components/screenHeader";
 import { PasswordField } from "@/view/components/passwordField";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Typography } from "@/view/components/typography";
@@ -16,6 +19,8 @@ const RedefinirSenha = () => {
   const { spacing } = theme;
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <ScreenHeader title="Redefinir senha" onBack={actions.goLogin} />
     <FormScreen
       footer={
         <>
@@ -59,7 +64,6 @@ const RedefinirSenha = () => {
             label="Nova senha"
             fieldName="nova senha"
             placeholder="Mínimo de 8 caracteres"
-            labelAlwaysFloating
             value={state.form.newPassword}
             onChangeText={(t) => actions.setField("newPassword", t)}
             errorText={state.fieldErrors.newPassword}
@@ -70,7 +74,6 @@ const RedefinirSenha = () => {
             label="Confirmar nova senha"
             fieldName="confirmação da senha"
             placeholder="Digite a nova senha novamente"
-            labelAlwaysFloating
             value={state.form.confirmPassword}
             onChangeText={(t) => actions.setField("confirmPassword", t)}
             errorText={state.fieldErrors.confirmPassword}
@@ -81,6 +84,7 @@ const RedefinirSenha = () => {
         </>
       )}
     </FormScreen>
+    </SafeAreaView>
   );
 };
 

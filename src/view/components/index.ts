@@ -22,3 +22,5 @@ export * from "@/view/components/photoPicker";
 export * from "@/view/components/overflowMenu";
 export * from "@/view/components/barbershopFields";
 export * from "@/view/components/screenHeader";
+export * from "@/view/components/tabs";
+export * from "@/view/components/stepProgress";

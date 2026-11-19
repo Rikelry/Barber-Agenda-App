@@ -21,8 +21,6 @@ export type MeuTrabalhoState = {
 export type MeuTrabalhoActions = {
   retry: () => void;
   goBack: () => void;
-  openAgenda: () => void;
-  openBlocks: () => void;
 };
 
 export function useMeuTrabalhoViewModel(
@@ -61,8 +59,6 @@ export function useMeuTrabalhoViewModel(
         carregar();
       },
       goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
-      openAgenda: () => router.push("/minha-agenda"),
-      openBlocks: () => router.push("/indisponibilidades"),
     },
   ];
 }

@@ -20,18 +20,16 @@ export const SearchBar = ({ value, onChangeText, placeholder, accessibilityLabel
 
     return (
         <View
-            style={[
-                {
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: spacing.sm,
-                    minHeight: componentSizes.searchBar.height,
-                    paddingHorizontal: spacing.lg,
-                    borderRadius: theme.shapes.full,
-                    backgroundColor: colors.surfaceContainerHigh,
-                },
-                theme.getElevationStyle("level1", colors.shadow),
-            ]}
+            style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: spacing.md,
+                minHeight: componentSizes.searchBar.height,
+                paddingHorizontal: spacing.lg,
+                borderRadius: theme.shapes.extraLarge,
+                // Canvas de telas: busca em pílula no tom neutral-200, sem sombra.
+                backgroundColor: colors.surfaceDim,
+            }}
         >
             <Icon name="search" size={spacing.xl} color={colors.onSurfaceVariant} />
             <TextInput

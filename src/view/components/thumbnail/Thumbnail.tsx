@@ -13,9 +13,11 @@ export type ThumbnailProps = {
     label: string;
     width: DimensionValue;
     height: number;
+    /** Canto arredondado; padrão 12 (medium). */
+    radius?: number;
 };
 
-export const Thumbnail = ({ uri, label, width, height }: ThumbnailProps) => {
+export const Thumbnail = ({ uri, label, width, height, radius }: ThumbnailProps) => {
     const { theme } = useDesignSystem();
     const [falhou, setFalhou] = useState(false);
 
@@ -27,7 +29,7 @@ export const Thumbnail = ({ uri, label, width, height }: ThumbnailProps) => {
             style={{
                 width,
                 height,
-                borderRadius: theme.shapes.medium,
+                borderRadius: radius ?? theme.shapes.medium,
                 overflow: "hidden",
                 backgroundColor: theme.colors.primaryContainer,
                 alignItems: "center",

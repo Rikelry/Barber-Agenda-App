@@ -6,7 +6,14 @@ import { ValidationError } from "@/model/errors";
 import type { IProfileUseCases } from "@/usecase/iProfileUseCases";
 import { usePerfilViewModel } from "@/viewmodel/usePerfilViewModel";
 
-jest.mock("expo-router", () => ({ router: { navigate: jest.fn() } }));
+import { authFalso } from "../helpers/authFalso";
+
+const mockReplace = jest.fn();
+const mockPush = jest.fn();
+jest.mock("expo-router", () => ({
+  router: { navigate: jest.fn(), replace: (...a: unknown[]) => mockReplace(...a), push: (...a: unknown[]) => mockPush(...a) },
+  useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
+}));
 jest.mock("@/di/container", () => ({ profileUseCases: {}, authUseCases: { getSession: () => null } }));
 
 const USUARIO: User = {
@@ -56,5 +63,31 @@ describe("usePerfilViewModel", () => {
     });
     await waitFor(() => expect(result.current[0].successMessage).toBe("Alterações salvas."));
     expect(result.current[0].form.newPassword).toBe("");
+  });
+
+  it("sair limpa a sessão e volta para o login; quem não é dono pode cadastrar barbearia", async () => {
+    const casos: jest.Mocked<IProfileUseCases> = {
+      getProfile: jest.fn(async () => USUARIO),
+      saveProfile: jest.fn(async () => USUARIO),
+    };
+    const auth = authFalso();
+    const { result } = await renderHook(() => usePerfilViewModel(casos, auth));
+    await waitFor(() => expect(result.current[0].status).toBe("content"));
+    expect(result.current[0].isOwner).toBe(false);
+    await act(async () => {
+      result.current[1].registerBarbershop();
+    });
+    expect(mockPush).toHaveBeenCalledWith("/minhas-barbearias/nova");
+    await act(async () => {
+      result.current[1].openPersonalData();
+      result.current[1].openChangePassword();
+    });
+    expect(mockPush).toHaveBeenCalledWith("/perfil/dados");
+    expect(mockPush).toHaveBeenCalledWith("/perfil/senha");
+    await act(async () => {
+      result.current[1].logout();
+    });
+    expect(auth.logout).toHaveBeenCalled();
+    expect(mockReplace).toHaveBeenCalledWith("/login");
   });
 });

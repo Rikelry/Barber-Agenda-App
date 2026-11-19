@@ -6,7 +6,6 @@ import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/view/components/avatar";
-import { Button } from "@/view/components/button";
 import { Card } from "@/view/components/card";
 import { formatDuration, formatPhone, formatPrice } from "@/view/components/format";
 import { ScreenHeader } from "@/view/components/screenHeader";
@@ -59,15 +58,6 @@ const MeuTrabalho = () => {
               <Typography variant="bodySmall" color="onSurfaceVariant" align="center">
                 A especialidade e a foto profissional são alteradas pelo dono da barbearia.
               </Typography>
-            </View>
-
-            <View style={{ flexDirection: "row", gap: spacing.md }}>
-              <Button variant="filled" size="small" style={{ flex: 1 }} onPress={actions.openAgenda}>
-                Minha agenda
-              </Button>
-              <Button variant="outlined" size="small" style={{ flex: 1 }} onPress={actions.openBlocks}>
-                Indisponibilidades
-              </Button>
             </View>
 
             <View style={{ gap: spacing.md }}>

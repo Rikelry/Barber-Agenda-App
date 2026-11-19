@@ -117,29 +117,23 @@ const ProfissionaisBarbearia = () => {
               <IconButton accessibilityLabel="Fechar formulário" onPress={actions.closeForm} icon={(cor) => <Icon name="close" color={cor} />} />
             </View>
             <TextField
-              labelBackgroundColor={colors.surfaceContainerHighest}
               label="Nome completo"
               placeholder="Ex: Lucas Silva"
-              labelAlwaysFloating
               value={form.name}
               onChangeText={(t) => actions.setField("name", t)}
               errorText={fieldErrors.name}
             />
             <TextField
-              labelBackgroundColor={colors.surfaceContainerHighest}
               label="Telefone celular"
               placeholder="(11) 99999-9999"
-              labelAlwaysFloating
               keyboardType="phone-pad"
               value={form.phone}
               onChangeText={(t) => actions.setField("phone", t)}
               errorText={fieldErrors.phone}
             />
             <TextField
-              labelBackgroundColor={colors.surfaceContainerHighest}
               label={novo ? "E-mail de acesso" : "E-mail de acesso (não muda)"}
               placeholder="profissional@provedor.com"
-              labelAlwaysFloating
               keyboardType="email-address"
               autoCapitalize="none"
               value={form.email}
@@ -149,20 +143,16 @@ const ProfissionaisBarbearia = () => {
             />
             {novo ? (
               <PasswordField
-                labelBackgroundColor={colors.surfaceContainerHighest}
                 label="Senha de acesso"
                 placeholder="Crie uma senha de acesso"
-                labelAlwaysFloating
                 value={form.password}
                 onChangeText={(t) => actions.setField("password", t)}
                 errorText={fieldErrors.password}
               />
             ) : null}
             <TextField
-              labelBackgroundColor={colors.surfaceContainerHighest}
               label="Especialidade"
               placeholder="Ex: Cabelo, Barba, Sobrancelha"
-              labelAlwaysFloating
               value={form.specialty}
               onChangeText={(t) => actions.setField("specialty", t)}
             />

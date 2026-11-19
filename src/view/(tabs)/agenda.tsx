@@ -9,6 +9,7 @@ import { Button } from "@/view/components/button";
 import { formatTime } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
 import { IconButton } from "@/view/components/iconButton";
+import { MainTabBar } from "@/view/components/mainTabBar";
 import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
 import { StatusBadge } from "@/view/components/statusBadge";
@@ -16,20 +17,21 @@ import { useDesignSystem } from "@/view/components/themeProvider";
 import { Typography } from "@/view/components/typography";
 import { componentSizes } from "@/view/theme";
 import { useMinhaAgendaViewModel } from "@/viewmodel/useMinhaAgendaViewModel";
+import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const MinhaAgenda = () => {
   const [state, actions] = useMinhaAgendaViewModel();
+  const tabs = useTabBarViewModel("agenda");
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
   const hoje = state.week.find((d) => d.selected)?.today ?? false;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
       <ScreenHeader
-        title="Minha Agenda"
-        onBack={actions.goBack}
+        title="Minha agenda"
         right={
           <IconButton
             accessibilityLabel="Indisponibilidades"
@@ -49,7 +51,7 @@ const MinhaAgenda = () => {
             accessibilityState={{ selected: d.selected }}
             style={{
               flex: 1,
-              minHeight: componentSizes.touchTarget,
+              minHeight: componentSizes.dayButton.height,
               alignItems: "center",
               justifyContent: "center",
               paddingVertical: spacing.xs,
@@ -71,8 +73,8 @@ const MinhaAgenda = () => {
 
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Typography variant="titleSmall" weight="700" accessibilityRole="header" style={{ flex: 1 }}>
-            {hoje ? "Horários de Hoje" : "Horários do dia"}
+          <Typography variant="titleLarge" weight="500" accessibilityRole="header" style={{ flex: 1 }}>
+            {hoje ? "Hoje" : "Horários do dia"}
           </Typography>
           <Button variant="text" size="xs" onPress={actions.openWorkplace}>
             Horário da barbearia
@@ -201,6 +203,7 @@ const MinhaAgenda = () => {
           ))
         )}
       </ScrollView>
+      <MainTabBar active={tabs[0].active} tabs={tabs[0].tabs} onNavigate={tabs[1].navigate} />
     </SafeAreaView>
   );
 };

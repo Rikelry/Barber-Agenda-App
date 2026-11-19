@@ -27,7 +27,6 @@ export type MinhaAgendaState = {
 export type MinhaAgendaActions = {
   selectDate: (iso: string) => void;
   retry: () => void;
-  goBack: () => void;
   openBlocks: () => void;
   openWorkplace: () => void;
   select: (appointmentId: string) => void;
@@ -126,7 +125,6 @@ export function useMinhaAgendaViewModel(
         setStatus("loading");
         carregar(date);
       },
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
       openBlocks: () => router.push("/indisponibilidades"),
       openWorkplace: () => router.push("/meu-trabalho"),
       select: (id) => {

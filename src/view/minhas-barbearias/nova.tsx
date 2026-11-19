@@ -17,7 +17,7 @@ const NovaBarbearia = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <ScreenHeader title="Nova Barbearia" onBack={actions.goBack} />
+      <ScreenHeader title="Nova barbearia" onBack={actions.goBack} />
       <FormScreen
         footer={
           <>
@@ -27,7 +27,7 @@ const NovaBarbearia = () => {
               </Typography>
             ) : null}
             <Button variant="filled" size="medium" fullWidth onPress={actions.submit} disabled={state.saving}>
-              {state.saving ? "Criando..." : "Criar Barbearia"}
+              {state.saving ? "Criando..." : "Criar barbearia"}
             </Button>
           </>
         }

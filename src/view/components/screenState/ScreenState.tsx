@@ -95,7 +95,7 @@ export const ScreenState = ({
             style={{ alignItems: "center", gap: spacing.md, paddingVertical: spacing.xxxl }}
         >
             <Icon
-                name={erro ? "close" : "search"}
+                name={erro ? "error" : "search"}
                 size={spacing.huge}
                 color={erro ? colors.error : colors.onSurfaceVariant}
             />

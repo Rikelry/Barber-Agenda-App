@@ -23,13 +23,14 @@ export const ScreenHeader = ({ title, onBack, right }: ScreenHeaderProps) => {
                 alignItems: "center",
                 gap: theme.spacing.sm,
                 paddingHorizontal: onBack ? theme.spacing.sm : theme.spacing.lg,
-                paddingVertical: theme.spacing.xs,
+                paddingTop: theme.spacing.xl,
+                paddingBottom: theme.spacing.sm,
             }}
         >
             {onBack ? (
                 <IconButton accessibilityLabel="Voltar" onPress={onBack} icon={(cor) => <Icon name="back" color={cor} />} />
             ) : null}
-            <Typography variant="titleLarge" numberOfLines={1} accessibilityRole="header" style={{ flex: 1 }}>
+            <Typography variant="headlineSmall" weight="700" numberOfLines={1} accessibilityRole="header" style={{ flex: 1 }}>
                 {title}
             </Typography>
             {right}

@@ -1,5 +1,6 @@
 import { Platform, Pressable, View } from "react-native";
 import { useDesignSystem } from "@/view/components/themeProvider";
+import { Icon } from "@/view/components/icon";
 import { Typography } from "@/view/components/typography";
 import { getHitSlop } from "@/view/theme";
 import { getChipColors, getChipStyle } from "@/view/components/chip/Chip.styles";
@@ -44,14 +45,7 @@ export const Chip = ({
 
     const renderLeading = () => {
         if (variant === "filter" && selected && !leadingIcon) {
-            return (
-                <Typography
-                    variant="labelSmall"
-                    style={{ color: colors.contentColor, fontWeight: "700" }}
-                >
-                    ✓
-                </Typography>
-            );
+            return <Icon name="checkmark" size={theme.spacing.lg} color={colors.contentColor} />;
         }
         if (!leadingIcon) return null;
         if (typeof leadingIcon === "function") {

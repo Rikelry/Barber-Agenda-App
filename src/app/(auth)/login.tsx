@@ -1,3 +1,3 @@
-import Login from "@/view/login";
+import Login from "@/view/(auth)/login";
 
 export default Login;

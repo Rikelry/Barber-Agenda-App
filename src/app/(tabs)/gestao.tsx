@@ -1,3 +1,3 @@
-import MinhasBarbearias from "@/view/minhas-barbearias/index";
+import MinhasBarbearias from "@/view/(tabs)/gestao";
 
 export default MinhasBarbearias;

@@ -11,19 +11,21 @@ import type { IBarbershopUseCases } from "@/usecase/iBarbershopUseCases";
 import { useAgendamentosViewModel } from "@/viewmodel/useAgendamentosViewModel";
 import { useBarbeariasViewModel } from "@/viewmodel/useBarbeariasViewModel";
 import { useNovoAgendamentoViewModel } from "@/viewmodel/useNovoAgendamentoViewModel";
-import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
+import { abasDoPapel, useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
-import { agir } from "../helpers/authFalso";
+import { agir, authFalso, SESSAO } from "../helpers/authFalso";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockDismissTo = jest.fn();
+const mockNavigate = jest.fn();
 let mockParams: Record<string, string> = {};
 jest.mock("expo-router", () => ({
   router: {
     push: (...a: unknown[]) => mockPush(...a),
     replace: (...a: unknown[]) => mockReplace(...a),
     dismissTo: (...a: unknown[]) => mockDismissTo(...a),
+    navigate: (...a: unknown[]) => mockNavigate(...a),
     canGoBack: () => true,
     back: jest.fn(),
   },
@@ -71,16 +73,33 @@ beforeEach(() => {
   mockPush.mockClear();
   mockReplace.mockClear();
   mockDismissTo.mockClear();
+  mockNavigate.mockClear();
   mockParams = {};
 });
 
 describe("useTabBarViewModel", () => {
-  it("troca de aba com dismissTo e ignora a aba atual", async () => {
-    const { result } = await renderHook(() => useTabBarViewModel("inicio"));
+  it("troca de aba com navigate e ignora a aba atual", async () => {
+    const auth = authFalso();
+    const { result } = await renderHook(() => useTabBarViewModel("inicio", auth));
     await agir(() => result.current[1].navigate("inicio"));
     await agir(() => result.current[1].navigate("agendas"));
     await agir(() => result.current[1].navigate("buscar"));
-    expect(mockDismissTo.mock.calls).toEqual([["/agendamentos"], ["/barbearias"]]);
+    await agir(() => result.current[1].navigate("agenda"));
+    await agir(() => result.current[1].navigate("gestao"));
+    expect(mockNavigate.mock.calls).toEqual([["/agendamentos"], ["/barbearias"], ["/agenda"], ["/gestao"]]);
+  });
+
+  it("mostra as abas do papel de quem entrou", async () => {
+    const auth = authFalso();
+    auth.getSession.mockReturnValue({ ...SESSAO, roles: ["cliente", "profissional"] });
+    const { result } = await renderHook(() => useTabBarViewModel("perfil", auth));
+    expect(result.current[0].tabs).toEqual(["inicio", "buscar", "agendas", "agenda", "perfil"]);
+  });
+
+  it("monta no máximo 5 abas para cada combinação de papéis", () => {
+    expect(abasDoPapel(["cliente"])).toEqual(["inicio", "buscar", "agendas", "perfil"]);
+    expect(abasDoPapel(["cliente", "owner"])).toEqual(["inicio", "buscar", "agendas", "gestao", "perfil"]);
+    expect(abasDoPapel(["cliente", "profissional", "owner"])).toEqual(["inicio", "agendas", "agenda", "gestao", "perfil"]);
   });
 });
 
@@ -95,7 +114,7 @@ describe("useBarbeariasViewModel", () => {
 });
 
 describe("useNovoAgendamentoViewModel", () => {
-  it("escolher profissional carrega horários; confirmar agenda e abre os agendamentos", async () => {
+  it("passo 1 escolhe profissional e horário, revisão confirma e o sucesso abre os agendamentos", async () => {
     mockParams = { barbershopId: "b1", serviceId: "s1" };
     const agendamentos = agendamentosFalsos();
     const barbearias = barbeariasFalsas();
@@ -111,8 +130,14 @@ describe("useNovoAgendamentoViewModel", () => {
     expect(agendamentos.getAvailableSlots).toHaveBeenCalledWith("b1", "p1", "s1", result.current[0].date);
 
     await agir(() => result.current[1].selectTime("15:00"));
+    expect(result.current[0].endTime).toBe("15:40");
+    await agir(() => result.current[1].review());
+    expect(result.current[0].step).toBe("revisao");
     await agir(() => result.current[1].confirm());
-    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/agendamentos"));
+    await waitFor(() => expect(result.current[0].step).toBe("sucesso"));
+    expect(mockDismissTo).not.toHaveBeenCalled();
+    await agir(() => result.current[1].openAppointments());
+    expect(mockDismissTo).toHaveBeenCalledWith("/agendamentos");
     expect(agendamentos.book).toHaveBeenCalledWith({
       barbershopId: "b1",
       serviceId: "s1",
@@ -130,8 +155,16 @@ describe("useNovoAgendamentoViewModel", () => {
     const { result } = await renderHook(() => useNovoAgendamentoViewModel(agendamentos, barbearias));
     await waitFor(() => expect(result.current[0].slotsStatus).toBe("content"));
     expect(result.current[0].professionalId).toBe("p1");
+    // Sem horário, a revisão não abre.
+    await agir(() => result.current[1].review());
+    expect(result.current[0].step).toBe("escolha");
+    expect(result.current[0].fieldErrors.time).toBe("Escolha um horário.");
+    // Erro do servidor na confirmação volta ao passo 1 com o aviso no campo.
+    await agir(() => result.current[1].selectTime("15:00"));
+    await agir(() => result.current[1].review());
     await agir(() => result.current[1].confirm());
     await waitFor(() => expect(result.current[0].fieldErrors.time).toBe("Escolha um horário."));
+    expect(result.current[0].step).toBe("escolha");
     expect(mockDismissTo).not.toHaveBeenCalled();
   });
 

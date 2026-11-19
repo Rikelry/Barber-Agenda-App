@@ -121,8 +121,8 @@ export function getTextFieldContainerStyle({
     return {
         minHeight: multiline ? 112 : 56,
 
-        paddingHorizontal: theme.spacing.lg,
-        paddingVertical: multiline ? 12 : 0,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: multiline ? theme.spacing.md : theme.spacing.none,
 
         flexDirection: "row",
         alignItems: multiline ? "flex-start" : "center",
@@ -135,14 +135,14 @@ export function getTextFieldContainerStyle({
             ? {
                 borderWidth: indicatorWidth,
                 borderColor: colors.borderColor,
-                borderRadius: theme.shapes.extraSmall,
+                borderRadius: theme.shapes.small,
             }
             : {
                 borderBottomWidth: indicatorWidth,
                 borderBottomColor: colors.indicatorColor,
 
-                borderTopLeftRadius: theme.shapes.extraSmall,
-                borderTopRightRadius: theme.shapes.extraSmall,
+                borderTopLeftRadius: theme.shapes.small,
+                borderTopRightRadius: theme.shapes.small,
 
                 borderBottomLeftRadius: 0,
                 borderBottomRightRadius: 0,

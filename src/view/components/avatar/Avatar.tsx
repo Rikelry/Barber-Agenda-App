@@ -51,14 +51,14 @@ export const Avatar = ({ name, uri, size = "medium", outlined = false }: AvatarP
                 width: lado,
                 height: lado,
                 borderRadius: theme.shapes.full,
-                backgroundColor: theme.colors.surfaceVariant,
+                backgroundColor: theme.colors.primaryContainer,
                 overflow: "hidden",
                 alignItems: "center",
                 justifyContent: "center",
             }}
         >
             {/* A inicial fica por baixo: aparece enquanto a foto carrega e se ela falhar. */}
-            <Typography variant={VARIANTE_INICIAL[size]} color="onSurfaceVariant">
+            <Typography variant={VARIANTE_INICIAL[size]} weight="500" color="onPrimaryContainer">
                 {name.trim().charAt(0).toUpperCase() || "?"}
             </Typography>
             {mostrarFoto ? (

@@ -83,7 +83,7 @@ describe("telas do dono", () => {
     await agir(() => result.current[1].submit());
     await waitFor(() => expect(result.current[0].fieldErrors.street).toBe("Informe a rua."));
     await agir(() => result.current[1].submit());
-    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/minhas-barbearias"));
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/gestao"));
     expect(dono.createBarbershop).toHaveBeenLastCalledWith(expect.any(Object), expect.objectContaining({ uri: "file:///logo.jpg" }));
     expect(auth.refreshSession).toHaveBeenCalled();
   });

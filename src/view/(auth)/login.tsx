@@ -22,27 +22,27 @@ const Login = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, gap: spacing.lg }}
+          contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, paddingTop: spacing.huge, gap: spacing.md }}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ alignItems: "center", gap: spacing.sm, paddingTop: spacing.giant, paddingBottom: spacing.xl }}>
+          <View style={{ alignItems: "center", gap: spacing.md, paddingTop: spacing.xxxl, paddingBottom: spacing.lg }}>
             <View
               style={{
-                width: componentSizes.avatar.large * 0.5,
-                height: componentSizes.avatar.large * 0.5,
-                borderRadius: theme.shapes.full,
+                width: componentSizes.brandMark.size,
+                height: componentSizes.brandMark.size,
+                borderRadius: componentSizes.brandMark.radius,
                 backgroundColor: colors.primaryContainer,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="scissors" size={spacing.xxl} color={colors.onPrimaryContainer} />
+              <Icon name="scissors" size={componentSizes.brandMark.size / 2} color={colors.onPrimaryContainer} />
             </View>
-            <Typography variant="headlineMedium" weight="700" color="primary" accessibilityRole="header">
-              barberAgenda
+            <Typography variant="headlineLarge" weight="700" accessibilityRole="header">
+              Barber Agenda
             </Typography>
-            <Typography variant="bodyMedium" color="onSurfaceVariant">
-              Seu estilo no horário certo
+            <Typography variant="bodyLarge" color="onSurfaceVariant">
+              Seu horário na barbearia, sem fila.
             </Typography>
           </View>
 
@@ -86,7 +86,7 @@ const Login = () => {
 
           <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: spacing.xs }}>
             <Typography variant="bodyMedium" color="onSurfaceVariant">
-              Não tem uma conta?
+              Não tem conta?
             </Typography>
             <Pressable
               onPress={actions.goRegister}
@@ -94,7 +94,7 @@ const Login = () => {
               accessibilityLabel="Criar conta"
               style={{ minHeight: componentSizes.touchTarget, justifyContent: "center" }}
             >
-              <Typography variant="labelLarge" weight="700" color="primary">
+              <Typography variant="labelLarge" color="primary">
                 Criar conta
               </Typography>
             </Pressable>

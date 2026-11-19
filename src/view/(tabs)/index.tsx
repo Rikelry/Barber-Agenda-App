@@ -1,5 +1,5 @@
-// Home: saudação com foto, busca, acesso rápido por categoria, destaques da semana, próximo
-// agendamento e a barra de navegação inferior. Usa os componentes de src/view/components.
+// Início (canvas de telas): saudação com busca e foto, próximo agendamento, destaques da
+// semana com filtro por categoria e a barra de navegação inferior. Usa os componentes de src/view/components.
 
 import { Image } from "expo-image";
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -11,10 +11,12 @@ import { Card } from "@/view/components/card";
 import { Chip } from "@/view/components/chip";
 import { formatDayLabel, formatTime } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
+import { IconButton } from "@/view/components/iconButton";
 import { MainTabBar } from "@/view/components/mainTabBar";
 import { STATUS_LABEL, StatusBadge } from "@/view/components/statusBadge";
 import { Typography } from "@/view/components/typography";
 import { useDesignSystem } from "@/view/components/themeProvider";
+import { componentSizes } from "@/view/theme";
 import type { ServiceCategory } from "@/model/entities/highlight";
 import { useHomeViewModel } from "@/viewmodel/useHomeViewModel";
 import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
@@ -27,7 +29,7 @@ const CATEGORIAS: { valor: ServiceCategory; rotulo: string }[] = [
 ];
 
 /** Card do carrossel de destaques. */
-const DESTAQUE = { largura: 220, alturaImagem: 120 };
+const DESTAQUE = { largura: 200, alturaImagem: 96 };
 
 const Home = () => {
   const [state, actions] = useHomeViewModel();
@@ -39,8 +41,8 @@ const Home = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxl, gap: spacing.xxl }}>
-        {/* Cabeçalho roxo com saudação, foto e busca */}
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxl, gap: spacing.lg }}>
+        {/* Cabeçalho marrom com saudação, busca e foto */}
         <View
           style={{
             backgroundColor: colors.primary,
@@ -49,11 +51,10 @@ const Home = () => {
             paddingBottom: spacing.xl,
             borderBottomLeftRadius: theme.shapes.extraLarge,
             borderBottomRightRadius: theme.shapes.extraLarge,
-            gap: spacing.lg,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.lg }}>
-            <View style={{ flex: 1, gap: spacing.xs }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+            <View style={{ flex: 1 }}>
               <Typography variant="bodyMedium" color="onPrimary">
                 {primeiroNome ? `Olá, ${primeiroNome}!` : "Olá!"}
               </Typography>
@@ -61,38 +62,22 @@ const Home = () => {
                 Escolha o seu estilo
               </Typography>
             </View>
+            <IconButton
+              accessibilityLabel="Buscar barbearia, serviço ou barbeiro"
+              onPress={actions.openSearch}
+              icon={() => <Icon name="search" color={colors.onPrimary} />}
+            />
             {state.user ? (
               <Pressable
                 onPress={actions.goProfile}
                 accessibilityRole="button"
                 accessibilityLabel="Abrir meu perfil"
-                hitSlop={spacing.sm}
+                style={{ minWidth: componentSizes.touchTarget, minHeight: componentSizes.touchTarget, justifyContent: "center" }}
               >
                 <Avatar name={state.user.name} uri={state.user.avatarUrl} />
               </Pressable>
             ) : null}
           </View>
-
-          <Pressable
-            onPress={actions.openSearch}
-            accessibilityRole="button"
-            accessibilityLabel="Buscar barbearia, serviços ou profissionais"
-            accessibilityHint="Abre a busca"
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: spacing.md,
-              minHeight: spacing.massive,
-              paddingHorizontal: spacing.lg,
-              borderRadius: theme.shapes.full,
-              backgroundColor: colors.surface,
-            }}
-          >
-            <Icon name="search" size={spacing.xl} color={colors.onSurfaceVariant} />
-            <Typography variant="bodyMedium" color="onSurfaceVariant" numberOfLines={2} style={{ flex: 1 }}>
-              Buscar barbearia, serviços ou profissionais...
-            </Typography>
-          </Pressable>
         </View>
 
         {state.status === "loading" && (
@@ -122,49 +107,79 @@ const Home = () => {
 
         {state.status === "content" && (
           <>
-            {/* Acesso rápido */}
-            <View style={{ gap: spacing.md, paddingHorizontal: spacing.lg }}>
-              <Typography variant="titleMedium" weight="700" accessibilityRole="header">
-                Acesso rápido
-              </Typography>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-                {CATEGORIAS.map((c) => (
-                  <Chip
-                    key={c.valor}
-                    variant="filter"
-                    label={c.rotulo}
-                    selected={state.category === c.valor}
-                    leadingIcon={(cor) => <Icon name="scissors" size={spacing.lg} color={cor} />}
-                    onPress={() => actions.selectCategory(c.valor)}
-                    accessibilityHint={`Mostra barbearias com ${c.rotulo.toLowerCase()}`}
-                  />
-                ))}
-              </View>
+            {/* Próximo agendamento (canvas de telas: primeiro bloco do Início) */}
+            <View style={{ paddingHorizontal: spacing.lg }}>
+              {state.nextAppointment ? (
+                <Card
+                  variant="filled"
+                  onPress={actions.openAppointments}
+                  accessibilityLabel={`Próximo agendamento: ${state.nextAppointment.barbershopName}, ${formatDayLabel(state.nextAppointment.startsAt)} às ${formatTime(state.nextAppointment.startsAt)}, ${STATUS_LABEL[state.nextAppointment.status]}`}
+                  accessibilityHint="Abre seus agendamentos"
+                  style={{ gap: spacing.sm, backgroundColor: colors.primaryContainer }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                    <View style={{ flex: 1 }}>
+                      <Typography variant="labelMedium" color="onPrimaryContainer">
+                        Próximo agendamento
+                      </Typography>
+                      <Typography variant="titleMedium" weight="700" color="onPrimaryContainer">
+                        {state.nextAppointment.barbershopName}
+                      </Typography>
+                    </View>
+                    <StatusBadge status={state.nextAppointment.status} />
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                    <Icon name="calendar" size={spacing.lg} color={colors.onPrimaryContainer} />
+                    <Typography variant="labelLarge" color="onPrimaryContainer" style={{ flex: 1 }}>
+                      {formatDayLabel(state.nextAppointment.startsAt)} · {formatTime(state.nextAppointment.startsAt)}
+                    </Typography>
+                    <Icon name="chevronRight" size={spacing.xl} color={colors.onPrimaryContainer} />
+                  </View>
+                  <Typography variant="bodyMedium" color="onPrimaryContainer">
+                    {state.nextAppointment.serviceName} com {state.nextAppointment.professionalName}
+                  </Typography>
+                </Card>
+              ) : (
+                <Card variant="outlined" onPress={actions.openSearch} accessibilityLabel="Você não tem agendamentos. Encontrar uma barbearia">
+                  <Typography variant="titleSmall" weight="700">
+                    Nenhum agendamento marcado
+                  </Typography>
+                  <Typography variant="bodyMedium" color="onSurfaceVariant">
+                    Encontre uma barbearia e escolha seu horário.
+                  </Typography>
+                </Card>
+              )}
             </View>
 
-            {/* Destaques da semana */}
-            <View style={{ gap: spacing.md }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  paddingHorizontal: spacing.lg,
-                }}
-              >
-                <Typography variant="titleMedium" weight="700" accessibilityRole="header">
+            {/* Destaques da semana com filtro por categoria */}
+            <View style={{ gap: spacing.sm }}>
+              <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.lg }}>
+                <Typography variant="titleLarge" weight="500" accessibilityRole="header" style={{ flex: 1 }}>
                   Destaques da semana
                 </Typography>
                 <Button variant="text" size="xs" onPress={actions.openSearch}>
                   Ver tudo
                 </Button>
               </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.sm }}
+                accessibilityLabel="Filtrar destaques por categoria"
+              >
+                {CATEGORIAS.map((c) => (
+                  <Chip
+                    key={c.valor}
+                    variant="filter"
+                    label={c.rotulo}
+                    selected={state.category === c.valor}
+                    onPress={() => actions.selectCategory(c.valor)}
+                    accessibilityHint={`Mostra barbearias com ${c.rotulo.toLowerCase()}`}
+                  />
+                ))}
+              </ScrollView>
               {state.highlights.length === 0 ? (
-                <Typography
-                  variant="bodyMedium"
-                  color="onSurfaceVariant"
-                  style={{ paddingHorizontal: spacing.lg }}
-                >
+                <Typography variant="bodyMedium" color="onSurfaceVariant" style={{ paddingHorizontal: spacing.lg }}>
                   {state.loadingHighlights ? "Carregando..." : "Nenhuma barbearia com essa categoria."}
                 </Typography>
               ) : (
@@ -176,22 +191,24 @@ const Home = () => {
                   contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.md }}
                   style={{ opacity: state.loadingHighlights ? theme.state.disabledContent : 1 }}
                   renderItem={({ item }) => (
-                    <Card
-                      variant="filled"
+                    <Pressable
                       onPress={() => actions.openHighlight(item.id)}
+                      accessibilityRole="button"
                       accessibilityLabel={`${item.name}, ${item.neighborhood}, nota ${item.rating.toLocaleString("pt-BR")}`}
                       accessibilityHint="Abre os detalhes da barbearia"
-                      style={{ width: DESTAQUE.largura, padding: spacing.none, overflow: "hidden" }}
+                      style={{ width: DESTAQUE.largura, gap: spacing.xs }}
                     >
                       <View
                         style={{
                           height: DESTAQUE.alturaImagem,
-                          backgroundColor: colors.primaryContainer,
+                          borderRadius: theme.shapes.medium,
+                          overflow: "hidden",
+                          backgroundColor: colors.primaryFixedDim,
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <Icon name="scissors" size={spacing.xxxl} color={colors.onPrimaryContainer} />
+                        <Icon name="scissors" size={spacing.xxl} color={colors.onPrimaryContainer} />
                         {item.imageUrl ? (
                           <Image
                             source={{ uri: item.imageUrl }}
@@ -201,83 +218,28 @@ const Home = () => {
                           />
                         ) : null}
                       </View>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "flex-end",
-                          gap: spacing.sm,
-                          padding: spacing.md,
-                        }}
-                      >
-                        <View style={{ flex: 1, gap: spacing.xs }}>
-                          <Typography variant="titleSmall" weight="700" numberOfLines={1}>
-                            {item.name}
-                          </Typography>
-                          <Typography variant="bodySmall" color="onSurfaceVariant" numberOfLines={1}>
-                            {item.neighborhood}
-                          </Typography>
-                        </View>
+                      <Typography variant="titleMedium" numberOfLines={1}>
+                        {item.name}
+                      </Typography>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                        <Typography variant="bodyMedium" color="onSurfaceVariant" numberOfLines={1} style={{ flexShrink: 1 }}>
+                          {item.neighborhood}
+                        </Typography>
+                        <Icon name="star" size={spacing.md + spacing.xs / 2} color={colors.primary} />
                         <Typography variant="labelLarge" weight="700">
-                          ★ {item.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}
+                          {item.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}
                         </Typography>
                       </View>
-                    </Card>
+                    </Pressable>
                   )}
                 />
-              )}
-            </View>
-
-            {/* Próximos agendamentos */}
-            <View style={{ gap: spacing.md, paddingHorizontal: spacing.lg }}>
-              <Typography variant="titleMedium" weight="700" accessibilityRole="header">
-                Próximos agendamentos
-              </Typography>
-              {state.nextAppointment ? (
-                <Card
-                  variant="outlined"
-                  accessible
-                  accessibilityLabel={`${state.nextAppointment.barbershopName}, ${formatDayLabel(state.nextAppointment.startsAt)} às ${formatTime(state.nextAppointment.startsAt)}, ${STATUS_LABEL[state.nextAppointment.status]}`}
-                  style={{
-                    gap: spacing.sm,
-                    backgroundColor: colors.primaryContainer,
-                    borderColor: colors.primary,
-                  }}
-                >
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                    <Typography variant="titleSmall" weight="700" color="onPrimaryContainer" style={{ flex: 1 }}>
-                      {state.nextAppointment.barbershopName}
-                    </Typography>
-                    <StatusBadge status={state.nextAppointment.status} />
-                  </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.lg }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
-                      <Icon name="calendar" size={spacing.lg} color={colors.onPrimaryContainer} />
-                      <Typography variant="labelLarge" color="onPrimaryContainer">
-                        {formatDayLabel(state.nextAppointment.startsAt)}
-                      </Typography>
-                    </View>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
-                      <Icon name="clock" size={spacing.lg} color={colors.onPrimaryContainer} />
-                      <Typography variant="labelLarge" color="onPrimaryContainer">
-                        {formatTime(state.nextAppointment.startsAt)}
-                      </Typography>
-                    </View>
-                  </View>
-                  <Typography variant="bodySmall" color="onPrimaryContainer">
-                    Profissional: {state.nextAppointment.professionalName} ({state.nextAppointment.serviceName})
-                  </Typography>
-                </Card>
-              ) : (
-                <Typography variant="bodyMedium" color="onSurfaceVariant">
-                  Você não tem agendamentos marcados.
-                </Typography>
               )}
             </View>
           </>
         )}
       </ScrollView>
 
-      <MainTabBar active={tabs[0].active} onNavigate={tabs[1].navigate} />
+      <MainTabBar active={tabs[0].active} tabs={tabs[0].tabs} onNavigate={tabs[1].navigate} />
     </View>
   );
 };

@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 
 import { authUseCases, profileUseCases } from "@/di/container";
 import type { User } from "@/model/entities/user";
@@ -20,9 +20,9 @@ export type PerfilState = {
   /** Erro ao carregar ou ao salvar (fora dos campos). */
   errorMessage: string | null;
   successMessage: string | null;
-  /** Dono de barbearia: mostra "Minhas barbearias"; senão, "Cadastrar minha barbearia". */
+  /** Dono já tem a aba Gestão; quem não é dono vê "Cadastrar minha barbearia". */
   isOwner: boolean;
-  /** Profissional de alguma barbearia: mostra "Minha agenda". */
+  /** Profissional de alguma barbearia: mostra "Meu perfil profissional" (a agenda é uma aba). */
   isProfessional: boolean;
 };
 
@@ -32,9 +32,13 @@ export type PerfilActions = {
   toggleShowNewPassword: () => void;
   save: () => void;
   retry: () => void;
-  openMyBarbershops: () => void;
-  openMyAgenda: () => void;
+  registerBarbershop: () => void;
+  openPersonalData: () => void;
+  openChangePassword: () => void;
+  goBack: () => void;
   openWorkplace: () => void;
+  /** Sai da conta e volta para o login. */
+  logout: () => void;
 };
 
 const FORM_VAZIO: ProfileForm = { name: "", phone: "", currentPassword: "", newPassword: "" };
@@ -83,9 +87,12 @@ export function usePerfilViewModel(
     );
   }, [useCases]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  // Recarrega ao voltar para a tela: o menu do Perfil mostra o nome salvo em Dados pessoais.
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar]),
+  );
 
   const save = () => {
     if (saving) return;
@@ -132,9 +139,15 @@ export function usePerfilViewModel(
       toggleShowCurrentPassword: () => setShowCurrentPassword((v) => !v),
       toggleShowNewPassword: () => setShowNewPassword((v) => !v),
       save,
-      openMyAgenda: () => router.push("/minha-agenda"),
       openWorkplace: () => router.push("/meu-trabalho"),
-      openMyBarbershops: () => router.push(isOwner ? "/minhas-barbearias" : "/minhas-barbearias/nova"),
+      registerBarbershop: () => router.push("/minhas-barbearias/nova"),
+      openPersonalData: () => router.push("/perfil/dados"),
+      openChangePassword: () => router.push("/perfil/senha"),
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
+      logout: () => {
+        auth.logout();
+        router.replace("/login");
+      },
       retry: () => {
         setStatus("loading");
         carregar();

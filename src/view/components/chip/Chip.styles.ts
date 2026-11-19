@@ -48,7 +48,7 @@ export function getChipColors({
 
     return {
         backgroundColor: "transparent",
-        borderColor: colors.outlineVariant,
+        borderColor: colors.outline,
         contentColor: colors.onSurfaceVariant,
         rippleColor: hexToRgba(colors.onSurfaceVariant, state.pressed),
     };
@@ -66,9 +66,10 @@ export function getChipStyle({
 
     return {
         height: 32,
-        paddingLeft: hasLeading ? theme.spacing.sm : theme.spacing.md,
-        paddingRight: hasTrailing ? theme.spacing.sm : theme.spacing.md,
-        borderRadius: theme.shapes.small,
+        paddingLeft: hasLeading ? theme.spacing.md : theme.spacing.lg,
+        paddingRight: hasTrailing ? theme.spacing.md : theme.spacing.lg,
+        // Canvas de telas: chip em pílula.
+        borderRadius: theme.shapes.full,
         borderCurve: "continuous",
         backgroundColor: chipColors.backgroundColor,
         borderWidth: selected ? 0 : 1,

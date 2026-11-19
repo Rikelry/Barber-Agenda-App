@@ -1,40 +1,32 @@
-// Detalhe da barbearia (padrão 2 de 05-padroes.md): foto, nome, endereço e telefone, horário
-// de hoje, abas Serviços e Profissionais e o botão Agendar em cada serviço.
+// Barbearia (canvas de telas): foto, nome, endereço, horário de hoje com selo Aberta/Fechada,
+// telefone, abas Serviços e Profissionais e o botão Agendar em cada serviço.
 
 import { Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/view/components/avatar";
 import { Button } from "@/view/components/button";
-import { Card } from "@/view/components/card";
-import { Chip } from "@/view/components/chip";
 import { formatDuration, formatPhone, formatPrice } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
-import { IconButton } from "@/view/components/iconButton";
-import { MainTabBar } from "@/view/components/mainTabBar";
+import { OpenBadge } from "@/view/components/statusBadge";
+import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
 import { useDesignSystem } from "@/view/components/themeProvider";
+import { Tabs } from "@/view/components/tabs";
 import { Thumbnail } from "@/view/components/thumbnail";
 import { Typography } from "@/view/components/typography";
 import { componentSizes } from "@/view/theme";
 import { useDetalheBarbeariaViewModel } from "@/viewmodel/useDetalheBarbeariaViewModel";
-import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const DetalheBarbearia = () => {
   const [state, actions] = useDetalheBarbeariaViewModel();
-  const tabs = useTabBarViewModel("buscar");
   const { theme } = useDesignSystem();
   const { colors, spacing } = theme;
   const detalhe = state.status === "content" ? state.detail : null;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.sm }}>
-        <IconButton accessibilityLabel="Voltar" onPress={actions.goBack} icon={(cor) => <Icon name="back" color={cor} />} />
-        <Typography variant="titleLarge" numberOfLines={1} accessibilityRole="header" style={{ flex: 1 }}>
-          {detalhe?.barbershop.name ?? "Barbearia"}
-        </Typography>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "bottom"]}>
+      <ScreenHeader title="Barbearia" onBack={actions.goBack} />
 
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxl }}>
         {!detalhe ? (
@@ -48,141 +40,123 @@ const DetalheBarbearia = () => {
             />
           </View>
         ) : (
-          <>
+          <View style={{ gap: spacing.md, paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
             <Thumbnail
               uri={detalhe.barbershop.avatarUrl}
               label={`Foto da ${detalhe.barbershop.name}`}
               width="100%"
               height={componentSizes.thumbnail.heroHeight}
+              radius={theme.shapes.large}
             />
 
-            <View
-              style={{
-                gap: spacing.xs,
-                padding: spacing.lg,
-                backgroundColor: colors.surfaceContainerHigh,
-              }}
-            >
-              <Typography variant="titleLarge" weight="700">
-                {detalhe.barbershop.name}
+            <Typography variant="titleLarge" weight="500" accessibilityRole="header">
+              {detalhe.barbershop.name}
+            </Typography>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+              <Icon name="location" size={spacing.xl} color={colors.onSurfaceVariant} />
+              <Typography variant="bodyMedium" color="onSurfaceVariant" style={{ flex: 1 }}>
+                {detalhe.barbershop.address}
               </Typography>
-              <Typography variant="bodySmall" color="onSurfaceVariant">
-                {detalhe.barbershop.address} • {formatPhone(detalhe.barbershop.phone)}
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+              <Icon name="clock" size={spacing.xl} color={colors.onSurfaceVariant} />
+              <Typography variant="bodyMedium" color="onSurfaceVariant">
+                {detalhe.hoursToday ? `Hoje, ${detalhe.hoursToday.openTime} às ${detalhe.hoursToday.closeTime}` : "Fechada hoje"}
               </Typography>
-              <Typography variant="labelMedium" color="primary">
-                {detalhe.hoursToday
-                  ? `Aberto hoje • ${detalhe.hoursToday.openTime} - ${detalhe.hoursToday.closeTime}`
-                  : "Fechado hoje"}
+              <OpenBadge open={Boolean(detalhe.hoursToday)} />
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+              <Icon name="phone" size={spacing.xl} color={colors.onSurfaceVariant} />
+              <Typography variant="bodyMedium" color="onSurfaceVariant">
+                {formatPhone(detalhe.barbershop.phone)}
               </Typography>
             </View>
 
-            <View style={{ gap: spacing.lg, padding: spacing.lg }}>
-              <View style={{ flexDirection: "row", gap: spacing.sm }} accessibilityRole="tablist">
-                <Chip
-                  variant="filter"
-                  label="Serviços"
-                  selected={state.tab === "servicos"}
-                  onPress={() => actions.setTab("servicos")}
-                />
-                <Chip
-                  variant="filter"
-                  label="Profissionais"
-                  selected={state.tab === "profissionais"}
-                  onPress={() => actions.setTab("profissionais")}
-                />
-              </View>
+            <Tabs
+              items={[
+                { key: "servicos", label: "Serviços" },
+                { key: "profissionais", label: "Profissionais" },
+              ]}
+              selected={state.tab}
+              onSelect={actions.setTab}
+            />
 
-              {state.tab === "servicos" ? (
-                <>
-                  {detalhe.professionals.length > 0 && (
-                    <View style={{ gap: spacing.md }}>
-                      <Typography variant="titleSmall" weight="700" accessibilityRole="header">
-                        Profissionais disponíveis
-                      </Typography>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xl }}>
-                        {detalhe.professionals.map((p) => (
-                          <Pressable
-                            key={p.id}
-                            onPress={() => actions.openBarber(p)}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Ver perfil de ${p.name}`}
-                            style={{ alignItems: "center", gap: spacing.xs }}
-                          >
-                            <Avatar name={p.name} uri={p.avatarUrl} outlined />
-                            <Typography variant="labelMedium">{p.name.split(" ")[0]}</Typography>
-                          </Pressable>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
-
-                  <View style={{ gap: spacing.md }}>
-                    <Typography variant="titleSmall" weight="700" accessibilityRole="header">
-                      Serviços
-                    </Typography>
-                    {detalhe.services.length === 0 ? (
-                      <Typography variant="bodyMedium" color="onSurfaceVariant">
-                        Esta barbearia ainda não cadastrou serviços.
-                      </Typography>
-                    ) : (
-                      detalhe.services.map((s) => (
-                        <Card key={s.id} variant="outlined">
-                          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
-                            <View style={{ flex: 1, gap: spacing.xs }}>
-                              <Typography variant="titleSmall" weight="700">
-                                {s.name}
-                              </Typography>
-                              <Typography variant="bodySmall" color="onSurfaceVariant">
-                                Duração: {formatDuration(s.durationMinutes)} • {formatPrice(s.price)}
-                              </Typography>
-                            </View>
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onPress={() => actions.book(s.id)}
-                              accessibilityLabel={`Agendar ${s.name}`}
-                            >
-                              Agendar
-                            </Button>
-                          </View>
-                        </Card>
-                      ))
-                    )}
-                  </View>
-                </>
-              ) : detalhe.professionals.length === 0 ? (
+            {state.tab === "servicos" ? (
+              detalhe.services.length === 0 ? (
                 <Typography variant="bodyMedium" color="onSurfaceVariant">
-                  Nenhum profissional vinculado ainda.
+                  Esta barbearia ainda não cadastrou serviços.
                 </Typography>
               ) : (
-                detalhe.professionals.map((p) => (
-                  <Card
-                    key={p.id}
-                    variant="outlined"
-                    onPress={() => actions.openBarber(p)}
-                    accessibilityLabel={`${p.name}, ${p.specialty ?? "Barbeiro"}`}
-                    accessibilityHint="Abre o perfil do profissional"
-                  >
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.lg }}>
-                      <Avatar name={p.name} uri={p.avatarUrl} />
-                      <View style={{ flex: 1, gap: spacing.xs }}>
-                        <Typography variant="titleSmall" weight="700">
-                          {p.name}
-                        </Typography>
-                        <Typography variant="bodySmall" color="onSurfaceVariant">
-                          {p.specialty ?? "Barbeiro"}
+                <View>
+                  {detalhe.services.map((s) => (
+                    <View
+                      key={s.id}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: spacing.md,
+                        paddingVertical: spacing.md,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.outlineVariant,
+                      }}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Typography variant="titleMedium">{s.name}</Typography>
+                        <Typography variant="bodyMedium" color="onSurfaceVariant">
+                          {s.description ? `${s.description} · ` : ""}
+                          {formatDuration(s.durationMinutes)}
                         </Typography>
                       </View>
-                      <Icon name="chevronRight" color={colors.onSurfaceVariant} />
+                      <View style={{ alignItems: "flex-end", gap: spacing.xs }}>
+                        <Typography variant="titleMedium" color="primary">
+                          {formatPrice(s.price)}
+                        </Typography>
+                        <Button variant="tonal" size="xs" onPress={() => actions.book(s.id)} accessibilityLabel={`Agendar ${s.name}`}>
+                          Agendar
+                        </Button>
+                      </View>
                     </View>
-                  </Card>
-                ))
-              )}
-            </View>
-          </>
+                  ))}
+                </View>
+              )
+            ) : detalhe.professionals.length === 0 ? (
+              <Typography variant="bodyMedium" color="onSurfaceVariant">
+                Nenhum profissional vinculado ainda.
+              </Typography>
+            ) : (
+              <View>
+                {detalhe.professionals.map((p) => (
+                  <Pressable
+                    key={p.id}
+                    onPress={() => actions.openBarber(p)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${p.name}, ${p.specialty ?? "Barbeiro"}`}
+                    accessibilityHint="Abre o perfil do profissional"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: spacing.lg,
+                      minHeight: componentSizes.listItem.twoLine,
+                      paddingVertical: spacing.sm,
+                      borderBottomWidth: 1,
+                      borderBottomColor: colors.outlineVariant,
+                    }}
+                  >
+                    <Avatar name={p.name} uri={p.avatarUrl} />
+                    <View style={{ flex: 1 }}>
+                      <Typography variant="titleMedium">{p.name}</Typography>
+                      <Typography variant="bodyMedium" color="onSurfaceVariant">
+                        {p.specialty ?? "Barbeiro"}
+                      </Typography>
+                    </View>
+                    <Icon name="chevronRight" size={spacing.xl} color={colors.onSurfaceVariant} />
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
         )}
       </ScrollView>
-      <MainTabBar active={tabs[0].active} onNavigate={tabs[1].navigate} />
     </SafeAreaView>
   );
 };
