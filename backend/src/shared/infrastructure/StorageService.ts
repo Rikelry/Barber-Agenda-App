@@ -5,7 +5,7 @@ const BUCKET = 'uploads'
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
 const VALID_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
-export type StorageFolder = 'barbershops' | 'services' | 'professionals' | 'users'
+export type StorageFolder = 'barbershops' | 'services' | 'professionals' | 'users' | 'portfolio'
 
 export interface UploadedFileInfo {
   fieldname: string

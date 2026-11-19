@@ -4,7 +4,7 @@ import { StorageService, UploadValidationError, StorageFolder } from '../../../s
 
 const storageService = new StorageService()
 
-const FOLDER_ALLOWED: StorageFolder[] = ['barbershops', 'services', 'professionals', 'users']
+const FOLDER_ALLOWED: StorageFolder[] = ['barbershops', 'services', 'professionals', 'users', 'portfolio']
 
 export class StorageController {
   async upload(req: Request, res: Response, next: NextFunction): Promise<void> {

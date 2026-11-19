@@ -73,6 +73,14 @@ import { RegistrarIndisponibilidadeRecorrenteUseCase } from './unavailabilities/
 import { RemoverIndisponibilidadeRecorrenteUseCase } from './unavailabilities/use-cases/RemoverIndisponibilidadeRecorrenteUseCase'
 import { ListarIndisponibilidadesRecorrentesUseCase } from './unavailabilities/use-cases/ListarIndisponibilidadesRecorrentesUseCase'
 import { routerStorage } from './shared/adapters/routes/storage.routes'
+import { routerPortfolio } from './portfolio/adapters/routes/portfolio.routes'
+import { PortfolioController } from './portfolio/adapters/controllers/PortfolioController'
+import { SupabasePortfolioRepository } from './portfolio/infrastructure/repositories/SupabasePortfolioRepository'
+import {
+  AdicionarFotoPortfolioUseCase,
+  ListarPortfolioUseCase,
+  RemoverFotoPortfolioUseCase,
+} from './portfolio/use-cases/PortfolioUseCases'
 
 dotenv.config()
 
@@ -318,6 +326,15 @@ apiV1.use(
   routerHorariosDisponiveis(horariosDisponiveisController)
 )
 apiV1.use('/storage', routerStorage())
+
+// Portfólio do profissional e Inspirações
+const portfolioRepository = new SupabasePortfolioRepository()
+const portfolioController = new PortfolioController(
+  new ListarPortfolioUseCase(portfolioRepository, profissionalRepository),
+  new AdicionarFotoPortfolioUseCase(portfolioRepository, profissionalRepository, servicoRepository),
+  new RemoverFotoPortfolioUseCase(portfolioRepository, profissionalRepository)
+)
+apiV1.use('/portfolio', routerPortfolio(portfolioController))
 
 app.use('/api/v1', apiV1)
 
