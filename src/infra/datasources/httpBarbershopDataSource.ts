@@ -29,7 +29,11 @@ type ProfessionalDto = {
   barbershopId: string;
   specialty: string | null;
   avatarUrl?: string | null;
-  usuario: { id: string; name: string; email: string; phone: string; avatarUrl?: string | null };
+  /** O cadastro devolve os dados do usuário aninhados; a listagem os devolve no próprio objeto. */
+  usuario?: { id: string; name: string; email: string; phone: string; avatarUrl?: string | null };
+  name?: string;
+  email?: string;
+  phone?: string;
 };
 
 type ServiceDto = {
@@ -62,11 +66,11 @@ export const toBarbershop = (dto: BarbershopDto): Barbershop => ({
 export const toProfessional = (dto: ProfessionalDto): Professional => ({
   id: dto.id,
   barbershopId: dto.barbershopId,
-  name: dto.usuario.name,
-  email: dto.usuario.email,
-  phone: dto.usuario.phone,
+  name: dto.usuario?.name ?? dto.name ?? "",
+  email: dto.usuario?.email ?? dto.email ?? "",
+  phone: dto.usuario?.phone ?? dto.phone ?? "",
   specialty: dto.specialty,
-  avatarUrl: dto.avatarUrl ?? dto.usuario.avatarUrl ?? null,
+  avatarUrl: dto.avatarUrl ?? dto.usuario?.avatarUrl ?? null,
 });
 
 export const toService = (dto: ServiceDto): Service => ({

@@ -54,6 +54,15 @@ describe("HttpBarbershopDataSource", () => {
     expect((await fonte.listServices("b1"))[0]!.price).toBe(45.5);
   });
 
+  it("a listagem de profissionais traz nome, e-mail e telefone no próprio objeto", async () => {
+    fetchMock.mockResolvedValue(
+      resposta([{ id: "p1", barbershopId: "b1", specialty: "Barba", avatarUrl: null, createdAt: "", name: "Bruno", email: "b@mail.com", phone: "8" }]),
+    );
+    expect(await montar().listProfessionals("b1")).toEqual([
+      { id: "p1", barbershopId: "b1", name: "Bruno", email: "b@mail.com", phone: "8", specialty: "Barba", avatarUrl: null },
+    ]);
+  });
+
   it.each([
     [401, "UNAUTHORIZED"],
     [404, "NOT_FOUND"],
