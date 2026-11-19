@@ -1,388 +1,182 @@
 # Tokens
 
-<!-- Camada 2: decisões com nome.
-     Três níveis: primitivo → semântico → componente.
-     Projeto: aplicativo de barbearia em Expo / React Native.
-     Referência: Material Design 3 Expressive.
-     Origem permitida: Herdado | Adaptado | Novo.
-     Dimensões de layout: dp (unidades independentes de densidade no React Native).
-     Tipografia: sp como referência de design; implementar com fontSize/lineHeight numéricos no React Native.
-     Valores M3 dependentes de geração tonal ou especificação de componente devem ser validados antes de produção. -->
+\<!-- Camada 2 da aula: decisões com nome. Três níveis: primitivo → semântico → componente.      Formato do nome: categoria.papel.variação (ex.: color.action, space.md, radius.lg, font.title).      Escreva sempre valor + unidade (px, dp ou pt). Em toda tabela, a coluna "Origem" usa: Herdado | Adaptado | Novo. -->
 
 ## 1. Primitivos (o valor bruto)
 
 ### Cor
 
-#### Cores da marca (equipe)
+| Token                 | Valor     | Origem   |
+| --------------------- | --------- | -------- |
+| `brown-1`             | `#CDAB8F` | Adaptado |
+| `brown-2`             | `#B5835A` | Adaptado |
+| `brown-3`             | `#986A44` | Adaptado |
+| `brown-4`             | `#865E3C` | Adaptado |
+| `brown-5`             | `#63452C` | Adaptado |
+| `neutral-0`           | `#FFFFFF` | Herdado  |
+| `neutral-50`          | `#FFF8F3` | Adaptado |
+| `neutral-100`         | `#F5EDE6` | Adaptado |
+| `neutral-200`         | `#E7DED6` | Adaptado |
+| `neutral-600`         | `#756B63` | Adaptado |
+| `neutral-900`         | `#241A14` | Adaptado |
+| `neutral-950`         | `#1D1712` | Adaptado |
+| `error-600`           | `#BA1A1A` | Herdado  |
+| `error-300`           | `#FFB4AB` | Herdado  |
+| `brown-hover`         | `#563B26` | Novo     |
+| `brown-pressed`       | `#4A321F` | Novo     |
+| `brown-light-hover`   | `#D8BBA3` | Novo     |
+| `brown-light-pressed` | `#B5835A` | Novo     |
 
-| Token | Valor | Origem |
-| --- | --- | --- |
-| `orange-500` | `#FF8500` | Herdado |
-| `amber-700` | `#CC7D29` | Herdado |
-| `ochre-700` | `#996D3D` | Herdado |
-| `brown-700` | `#66523D` | Herdado |
-| `brown-900` | `#332E29` | Herdado |
+### Espaço (grade de 8 pontos)
 
-As cinco cores originais da marca da equipe (Perypery Solutions), definidas na versão 0.1.0 inicial e recuperadas do histórico de commits do repositório (`1941542`), permanecem preservadas como valores primitivos de referência de marca.
+| Token      | Valor | Origem  |
+| ---------- | ----- | ------- |
+| `space-4`  | 4 dp  | Herdado |
+| `space-8`  | 8 dp  | Herdado |
+| `space-16` | 16 dp | Herdado |
+| `space-24` | 24 dp | Herdado |
+| `space-32` | 32 dp | Herdado |
+| `space-48` | 48 dp | Herdado |
+| `space-64` | 64 dp | Herdado |
 
-#### Cores naturais de cabelo
+### Tipografia
 
-| Token | Valor | Origem |
-| --- | --- | --- |
-| `hair.black` | `#1B1B1B` | Herdado |
-| `hair.dark-brown` | `#3B2214` | Herdado |
-| `hair.brown` | `#6F4E37` | Herdado |
-| `hair.light-brown` | `#A67B50` | Herdado |
-| `hair.dark-blonde` | `#B89B6A` | Herdado |
-| `hair.golden-blonde` | `#D4A843` | Herdado |
-| `hair.light-blonde` | `#F0D8A8` | Herdado |
-| `hair.redhead` | `#C2622D` | Herdado |
-| `hair.copper` | `#B4510E` | Herdado |
-| `hair.dark-red` | `#922724` | Herdado |
-| `hair.gray` | `#8B8B8B` | Herdado |
-| `hair.white` | `#F2F2F0` | Herdado |
+| Token                 | Valor  | Origem  |
+| --------------------- | ------ | ------- |
+| `font-family`         | Roboto | Herdado |
+| `font-size-12`        | 12 dp  | Herdado |
+| `font-size-14`        | 14 dp  | Herdado |
+| `font-size-16`        | 16 dp  | Herdado |
+| `font-size-20`        | 20 dp  | Herdado |
+| `font-size-24`        | 24 dp  | Herdado |
+| `font-size-32`        | 32 dp  | Herdado |
+| `font-weight-regular` | 400    | Herdado |
+| `font-weight-medium`  | 500    | Herdado |
+| `font-weight-bold`    | 700    | Herdado |
 
-As cores de cabelo são dados visuais de domínio. Não devem ser utilizadas como cores de interface (ação, texto, superfície, erro ou foco) nem como substitutas das cores da marca.
+### Forma e elevação
 
-#### Cores neutras e fontes de marca
-
-| Token | Valor | Origem |
-| --- | --- | --- |
-| `neutral.white` | `#FFFFFF` | Novo |
-| `neutral.black` | `#000000` | Novo |
-| `brand.source.primary` | `orange-500` (`#FF8500`); esquema tonal gerado com `SchemeFidelity` do Material (`@material/material-color-utilities`, o mesmo algoritmo do Theme Builder), contraste 0 | Adaptado |
-| `brand.source.secondary` | Derivada de `brand.source.primary` pelo esquema tonal (pode ser trocada por outra cor da marca) | Novo |
-| `brand.source.tertiary` | Derivada de `brand.source.primary` pelo esquema tonal (pode ser trocada por outra cor da marca) | Novo |
-
-As fontes de marca devem ser confirmadas pelo grupo e convertidas em paletas tonais completas no Material Theme Builder antes da fixação dos papéis semânticos derivados. As cores naturais de cabelo não constituem paleta tonal de interface.
-
-### Espaço (grade de 8 pontos, com ajustes de 4 dp)
-
-| Token | Valor | Origem |
-| --- | --- | --- |
-| `space-0` | 0 dp | Novo |
-| `space-4` | 4 dp | Adaptado |
-| `space-8` | 8 dp | Adaptado |
-| `space-12` | 12 dp | Novo |
-| `space-16` | 16 dp | Adaptado |
-| `space-24` | 24 dp | Adaptado |
-| `space-32` | 32 dp | Adaptado |
-| `space-48` | 48 dp | Novo |
-| `space-64` | 64 dp | Novo |
-
-Os espaçamentos primitivos são decisões de grade do projeto, medidos em dp (unidades independentes de densidade no React Native).
-
-### Forma (raio de arredondamento primitivo)
-
-| Token | Valor | Origem |
-| --- | --- | --- |
-| `radius-0` | 0 dp | Novo |
-| `radius-4` | 4 dp | Adaptado |
-| `radius-8` | 8 dp | Adaptado |
-| `radius-12` | 12 dp | Adaptado |
-| `radius-16` | 16 dp | Adaptado |
-| `radius-28` | 28 dp | Adaptado |
-| `radius-full` | 9999 dp (circular) | Adaptado |
-
-Os valores numéricos brutos de curvatura constituem os primitivos de forma. A aplicação deles na interface é mediada pelos papéis semânticos (`radius.none`, `radius.xs`, `radius.sm`, `radius.md`, `radius.lg`, `radius.xl`, `radius.full`).
-
-### Elevação
-
-| Token | Valor | Origem |
-| --- | --- | --- |
-| `elevation.level0` | 0 dp | Adaptado |
-| `elevation.level1` | 1 dp | Adaptado |
-| `elevation.level2` | 3 dp | Adaptado |
-| `elevation.level3` | 6 dp | Adaptado |
-| `elevation.level4` | 8 dp | Adaptado |
-| `elevation.level5` | 12 dp | Adaptado |
-
-Os níveis são referências para mapear componentes. Elevação tonal e sombra devem ser tratadas conforme o componente e a plataforma. Não se deve interpretar estes números como especificação universal de todos os componentes Expressive.
+| Token         | Valor  | Origem   |
+| ------------- | ------ | -------- |
+| `radius-4`    | 4 dp   | Herdado  |
+| `radius-8`    | 8 dp   | Herdado  |
+| `radius-12`   | 12 dp  | Adaptado |
+| `radius-16`   | 16 dp  | Herdado  |
+| `radius-full` | 999 dp | Herdado  |
+| `elevation-0` | 0 dp   | Herdado  |
+| `elevation-1` | 1 dp   | Herdado  |
+| `elevation-2` | 3 dp   | Herdado  |
+| `elevation-3` | 6 dp   | Herdado  |
 
 ## 2. Semânticos (o significado)
 
 ### Cor
 
-Os papéis semânticos seguem a nomenclatura do Material 3 Expressive. Os valores canônicos de ação (`color.primary`) e conteúdo sobre ação (`color.on-primary`) substituem os termos legados `color.action` e `color.on-action`. Os valores abaixo foram gerados da cor de marca da equipe com o algoritmo do Material Theme Builder (ver nota ao fim da tabela).
-
-| Token | Claro | Escuro | Uso | Origem |
-| --- | --- | --- | --- | --- |
-| `color.primary` | `#944B00` | `#FFB783` | Ações principais (substitui `color.action`) | Adaptado |
-| `color.on-primary` | `#FFFFFF` | `#4F2500` | Conteúdo sobre primário (substitui `color.on-action`) | Adaptado |
-| `color.primary-container` | `#FF8500` | `#FF8500` | Destaques e ações secundárias | Adaptado |
-| `color.on-primary-container` | `#602E00` | `#602E00` | Conteúdo sobre contêiner primário | Adaptado |
-| `color.secondary` | `#895023` | `#FFB783` | Ações de apoio | Adaptado |
-| `color.on-secondary` | `#FFFFFF` | `#4F2500` | Conteúdo sobre secundário | Adaptado |
-| `color.secondary-container` | `#FEB37D` | `#6D3A0D` | Seleções e ações tonais | Adaptado |
-| `color.on-secondary-container` | `#794317` | `#EEA570` | Conteúdo sobre contêiner secundário | Adaptado |
-| `color.tertiary` | `#006494` | `#8ECDFF` | Acentos complementares | Adaptado |
-| `color.on-tertiary` | `#FFFFFF` | `#00344F` | Conteúdo sobre terciário | Adaptado |
-| `color.tertiary-container` | `#02AFFF` | `#02AFFF` | Destaques complementares | Adaptado |
-| `color.on-tertiary-container` | `#003F60` | `#003F60` | Conteúdo sobre contêiner terciário | Adaptado |
-| `color.surface` | `#FFF8F5` | `#1B110A` | Superfícies de tela | Adaptado |
-| `color.on-surface` | `#241912` | `#F4DED2` | Texto e ícones principais | Adaptado |
-| `color.surface-variant` | `#FBDDC9` | `#574335` | Superfícies diferenciadas | Adaptado |
-| `color.on-surface-variant` | `#574335` | `#DEC1AE` | Conteúdo secundário | Adaptado |
-| `color.surface-container-low` | `#FFF1E9` | `#241912` | Cartões discretos | Adaptado |
-| `color.surface-container` | `#FFEADE` | `#291D15` | Agrupamentos de conteúdo | Adaptado |
-| `color.surface-container-high` | `#FAE4D7` | `#34271F` | Diálogos e superfícies elevadas | Adaptado |
-| `color.outline` | `#8A7262` | `#A68C7B` | Bordas e campos | Adaptado |
-| `color.outline-variant` | `#DEC1AE` | `#574335` | Divisores e contornos sutis | Adaptado |
-| `color.error` | `#BA1A1A` | `#FFB4AB` | Erros e ações destrutivas | Adaptado |
-| `color.on-error` | `#FFFFFF` | `#690005` | Conteúdo sobre erro | Adaptado |
-| `color.error-container` | `#FFDAD6` | `#93000A` | Fundo de mensagens de erro | Adaptado |
-| `color.on-error-container` | `#93000A` | `#FFDAD6` | Conteúdo sobre contêiner de erro | Adaptado |
-| `color.inverse-surface` | `#3B2E25` | `#F4DED2` | Superfícies invertidas | Adaptado |
-| `color.inverse-on-surface` | `#FFEDE4` | `#3B2E25` | Conteúdo em superfícies invertidas | Adaptado |
-| `color.inverse-primary` | `#FFB783` | `#944B00` | Primário em contexto invertido | Adaptado |
-| `color.focus` | Papel de contorno ou foco validado para o esquema claro* | Papel de contorno ou foco validado para o esquema escuro* | Indicador de foco acessível | Novo |
-
-\* **Situação dos valores semânticos:** Valores gerados de `orange-500` (`#FF8500`) com `SchemeFidelity`, que mantém a cor da marca como `primary-container`. Contraste medido (claro / escuro): `primary`×`on-primary` 6,43 / 7,73; `primary-container`×`on-primary-container` 4,56 / 4,56; `surface`×`on-surface` 16,35 / 14,34; `surface`×`on-surface-variant` 8,85 / 10,91. Em código: `src/view/theme.ts` (`lightColors` / `darkColors`).
+| Token                      | Claro           | Escuro                | Uso                       | Origem   |
+| -------------------------- | --------------- | --------------------- | ------------------------- | -------- |
+| `color.action`             | `brown-5`       | `brown-1`             | Ações principais          | Adaptado |
+| `color.on-action`          | `neutral-0`     | `neutral-900`         | Texto e ícone sobre ação  | Adaptado |
+| `color.secondary`          | `brown-3`       | `brown-2`             | Ações secundárias         | Adaptado |
+| `color.surface`            | `neutral-50`    | `neutral-950`         | Fundo das telas           | Adaptado |
+| `color.surface-container`  | `neutral-100`   | `neutral-900`         | Cards e áreas agrupadas   | Adaptado |
+| `color.on-surface`         | `neutral-900`   | `neutral-100`         | Texto principal           | Adaptado |
+| `color.on-surface-variant` | `brown-4`       | `brown-1`             | Texto secundário          | Adaptado |
+| `color.outline`            | `brown-3`       | `brown-2`             | Bordas e divisores        | Adaptado |
+| `color.error`              | `error-600`     | `error-300`           | Erros e ações destrutivas | Herdado  |
+| `color.focus`              | `brown-5`       | `brown-1`             | Anel de foco              | Adaptado |
+| `color.action-hover`       | `brown-hover`   | `brown-light-hover`   | Ação sob foco do ponteiro | Novo     |
+| `color.action-pressed`     | `brown-pressed` | `brown-light-pressed` | Ação pressionada          | Novo     |
+| `color.disabled`           | `neutral-200`   | `neutral-600`         | Elementos desabilitados   | Adaptado |
+| `color.on-disabled`        | `neutral-600`   | `neutral-200`         | Texto desabilitado        | Adaptado |
 
 ### Tipografia
 
-| Token | Família | Tamanho | Peso | Altura de linha | Uso | Origem |
-| --- | --- | --- | --- | --- | --- | --- |
-| `font.display-large` | Roboto | 57 sp | 400 | 64 sp | Destaques excepcionais | Adaptado |
-| `font.display-medium` | Roboto | 45 sp | 400 | 52 sp | Destaques de tela | Adaptado |
-| `font.display-small` | Roboto | 36 sp | 400 | 44 sp | Títulos de destaque | Adaptado |
-| `font.headline-large` | Roboto | 32 sp | 400 | 40 sp | Cabeçalhos principais | Adaptado |
-| `font.headline-medium` | Roboto | 28 sp | 400 | 36 sp | Cabeçalhos de seção | Adaptado |
-| `font.headline-small` | Roboto | 24 sp | 400 | 32 sp | Títulos de tela (substitui `font.title`) | Adaptado |
-| `font.title-large` | Roboto | 22 sp | 500 | 28 sp | Títulos de cartões | Adaptado |
-| `font.title-medium` | Roboto | 16 sp | 500 | 24 sp | Títulos de componentes | Adaptado |
-| `font.title-small` | Roboto | 14 sp | 500 | 20 sp | Títulos compactos | Adaptado |
-| `font.body-large` | Roboto | 16 sp | 400 | 24 sp | Texto corrido principal (substitui `font.body`) | Adaptado |
-| `font.body-medium` | Roboto | 14 sp | 400 | 20 sp | Texto corrido padrão | Adaptado |
-| `font.body-small` | Roboto | 12 sp | 400 | 16 sp | Texto auxiliar | Adaptado |
-| `font.label-large` | Roboto | 14 sp | 500 | 20 sp | Rótulos de botões (substitui `font.label`) | Adaptado |
-| `font.label-medium` | Roboto | 12 sp | 500 | 16 sp | Rótulos e indicadores | Adaptado |
-| `font.label-small` | Roboto | 11 sp | 500 | 16 sp | Metadados compactos | Adaptado |
-
-A escala de referência segue a tipografia Material 3. O peso numérico `500` depende da disponibilidade da fonte e deve ser validado na plataforma. No Expo, os valores numéricos de `fontSize` e `lineHeight` são usados no React Native; `sp` documenta a intenção de design, não uma unidade literal aceita pelo StyleSheet.
-
-**Mapeamento de compatibilidade histórica:**
-- `font.title` (24 sp, versão 0.1.0) mapeia para `font.headline-small` (títulos de tela) ou `font.title-large` (títulos de seções e cards).
-- `font.body` (16 sp, versão 0.1.0) mapeia para `font.body-large` (texto principal) ou `font.body-medium` (texto padrão).
-- `font.label` (14 sp, versão 0.1.0) mapeia para `font.label-large` (rótulos de botões) ou `font.label-medium` (rótulos de campos/chips).
+| Token           | Família | Tamanho | Peso | Altura de linha | Uso                      | Origem  |
+| --------------- | ------- | ------- | ---- | --------------- | ------------------------ | ------- |
+| `font.title`    | Roboto  | 24 dp   | 700  | 32 dp           | Títulos de tela          | Herdado |
+| `font.subtitle` | Roboto  | 20 dp   | 500  | 28 dp           | Subtítulos               | Herdado |
+| `font.body`     | Roboto  | 16 dp   | 400  | 24 dp           | Texto corrido            | Herdado |
+| `font.caption`  | Roboto  | 12 dp   | 400  | 16 dp           | Informações auxiliares   | Herdado |
+| `font.label`    | Roboto  | 14 dp   | 500  | 20 dp           | Rótulos de botão e campo | Herdado |
 
 ### Espaço, forma e elevação
 
-| Token | Valor | Uso | Origem |
-| --- | --- | --- | --- |
-| `space.sm` | `space-8` = 8 dp | Elementos relacionados | Adaptado |
-| `space.md` | `space-16` = 16 dp | Preenchimento padrão | Adaptado |
-| `space.lg` | `space-24` = 24 dp | Separação entre grupos | Adaptado |
-| `space.xl` | `space-32` = 32 dp | Separação entre seções | Novo |
-| `radius.none` | `radius-0` = 0 dp | Sem arredondamento de cantos | Novo |
-| `radius.xs` | `radius-4` = 4 dp | Badges, tags e etiquetas de status | Adaptado |
-| `radius.sm` | `radius-8` = 8 dp | Controles compactos e campos de texto | Adaptado |
-| `radius.md` | `radius-12` = 12 dp | Botões e campos padrão M3 | Adaptado |
-| `radius.lg` | `radius-16` = 16 dp | Cartões e superfícies médias M3 | Adaptado |
-| `radius.xl` | `radius-28` = 28 dp | Diálogos e superfícies maiores | Adaptado |
-| `radius.full` | `radius-full` = circular | Pílula ou círculo completo (Avatares, Chips, FAB, Switch) | Adaptado |
-| `elevation.card` | `elevation.level1` = 1 dp, como mapeamento inicial | Cartões sobre superfícies | Adaptado |
-| `elevation.dialog` | Nível definido pela variante de diálogo adotada | Diálogos | Adaptado |
-
-Os valores de forma e elevação devem ser ajustados à especificação concreta dos componentes selecionados. O mapeamento acima é uma convenção inicial de projeto, não uma regra universal do Expressive.
+| Token              | Valor         | Uso                                 | Origem   |
+| ------------------ | ------------- | ----------------------------------- | -------- |
+| `space.sm`         | `space-8`     | Espaço entre elementos relacionados | Herdado  |
+| `space.md`         | `space-16`    | Margem interna padrão               | Herdado  |
+| `space.lg`         | `space-24`    | Separação entre grupos              | Herdado  |
+| `space.xl`         | `space-32`    | Separação entre seções              | Herdado  |
+| `radius.sm`        | `radius-4`    | Pequenos elementos e etiquetas      | Herdado  |
+| `radius.md`        | `radius-8`    | Campos e botões                     | Herdado  |
+| `radius.lg`        | `radius-16`   | Cards e painéis                     | Adaptado |
+| `radius.full`      | `radius-full` | Elementos circulares                | Herdado  |
+| `elevation.card`   | `elevation-1` | Cards sobre a superfície            | Herdado  |
+| `elevation.dialog` | `elevation-3` | Diálogos e janelas sobrepostas      | Herdado  |
 
 ### Movimento
 
-| Token | Valor | Uso | Origem |
-| --- | --- | --- | --- |
-| `motion.duration.short` | Faixa curta definida pela especificação de movimento adotada, em ms | Feedback de toque | Adaptado |
-| `motion.duration.medium` | Faixa média definida pela especificação de movimento adotada, em ms | Transições de interface | Adaptado |
-| `motion.duration.long` | Faixa longa definida pela especificação de movimento adotada, em ms | Transições expressivas que a exijam | Adaptado |
-| `motion.easing.standard` | Curva padrão da implementação M3 selecionada | Movimento cotidiano | Adaptado |
-| `motion.easing.emphasized` | Curva enfatizada da implementação M3 selecionada | Transições com destaque | Adaptado |
-
-As durações e curvas finais devem ser copiadas da especificação correspondente à biblioteca e à variante do componente utilizadas. Não definir um único tempo para todas as animações: entrada, saída, feedback e transições entre estados têm objetivos diferentes.
+| Token                      | Valor                        | Uso                            | Origem   |
+| -------------------------- | ---------------------------- | ------------------------------ | -------- |
+| `motion.duration.short`    | 100 ms                       | Feedback de toque              | Herdado  |
+| `motion.duration.medium`   | 250 ms                       | Transições entre telas         | Adaptado |
+| `motion.duration.long`     | 350 ms                       | Abertura de diálogos e painéis | Adaptado |
+| `motion.easing.standard`   | `cubic-bezier(0.2, 0, 0, 1)` | Curva padrão                   | Herdado  |
+| `motion.easing.decelerate` | `cubic-bezier(0, 0, 0, 1)`   | Entrada de elementos           | Herdado  |
 
 ## 3. Tokens de componente (onde é usado)
 
-| Token | Aponta para | Origem |
-| --- | --- | --- |
-| `button.bg` | `color.primary` | Adaptado |
-| `button.label` | `color.on-primary` | Adaptado |
-| `button.radius` | `radius.md` (12 dp, forma padrão do botão M3) | Adaptado |
-| `button.bg-hover` | `color.primary` + camada de estado hover do componente | Adaptado |
-| `button.bg-pressed` | `color.primary` + camada de estado pressed do componente | Adaptado |
-| `button.bg-disabled` | Papel de superfície e estado desabilitado da implementação M3 | Adaptado |
-| `button.label-disabled` | Papel de conteúdo desabilitado da implementação M3 | Adaptado |
-| `field.bg` | Papel de superfície definido pela variante de campo | Adaptado |
-| `field.label` | `color.on-surface-variant` | Adaptado |
-| `field.outline` | `color.outline` | Adaptado |
-| `field.outline-focused` | `color.focus` / papel de foco validado | Adaptado |
-| `field.radius` | `radius.sm` (8 dp, raio padrão de campos de texto) | Adaptado |
-| `card.bg` | `color.surface-container-low` | Adaptado |
-| `card.label` | `color.on-surface` | Adaptado |
-| `card.elevation` | `elevation.card` (1 dp) | Adaptado |
-| `card.radius` | `radius.lg` (16 dp, raio padrão de cartões M3) | Adaptado |
-| `navigation.bg` | `color.surface` | Adaptado |
-| `navigation.label` | `color.on-surface-variant` | Adaptado |
-| `navigation.selected-bg` | Papel de contêiner da variante de navegação | Adaptado |
-| `navigation.selected-label` | Papel de conteúdo correspondente ao contêiner selecionado | Adaptado |
-| `booking.confirm-bg` | `button.bg` (`color.primary`) | Novo |
-| `booking.confirm-label` | `button.label` (`color.on-primary`) | Novo |
-| `booking.cancel-label` | Papel de ação textual ou destrutiva conforme o contexto | Novo |
-| `hair-selector.option` | `hair.*` correspondente à opção escolhida | Novo |
-| `hair-selector.selected-outline` | `color.focus` / papel de contorno validado | Novo |
-
-Os estados hover, pressed e disabled devem ser implementados com as camadas e regras de estado da biblioteca adotada. Não inventar hexadecimais para cada estado. Em telas sensíveis ao toque, hover não deve ser requisito para compreender ou executar uma ação.
-
-Os tokens de agendamento e seleção de cabelo são extensões do produto. Eles reutilizam o sistema semântico, mas não são componentes oficiais do Material 3 por si só.
+| Token                   | Aponta para               | Origem   |
+| ----------------------- | ------------------------- | -------- |
+| `button.bg`             | `color.action`            | Adaptado |
+| `button.label`          | `color.on-action`         | Adaptado |
+| `button.radius`         | `radius.md`               | Herdado  |
+| `button.bg-hover`       | `color.action-hover`      | Novo     |
+| `button.bg-pressed`     | `color.action-pressed`    | Novo     |
+| `button.bg-disabled`    | `color.disabled`          | Adaptado |
+| `button.label-disabled` | `color.on-disabled`       | Adaptado |
+| `button.focus`          | `color.focus`             | Adaptado |
+| `card.bg`               | `color.surface-container` | Adaptado |
+| `card.radius`           | `radius.lg`               | Adaptado |
+| `card.elevation`        | `elevation.card`          | Herdado  |
+| `input.bg`              | `color.surface`           | Herdado  |
+| `input.label`           | `color.on-surface`        | Herdado  |
+| `input.border`          | `color.outline`           | Herdado  |
+| `input.focus`           | `color.focus`             | Adaptado |
+| `input.error`           | `color.error`             | Herdado  |
 
 ## 4. Modo escuro
 
-Os componentes mantêm os mesmos nomes de tokens e a mesma estrutura. O tema escuro altera os valores resolvidos pelos tokens semânticos:
+O modo escuro mantém a mesma estrutura de componentes, dimensões e hierarquia visual. Apenas os valores dos tokens semânticos são alterados.
 
-- `color.primary` e `color.on-primary`: passam a apontar para os papéis correspondentes do esquema tonal escuro gerado no Material Theme Builder.
-- `color.primary-container` e `color.on-primary-container`: utilizam os papéis de contêiner do esquema escuro.
-- `color.secondary`, `color.on-secondary`, `color.tertiary` e seus respectivos contêineres: recebem os valores do esquema escuro.
-- `color.surface`, `color.on-surface`, `color.surface-variant` e `color.on-surface-variant`: passam para os papéis de superfície e conteúdo do esquema escuro (`#1C1B1F` e `#E6E1E5` como base).
-- `color.surface-container-low`, `color.surface-container` e `color.surface-container-high`: recebem os valores de superfície do esquema escuro.
-- `color.outline` e `color.outline-variant`: recebem os contornos correspondentes ao tema escuro.
-- `color.error`, `color.on-error`, `color.error-container` e `color.on-error-container`: passam para os papéis de erro do esquema escuro (`#F2B8B5` e `#601410` como base).
-- `color.inverse-surface`, `color.inverse-on-surface` e `color.inverse-primary`: recebem os valores inversos do esquema escuro.
-- `color.focus`: deve ser validado novamente para garantir visibilidade e contraste mínimo de 3:1 no fundo escuro.
-- Os tokens derivados de cor dos componentes, como `button.bg`, `button.label`, `card.bg` e `navigation.bg`, acompanham automaticamente os papéis semânticos que referenciam.
+As principais mudanças são:
 
-As cores da marca (`orange-500` a `brown-900`), as 12 cores de cabelo, os espaçamentos primitivos, a escala tipográfica, os raios de curvatura e os nomes canônicos dos tokens permanecem inalterados. Sombras, elevação tonal, contraste e camadas de estado devem seguir a implementação do tema selecionado.
+- `color.action`: passa de `brown-5` para `brown-1`.
+- `color.on-action`: passa de `neutral-0` para `neutral-900` (`#241A14`), garantindo contraste adequado sobre `color.action`.
+- `color.secondary`: passa de `brown-3` para `brown-2`.
+- `color.surface`: passa de `neutral-50` para `neutral-950`.
+- `color.surface-container`: passa de `neutral-100` para `neutral-900`.
+- `color.on-surface`: passa de `neutral-900` para `neutral-100`.
+- `color.on-surface-variant`: passa de `brown-4` para `brown-1`.
+- `color.outline`: passa de `brown-3` para `brown-2`.
+- `color.error`: passa de `error-600` para `error-300`.
+- `color.focus`: passa de `brown-5` para `brown-1`.
+- `color.action-hover`: passa de `brown-hover` para `brown-light-hover`.
+- `color.action-pressed`: passa de `brown-pressed` para `brown-light-pressed`.
 
-Não inverter os hexadecimais do tema claro para fabricar o tema escuro. Ambos devem ser gerados e validados como esquemas próprios no Material Theme Builder.
+Não utilize `brown-5` sobre `brown-1` para textos comuns no modo escuro, pois essa combinação não atinge o contraste mínimo de 4,5:1. O texto e os ícones sobre `color.action` devem utilizar `neutral-900`.
 
-## 5. (Bônus) Versão legível por máquina
+Os tokens de componente continuam apontando para os mesmos tokens semânticos. Dessa forma, os componentes não precisam de especificações diferentes para cada tema.
 
-<!-- Exemplo parcial ilustrativo no formato W3C Design Tokens Community Group (DTCG).
-     Não é um arquivo de exportação final nem substitui a geração pelo Material Theme Builder. -->
+## 5. Regras de utilização
 
-```json
-{
-  "$description": "Exemplo parcial ilustrativo de design tokens para app de barbearia Expo, seguindo a especificação W3C DTCG.",
-  "brand": {
-    "orange-500": {
-      "$type": "color",
-      "$value": "#FF8500",
-      "$description": "Cor de marca primária da equipe"
-    },
-    "amber-700": {
-      "$type": "color",
-      "$value": "#CC7D29",
-      "$description": "Cor de marca secundária da equipe"
-    },
-    "ochre-700": {
-      "$type": "color",
-      "$value": "#996D3D",
-      "$description": "Cor de marca terciária da equipe"
-    },
-    "brown-700": {
-      "$type": "color",
-      "$value": "#66523D",
-      "$description": "Tom neutro escuro da marca"
-    },
-    "brown-900": {
-      "$type": "color",
-      "$value": "#332E29",
-      "$description": "Tom de contraste sobre primário da marca"
-    }
-  },
-  "hair": {
-    "black": { "$type": "color", "$value": "#1B1B1B" },
-    "dark-brown": { "$type": "color", "$value": "#3B2214" },
-    "brown": { "$type": "color", "$value": "#6F4E37" },
-    "light-brown": { "$type": "color", "$value": "#A67B50" },
-    "dark-blonde": { "$type": "color", "$value": "#B89B6A" },
-    "golden-blonde": { "$type": "color", "$value": "#D4A843" },
-    "light-blonde": { "$type": "color", "$value": "#F0D8A8" },
-    "redhead": { "$type": "color", "$value": "#C2622D" },
-    "copper": { "$type": "color", "$value": "#B4510E" },
-    "dark-red": { "$type": "color", "$value": "#922724" },
-    "gray": { "$type": "color", "$value": "#8B8B8B" },
-    "white": { "$type": "color", "$value": "#F2F2F0" }
-  },
-  "neutral": {
-    "white": { "$type": "color", "$value": "#FFFFFF" },
-    "black": { "$type": "color", "$value": "#000000" }
-  },
-  "space": {
-    "0": { "$type": "dimension", "$value": "0dp" },
-    "4": { "$type": "dimension", "$value": "4dp" },
-    "8": { "$type": "dimension", "$value": "8dp" },
-    "12": { "$type": "dimension", "$value": "12dp" },
-    "16": { "$type": "dimension", "$value": "16dp" },
-    "24": { "$type": "dimension", "$value": "24dp" },
-    "32": { "$type": "dimension", "$value": "32dp" },
-    "48": { "$type": "dimension", "$value": "48dp" },
-    "64": { "$type": "dimension", "$value": "64dp" }
-  },
-  "radius": {
-    "none": { "$type": "dimension", "$value": "0dp" },
-    "xs": { "$type": "dimension", "$value": "4dp" },
-    "sm": { "$type": "dimension", "$value": "8dp" },
-    "md": { "$type": "dimension", "$value": "12dp" },
-    "lg": { "$type": "dimension", "$value": "16dp" },
-    "xl": { "$type": "dimension", "$value": "28dp" },
-    "full": { "$type": "dimension", "$value": "9999dp" }
-  },
-  "color": {
-    "$description": "Papéis semânticos - Valores dependem da exportação oficial do Material Theme Builder.",
-    "light": {
-      "primary": {
-        "$type": "color",
-        "$value": "{brand.orange-500}"
-      },
-      "on-primary": {
-        "$type": "color",
-        "$value": "{brand.brown-900}"
-      },
-      "surface": {
-        "$type": "color",
-        "$value": "#FFFFFF"
-      },
-      "on-surface": {
-        "$type": "color",
-        "$value": "#1C1B1F"
-      },
-      "error": {
-        "$type": "color",
-        "$value": "#B3261E"
-      }
-    },
-    "dark": {
-      "primary": {
-        "$type": "color",
-        "$value": "{pending.dark.primary}"
-      },
-      "on-primary": {
-        "$type": "color",
-        "$value": "{pending.dark.on-primary}"
-      },
-      "surface": {
-        "$type": "color",
-        "$value": "#1C1B1F"
-      },
-      "on-surface": {
-        "$type": "color",
-        "$value": "#E6E1E5"
-      },
-      "error": {
-        "$type": "color",
-        "$value": "#F2B8B5"
-      }
-    }
-  }
-}
-```
-
-As referências `{pending.*}` são marcadores ilustrativos para documentar dependências pendentes de exportação do Material Theme Builder, não valores finais de produção.
-
-### Critérios de aceite
-
-- As cinco cores de marca da equipe (`orange-500` a `brown-900`) e as 12 cores naturais de cabelo são preservadas como primitivos.
-- Todos os tokens possuem nomes canônicos consistentes e uma única responsabilidade.
-- Os valores semânticos claro e escuro são derivados de esquemas tonais oficiais, sem inversões caseiras.
-- Os componentes reutilizam tokens semânticos, sem valores literais arbitrários.
-- A escala tipográfica é implementada com suporte ao ajuste de fonte de sistema (Dynamic Type / escala Android).
-- Formas, elevação, estados e movimento são mapeados aos tokens correspondentes.
-- Contraste, foco, leitor de tela e movimento reduzido possuem critérios verificáveis (WCAG 2.2 AA).
-- Nenhum valor pendente de definição é apresentado falsamente como especificação oficial concluída.
+1. Utilize exclusivamente tokens definidos neste arquivo para cores, tipografia, espaços, formas, elevação e movimento.
+2. Não utilize valores de cores diretamente nos componentes.
+3. Utilize a grade de 8 dp como padrão de espaçamento, permitindo ajustes de 4 dp quando necessário.
+4. Preserve a hierarquia tipográfica definida para títulos, subtítulos, textos e rótulos.
+5. Utilize `color.action` para destacar ações principais.
+6. Mantenha o contraste mínimo de 4,5:1 para textos comuns.
+7. Respeite o modo claro e escuro em todos os componentes.
+8. Não utilize sombras excessivas nem animações que prejudiquem a navegação.
+9. No React Native, utilize os valores numéricos em dp, sem converter manualmente para pixels físicos.
+10. Respeite as configurações de ampliação de texto do Android.

@@ -4,30 +4,30 @@
      Exemplos do sistema base: Material ("o material é a metáfora", "ousado e intencional", "movimento dá significado");
      HIG ("hierarquia", "harmonia", "consistência"); Fluent 2 ("natural em cada plataforma", "feito para o foco", "um por todos"). -->
 
-## Princípio 1: Simplicidade e clareza
+## Princípio 1: Simplicidade na navegação
 
-- **Origem:** Adaptado. Inspirado nas diretrizes do Material Design 3 de criar interfaces claras, intencionais e centradas nas necessidades dos usuários.
-- **O porquê:** Facilitar a busca por barbearias, a consulta de serviços e a realização de agendamentos, reduzindo dúvidas e etapas desnecessárias.
-- **Na prática:** Organizar as informações em seções claras, utilizar textos objetivos, destacar a ação principal de cada tela e dividir o agendamento em etapas compreensíveis. Utilizar títulos, botões e campos de texto com funções bem definidas.
-- **Evite:** Excesso de informações, textos desnecessários, formulários longos sem necessidade e várias ações principais competindo pela atenção.
+- **Origem:** Adaptado. Material Design 3: hierarquia visual e navegação intuitiva.
+- **O porquê:** Facilitar o uso do aplicativo para clientes, profissionais e proprietários, reduzindo a complexidade das tarefas e o esforço para encontrar funcionalidades.
+- **Na prática:** Organize as informações por importância, utilize navegação inferior para as principais áreas e destaque a ação principal com `button.primary`.
+- **Evite:** Telas sobrecarregadas, menus confusos e excesso de ações competindo pela atenção.
 
-## Princípio 2: Consistência visual
+## Princípio 2: Confiança em cada interação
 
-- **Origem:** Adaptado. Inspirado nas diretrizes de consistência e uso de padrões reconhecíveis do Material Design 3.
-- **O porquê:** Permitir que os usuários reconheçam os componentes e compreendam seu funcionamento em diferentes telas, reduzindo o esforço de aprendizagem e tornando a navegação previsível.
-- **Na prática:** Manter padrões consistentes de cores, tipografia, espaçamentos, botões, campos de texto, ícones e navegação. Centralizar os valores visuais em tokens e reutilizar os componentes documentados em `04-componentes/`.
-- **Evite:** Utilizar estilos diferentes para componentes que desempenham a mesma função sem justificativa, definir valores visuais arbitrários ou alterar padrões de navegação entre telas equivalentes.
+- **Origem:** Novo. Necessidade de transmitir segurança nas operações de agendamento e gerenciamento.
+- **O porquê:** Clientes precisam confiar nas informações dos serviços e horários, enquanto profissionais e proprietários precisam ter segurança na organização de suas agendas.
+- **Na prática:** Apresente informações claras sobre serviços, preços, profissionais e horários. Utilize confirmações visuais para agendamentos, cancelamentos e alterações.
+- **Evite:** Informações incompletas, ações sem confirmação e mudanças de estado sem feedback visual.
 
-## Princípio 3: Acessibilidade e legibilidade
+## Princípio 3: Identidade acolhedora e consistente
 
-- **Origem:** Adaptado. Baseado nas diretrizes de acessibilidade do Material Design 3, complementadas pelos requisitos de acessibilidade do Android.
-- **O porquê:** Tornar as informações e funcionalidades mais fáceis de perceber, compreender e utilizar por pessoas com diferentes capacidades visuais, motoras e cognitivas.
-- **Na prática:** Utilizar contraste mínimo de 4,5:1 para texto comum, textos legíveis, rótulos acessíveis, alvos de toque adequados, suporte ao aumento de fonte e compatibilidade com leitores de tela. Não depender exclusivamente de cores para comunicar estados.
-- **Evite:** Textos pequenos ou com baixo contraste, botões difíceis de tocar, campos identificados somente por ícones sem rótulos acessíveis e informações transmitidas apenas por cores.
+- **Origem:** Adaptado. Material Design 3: personalização e consistência visual.
+- **O porquê:** Construir uma identidade visual que transmita profissionalismo, proximidade e personalidade, diferenciando o Barber Agenda sem comprometer a familiaridade da interface.
+- **Na prática:** Utilize a paleta castanha da marca por meio dos tokens semânticos `color.primary`, `color.secondary` e `color.surface`. Mantenha padrões consistentes de tipografia, espaçamento, componentes e estados.
+- **Evite:** Cores fora da identidade visual, estilos inconsistentes entre telas e elementos decorativos que prejudiquem a compreensão.
 
-## Princípio 4: Confiança e transparência
+## Princípio 4: Acessibilidade para todos
 
-- **Origem:** Novo. Princípio específico do Barber Agenda, definido a partir das necessidades dos usuários ao consultar serviços e realizar agendamentos.
-- **O porquê:** Ajudar os usuários a tomar decisões conscientes ao escolher serviços e realizar agendamentos, deixando claras as informações e o resultado de cada ação.
-- **Na prática:** Apresentar claramente o serviço, o profissional, a data, o horário e o preço antes da confirmação, quando disponível. Exibir mensagens de sucesso ou erro após as operações e indicar os estados dos agendamentos de maneira compreensível.
-- **Evite:** Ocultar informações importantes, apresentar preços ambíguos, indicar horários indisponíveis como livres ou deixar o usuário sem retorno após uma ação.
+- **Origem:** Adaptado. Material Design 3: acessibilidade e design inclusivo.
+- **O porquê:** Garantir que pessoas com diferentes capacidades e necessidades consigam utilizar o aplicativo com autonomia e compreender suas informações.
+- **Na prática:** Mantenha contraste mínimo de 4,5:1 para textos comuns, alvos de toque de pelo menos 48 dp, rótulos acessíveis para leitores de tela e suporte à ampliação de texto.
+- **Evite:** Utilizar somente cores para transmitir informações, textos pequenos, áreas de toque reduzidas e elementos sem identificação acessível.
