@@ -27,7 +27,17 @@ Versões no formato `MAIOR.MENOR.CORREÇÃO`. Mudança grande = versão nova (ex
   - Correção da tabela de acessibilidade (`06-acessibilidade.md`) com cálculo reproduzível de luminância e contraste conforme WCAG 2.2 AA, diferenciando requisitos documentados de testes pendentes de homologação em dispositivos reais.
   - Validação e correção do exemplo JSON parcial (W3C DTCG) e eliminação de links quebrados em fluxos (`05-padroes.md`).
 
-## 0.1.3 · 15/11/2026
+## 0.2.0 · 12/11/26
+
+- Fixação do esquema de cor a partir da marca.
+- **Responsáveis:** @jose2gabriel
+- **Mudanças:**
+  - `brand.source.primary` confirmado como `orange-500` (`#FF8500`).
+  - Papéis semânticos de cor (claro e escuro) gerados com `SchemeFidelity` do Material e aplicados em `src/view/theme.ts`, substituindo o roxo padrão do M3.
+  - Contraste dos pares texto/fundo principais medido e registrado no `02-tokens.md` (todos acima de 4,5:1).
+  - `color.focus` continua pendente de definição.
+
+## 0.2.1 · 15/11/2026
 
 - Primeira versão do sistema de design do **Barber Agenda**, baseada no Material Design 3 e adaptada à identidade visual do aplicativo.
 - **Responsáveis:** Equipe de desenvolvimento do Barber Agenda.
