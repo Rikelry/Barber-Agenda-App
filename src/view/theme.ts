@@ -608,6 +608,8 @@ export const componentSizes = {
     /** Agendar: cartão de cada profissional e botão de cada dia. */
     professionalCard: { width: 96 },
     dayButton: { height: 56 },
+    /** Portfólio: altura de cada foto da grade (3 colunas) e da foto grande. */
+    portfolio: { gridHeight: 118, previewHeight: 260 },
     /** Esqueleto de carregamento (padrão 2 de 05-padroes.md). */
     skeleton: { line: 16, card: 96 },
     /** barra-busca.md: altura do contêiner. */

@@ -37,6 +37,7 @@ export type PerfilActions = {
   openChangePassword: () => void;
   goBack: () => void;
   openWorkplace: () => void;
+  openPortfolio: () => void;
   /** Sai da conta e volta para o login. */
   logout: () => void;
 };
@@ -140,6 +141,7 @@ export function usePerfilViewModel(
       toggleShowNewPassword: () => setShowNewPassword((v) => !v),
       save,
       openWorkplace: () => router.push("/meu-trabalho"),
+      openPortfolio: () => router.push("/portfolio"),
       registerBarbershop: () => router.push("/minhas-barbearias/nova"),
       openPersonalData: () => router.push("/perfil/dados"),
       openChangePassword: () => router.push("/perfil/senha"),

@@ -16,8 +16,13 @@ jest.mock("expo-router", () => ({
     push: (...a: unknown[]) => mockPush(...a),
     replace: (...a: unknown[]) => mockReplace(...a),
   },
+  useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
 }));
-jest.mock("@/di/container", () => ({ homeUseCases: {}, authUseCases: {} }));
+jest.mock("@/di/container", () => ({
+  homeUseCases: {},
+  authUseCases: {},
+  portfolioUseCases: { listInspirations: async () => [] },
+}));
 
 const USUARIO: User = {
   id: "u1",

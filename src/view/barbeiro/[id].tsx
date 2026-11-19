@@ -4,10 +4,12 @@ import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/view/components/avatar";
+import { Button } from "@/view/components/button";
 import { Card } from "@/view/components/card";
 import { Divider } from "@/view/components/divider";
 import { formatDuration, formatPhone, formatPrice } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
+import { PortfolioGrid } from "@/view/components/portfolioGrid";
 import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
 import { useDesignSystem } from "@/view/components/themeProvider";
@@ -57,6 +59,19 @@ const PerfilBarbeiro = () => {
               </Typography>
             </View>
           </View>
+
+          {state.photos.length > 0 && (
+            <View style={{ gap: spacing.md }}>
+              <Typography variant="titleMedium" accessibilityRole="header">
+                Portfólio · {state.photos.length} {state.photos.length === 1 ? "foto" : "fotos"}
+              </Typography>
+              <PortfolioGrid photos={state.photos} onOpen={actions.openPhoto} />
+            </View>
+          )}
+
+          <Button variant="filled" size="medium" fullWidth onPress={actions.openBarbershop}>
+            {`Agendar com ${perfil.professional.name.split(" ")[0]}`}
+          </Button>
 
           <View style={{ gap: spacing.md }}>
             <Typography variant="titleMedium" accessibilityRole="header">

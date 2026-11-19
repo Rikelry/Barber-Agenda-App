@@ -1,10 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { barbershopUseCases } from "@/di/container";
+import { barbershopUseCases, portfolioUseCases } from "@/di/container";
+import type { PortfolioPhoto } from "@/model/entities/portfolioPhoto";
 import type { Professional } from "@/model/entities/professional";
 import { DomainError } from "@/model/errors";
 import type { BarbershopDetail, IBarbershopUseCases } from "@/usecase/iBarbershopUseCases";
+import type { IPortfolioUseCases } from "@/usecase/iPortfolioUseCases";
 
 export type DetalheBarbeariaStatus = "loading" | "error" | "content";
 export type DetalheBarbeariaAba = "servicos" | "profissionais";
@@ -13,6 +15,8 @@ export type DetalheBarbeariaState = {
   status: DetalheBarbeariaStatus;
   detail: BarbershopDetail | null;
   tab: DetalheBarbeariaAba;
+  /** Trabalhos da equipe (portfólio dos profissionais da barbearia). */
+  photos: PortfolioPhoto[];
   errorMessage: string | null;
 };
 
@@ -23,16 +27,24 @@ export type DetalheBarbeariaActions = {
   openBarber: (professional: Professional) => void;
   /** Abre o novo agendamento com o serviço escolhido. */
   book: (serviceId: string) => void;
+  openPhoto: (photo: PortfolioPhoto) => void;
 };
 
 export function useDetalheBarbeariaViewModel(
   useCases: IBarbershopUseCases = barbershopUseCases,
+  portfolio: IPortfolioUseCases = portfolioUseCases,
 ): [DetalheBarbeariaState, DetalheBarbeariaActions] {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [status, setStatus] = useState<DetalheBarbeariaStatus>("loading");
   const [detail, setDetail] = useState<BarbershopDetail | null>(null);
   const [tab, setTab] = useState<DetalheBarbeariaAba>("servicos");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<PortfolioPhoto[]>([]);
+
+  useEffect(() => {
+    // Sem fotos (ou se falhar), a barbearia só não mostra a seção.
+    if (id) portfolio.listByBarbershop(id).then(setPhotos, () => setPhotos([]));
+  }, [id, portfolio]);
   const pedido = useRef(0);
 
   const carregar = useCallback(() => {
@@ -57,7 +69,7 @@ export function useDetalheBarbeariaViewModel(
   }, [carregar]);
 
   return [
-    { status, detail, tab, errorMessage },
+    { status, detail, tab, photos, errorMessage },
     {
       setTab,
       retry: () => {
@@ -72,6 +84,8 @@ export function useDetalheBarbeariaViewModel(
         }),
       book: (serviceId) =>
         router.push({ pathname: "/agendamento/novo", params: { barbershopId: id, serviceId } }),
+      openPhoto: (foto) =>
+        router.push({ pathname: "/portfolio/[id]", params: { id: foto.id, professionalId: foto.professionalId } }),
     },
   ];
 }

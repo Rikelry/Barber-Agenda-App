@@ -14,7 +14,11 @@ jest.mock("expo-router", () => ({
   router: { push: (...args: unknown[]) => mockPush(...args) },
   useLocalSearchParams: () => mockParams,
 }));
-jest.mock("@/di/container", () => ({ barbershopUseCases: {} }));
+jest.mock("@/di/container", () => ({
+  barbershopUseCases: {},
+  // Portfólio vazio: as telas só não mostram as fotos.
+  portfolioUseCases: { listByBarbershop: async () => [], listByProfessional: async () => [], listInspirations: async () => [] },
+}));
 
 const BARBEARIA: Barbershop = { id: "b1", name: "Central", address: "Rua A", phone: "86999990000", avatarUrl: null };
 const BARBEIRO: Professional = {

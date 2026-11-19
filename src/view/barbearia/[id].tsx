@@ -72,6 +72,32 @@ const DetalheBarbearia = () => {
               </Typography>
             </View>
 
+            {state.photos.length > 0 && (
+              <View style={{ gap: spacing.sm }}>
+                <Typography variant="titleMedium" accessibilityRole="header">
+                  Trabalhos da equipe
+                </Typography>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
+                  {state.photos.map((foto) => (
+                    <Pressable
+                      key={foto.id}
+                      onPress={() => actions.openPhoto(foto)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${foto.caption ?? "Corte"}, por ${foto.professionalName}`}
+                    >
+                      <Thumbnail
+                        uri={foto.imageUrl}
+                        label={foto.caption ?? "Corte"}
+                        width={componentSizes.portfolio.gridHeight}
+                        height={componentSizes.portfolio.gridHeight}
+                        radius={theme.shapes.small}
+                      />
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
             <Tabs
               items={[
                 { key: "servicos", label: "Serviços" },

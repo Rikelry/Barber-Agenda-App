@@ -1,13 +1,15 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
-import { authUseCases, homeUseCases } from "@/di/container";
+import { authUseCases, homeUseCases, portfolioUseCases } from "@/di/container";
+import type { PortfolioPhoto } from "@/model/entities/portfolioPhoto";
 import type { Appointment } from "@/model/entities/appointment";
 import type { BarbershopHighlight, ServiceCategory } from "@/model/entities/highlight";
 import type { User } from "@/model/entities/user";
 import { DomainError } from "@/model/errors";
 import type { IHomeUseCases } from "@/usecase/iHomeUseCases";
 import type { IAuthUseCases } from "@/usecase/iAuthUseCases";
+import type { IPortfolioUseCases } from "@/usecase/iPortfolioUseCases";
 
 export type HomeStatus = "loading" | "error" | "content";
 
@@ -18,6 +20,8 @@ export type HomeState = {
   highlights: BarbershopHighlight[];
   loadingHighlights: boolean;
   nextAppointment: Appointment | null;
+  /** Fotos dos profissionais marcadas para as Inspirações (vazio se falhar). */
+  inspirations: PortfolioPhoto[];
   errorMessage: string | null;
 };
 
@@ -29,6 +33,7 @@ export type HomeActions = {
   goProfile: () => void;
   /** Toque no card do próximo agendamento: abre a aba Agendas. */
   openAppointments: () => void;
+  openInspiration: (photo: PortfolioPhoto) => void;
 };
 
 const mensagem = (erro: unknown) =>
@@ -37,6 +42,7 @@ const mensagem = (erro: unknown) =>
 export function useHomeViewModel(
   home: IHomeUseCases = homeUseCases,
   auth: IAuthUseCases = authUseCases,
+  portfolio: IPortfolioUseCases = portfolioUseCases,
 ): [HomeState, HomeActions] {
   const [status, setStatus] = useState<HomeStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
@@ -72,9 +78,19 @@ export function useHomeViewModel(
     [home, auth],
   );
 
+  const [inspirations, setInspirations] = useState<PortfolioPhoto[]>([]);
+
   useEffect(() => {
     carregar("cabelo");
   }, [carregar]);
+
+  // As Inspirações são um extra: sem sessão ou com erro, a seção só não aparece. Recarrega
+  // ao voltar para a aba, para mostrar fotos publicadas enquanto o Início estava aberto.
+  useFocusEffect(
+    useCallback(() => {
+      portfolio.listInspirations().then(setInspirations, () => setInspirations([]));
+    }, [portfolio]),
+  );
 
   const selectCategory = (escolhida: ServiceCategory) => {
     // Tocar na categoria já escolhida mostra todas de novo.
@@ -88,7 +104,7 @@ export function useHomeViewModel(
   };
 
   return [
-    { status, user, category, highlights, loadingHighlights, nextAppointment, errorMessage },
+    { status, user, category, highlights, loadingHighlights, nextAppointment, inspirations, errorMessage },
     {
       selectCategory,
       retry: () => {
@@ -100,6 +116,8 @@ export function useHomeViewModel(
         router.push({ pathname: "/barbearia/[id]", params: { id: barbershopId } }),
       goProfile: () => router.navigate("/perfil"),
       openAppointments: () => router.navigate("/agendamentos"),
+      openInspiration: (foto) =>
+        router.push({ pathname: "/portfolio/[id]", params: { id: foto.id, professionalId: foto.professionalId } }),
     },
   ];
 }

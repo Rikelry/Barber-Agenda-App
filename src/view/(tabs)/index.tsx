@@ -14,6 +14,7 @@ import { Icon } from "@/view/components/icon";
 import { IconButton } from "@/view/components/iconButton";
 import { MainTabBar } from "@/view/components/mainTabBar";
 import { STATUS_LABEL, StatusBadge } from "@/view/components/statusBadge";
+import { Thumbnail } from "@/view/components/thumbnail";
 import { Typography } from "@/view/components/typography";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { componentSizes } from "@/view/theme";
@@ -235,6 +236,31 @@ const Home = () => {
                 />
               )}
             </View>
+
+            {/* Inspirações: fotos que os profissionais marcaram no portfólio */}
+            {state.inspirations.length > 0 && (
+              <View style={{ gap: spacing.sm, paddingHorizontal: spacing.lg }}>
+                <Typography variant="titleLarge" weight="500" accessibilityRole="header">
+                  Inspirações
+                </Typography>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
+                  {state.inspirations.map((foto) => (
+                    <Pressable
+                      key={foto.id}
+                      onPress={() => actions.openInspiration(foto)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${foto.caption ?? "Corte"}, por ${foto.professionalName}`}
+                      style={{ width: DESTAQUE.largura * 0.6, gap: spacing.xs }}
+                    >
+                      <Thumbnail uri={foto.imageUrl} label={foto.caption ?? "Corte"} width="100%" height={DESTAQUE.alturaImagem} />
+                      <Typography variant="bodySmall" color="onSurfaceVariant" numberOfLines={1}>
+                        {foto.caption ?? "Corte"}
+                      </Typography>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
           </>
         )}
       </ScrollView>

@@ -41,6 +41,8 @@ const SIMBOLOS: Record<string, Simbolo> = {
     blocked: { material: "event_busy", ios: "calendar.badge.minus" },
     error: { material: "error", ios: "exclamationmark.circle" },
     badge: { material: "badge", ios: "person.text.rectangle" },
+    camera: { material: "photo_camera", ios: "camera" },
+    photos: { material: "photo_library", ios: "photo.on.rectangle" },
 };
 
 export const Icon = ({ name, size = 24, color, style, children }: IconProps) => {

@@ -125,6 +125,7 @@ const Perfil = () => {
             {state.isProfessional
               ? item("scissors", "Meu perfil profissional", actions.openWorkplace, "Especialidade, barbearia e horário")
               : null}
+            {state.isProfessional ? item("camera", "Meu portfólio", actions.openPortfolio, "Fotos dos seus cortes") : null}
             {state.isOwner ? null : item("store", "Cadastrar minha barbearia", actions.registerBarbershop, "Receba agendamentos pelo app")}
 
             <View style={{ height: spacing.lg }} />

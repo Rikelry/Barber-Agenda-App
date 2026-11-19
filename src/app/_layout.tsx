@@ -30,6 +30,9 @@ const StackComTema = () => {
       <Stack.Screen name="barbeiro/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="perfil/dados" options={{ headerShown: false }} />
       <Stack.Screen name="perfil/senha" options={{ headerShown: false }} />
+      <Stack.Screen name="portfolio/index" options={{ headerShown: false }} />
+      <Stack.Screen name="portfolio/nova" options={{ headerShown: false }} />
+      <Stack.Screen name="portfolio/[id]" options={{ headerShown: false }} />
     </Stack>
   );
 };

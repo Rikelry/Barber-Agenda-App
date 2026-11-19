@@ -24,3 +24,4 @@ export * from "@/view/components/barbershopFields";
 export * from "@/view/components/screenHeader";
 export * from "@/view/components/tabs";
 export * from "@/view/components/stepProgress";
+export * from "@/view/components/portfolioGrid";
