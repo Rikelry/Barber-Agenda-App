@@ -8,13 +8,21 @@ const FORBIDDEN_DEPENDENCIES: Partial<
     viewmodel: ["infra"],
     usecase: ["infra"],
     model: ["infra"],
-    infra: ["view", "viewmodel"],
+    infra: ["view", "viewmodel", "usecase", "di"],
+    routes: ["viewmodel", "usecase", "infra"],
 };
 
 export function validateLayerDependencies(
     projectModel: ProjectModel,
 ): ProjectModel {
     const violations: ProjectModel["violations"] = [];
+
+    const filesByAbsolutePath = new Map(
+        projectModel.files.map((file) => [
+            file.absolutePath,
+            file,
+        ]),
+    );
 
     for (const file of projectModel.files) {
         for (const importInfo of file.imports) {
@@ -25,9 +33,8 @@ export function validateLayerDependencies(
                 continue;
             }
 
-            const targetFile = projectModel.files.find(
-                (candidate) =>
-                    candidate.absolutePath === importInfo.resolvedFilePath,
+            const targetFile = filesByAbsolutePath.get(
+                importInfo.resolvedFilePath,
             );
 
             if (!targetFile) {

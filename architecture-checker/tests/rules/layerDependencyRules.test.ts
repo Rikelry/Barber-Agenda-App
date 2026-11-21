@@ -93,4 +93,28 @@ describe("LAYER_DEPENDENCY_001", () => {
 
         expect(result.violations).toHaveLength(0);
     });
+
+    it("deve detectar Infra importando Use Cases", () => {
+        const project = createProjectModel("infra", "usecase");
+
+        const result = validateLayerDependencies(project);
+
+        expect(result.violations).toHaveLength(1);
+    });
+
+    it("deve detectar Routes importando Infra", () => {
+        const project = createProjectModel("routes", "infra");
+
+        const result = validateLayerDependencies(project);
+
+        expect(result.violations).toHaveLength(1);
+    });
+
+    it("deve detectar Routes importando ViewModel", () => {
+        const project = createProjectModel("routes", "viewmodel");
+
+        const result = validateLayerDependencies(project);
+
+        expect(result.violations).toHaveLength(1);
+    });
 });
