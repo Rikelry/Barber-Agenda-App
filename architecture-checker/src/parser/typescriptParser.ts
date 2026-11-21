@@ -3,9 +3,12 @@ import fs from "node:fs/promises";
 
 import type { ProjectFile } from "../core/types.js";
 import type {
+    ConstructorInfo,
     DeclarationInfo,
+    ExpressionInfo,
     ImportInfo,
     ParsedFile,
+    VariableInfo,
 } from "./typescriptTypes.js";
 
 function getLine(sourceFile: ts.SourceFile, node: ts.Node): number {
@@ -120,6 +123,123 @@ function extractDeclarations(
     return declarations;
 }
 
+function extractConstructors(
+    sourceFile: ts.SourceFile,
+): ConstructorInfo[] {
+    const constructors: ConstructorInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (!ts.isClassDeclaration(statement) || !statement.name) {
+            continue;
+        }
+
+        for (const member of statement.members) {
+            if (!ts.isConstructorDeclaration(member)) {
+                continue;
+            }
+
+            constructors.push({
+                className: statement.name.text,
+                line: getLine(sourceFile, member),
+                parameters: member.parameters.map((parameter) => ({
+                    name: parameter.name.getText(sourceFile),
+                    type: parameter.type?.getText(sourceFile),
+                })),
+            });
+        }
+    }
+
+    return constructors;
+}
+
+function extractExpression(
+    expression: ts.Expression,
+    sourceFile: ts.SourceFile,
+): ExpressionInfo {
+    if (ts.isNewExpression(expression)) {
+        return {
+            kind: "new",
+            text: expression.getText(sourceFile),
+            name: expression.expression.getText(sourceFile),
+            arguments: (expression.arguments ?? []).map((argument) =>
+                extractExpression(argument, sourceFile),
+            ),
+            line: getLine(sourceFile, expression),
+        };
+    }
+
+    if (ts.isIdentifier(expression)) {
+        return {
+            kind: "identifier",
+            text: expression.text,
+            name: expression.text,
+            line: getLine(sourceFile, expression),
+        };
+    }
+
+    return {
+        kind: "other",
+        text: expression.getText(sourceFile),
+        line: getLine(sourceFile, expression),
+    };
+}
+
+function extractInstantiations(
+    sourceFile: ts.SourceFile,
+): ExpressionInfo[] {
+    const instantiations: ExpressionInfo[] = [];
+
+    function visit(node: ts.Node): void {
+        if (ts.isNewExpression(node)) {
+            instantiations.push(extractExpression(node, sourceFile));
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+
+    return instantiations;
+}
+
+function extractVariables(
+    sourceFile: ts.SourceFile,
+): VariableInfo[] {
+    const variables: VariableInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (!ts.isVariableStatement(statement)) {
+            continue;
+        }
+
+        const modifiers = ts.canHaveModifiers(statement)
+            ? ts.getModifiers(statement)
+            : undefined;
+
+        const isExported =
+            modifiers?.some(
+                (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+            ) ?? false;
+
+        for (const declaration of statement.declarationList.declarations) {
+            if (!ts.isIdentifier(declaration.name)) {
+                continue;
+            }
+
+            variables.push({
+                name: declaration.name.text,
+                line: getLine(sourceFile, declaration),
+                isExported,
+                initializer: declaration.initializer
+                    ? extractExpression(declaration.initializer, sourceFile)
+                    : undefined,
+            });
+        }
+    }
+
+    return variables;
+}
+
 export async function parseTypeScriptFile(
     file: ProjectFile,
 ): Promise<ParsedFile> {
@@ -138,5 +258,8 @@ export async function parseTypeScriptFile(
         layer: file.layer,
         imports: extractImports(sourceFile),
         declarations: extractDeclarations(sourceFile),
+        constructors: extractConstructors(sourceFile),
+        instantiations: extractInstantiations(sourceFile),
+        variables: extractVariables(sourceFile),
     };
 }

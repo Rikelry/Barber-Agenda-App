@@ -23,6 +23,9 @@ export function buildProjectModel(
             ...file,
             imports: parsedFile.imports,
             declarations: parsedFile.declarations,
+            constructors: parsedFile.constructors,
+            instantiations: parsedFile.instantiations,
+            variables: parsedFile.variables,
         };
     });
 

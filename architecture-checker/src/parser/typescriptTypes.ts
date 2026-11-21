@@ -33,4 +33,33 @@ export interface ParsedFile {
   layer: ArchitectureLayer;
   imports: ImportInfo[];
   declarations: DeclarationInfo[];
+  constructors: ConstructorInfo[];
+  instantiations: ExpressionInfo[];
+  variables: VariableInfo[];
+}
+
+export interface ConstructorParameterInfo {
+  name: string;
+  type?: string;
+}
+
+export interface ConstructorInfo {
+  className: string;
+  line: number;
+  parameters: ConstructorParameterInfo[];
+}
+
+export interface ExpressionInfo {
+  kind: "new" | "identifier" | "other";
+  text: string;
+  name?: string;
+  arguments?: ExpressionInfo[];
+  line: number;
+}
+
+export interface VariableInfo {
+  name: string;
+  line: number;
+  isExported: boolean;
+  initializer?: ExpressionInfo;
 }

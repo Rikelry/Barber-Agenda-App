@@ -9,11 +9,17 @@ import type {
 import type {
     ImportInfo,
     DeclarationInfo,
+    ConstructorInfo,
+    ExpressionInfo,
+    VariableInfo,
 } from "../parser/typescriptTypes.js";
 
 export interface AnalyzedProjectFile extends ProjectFile {
     imports: ImportInfo[];
     declarations: DeclarationInfo[];
+    constructors: ConstructorInfo[];
+    instantiations: ExpressionInfo[];
+    variables: VariableInfo[];
 }
 
 export interface ProjectModel {
