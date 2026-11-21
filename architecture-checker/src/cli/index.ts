@@ -8,6 +8,7 @@ import { buildProjectModel } from "../analyzer/projectModelBuilder.js";
 import { loadProjectTypeScriptConfig } from "../analyzer/projectConfigLoader.js";
 import { resolveProjectImports } from "../analyzer/importResolver.js";
 import { validateLayerDependencies } from "../analyzer/layerDependencyRules.js";
+import { validateDIComposition } from "../analyzer/diCompositionRules.js";
 
 const args = process.argv.slice(2);
 
@@ -91,8 +92,12 @@ async function main(): Promise<void> {
             projectConfig.options,
         );
 
-        const projectModel = validateLayerDependencies(
+        const layerValidatedProject = validateLayerDependencies(
             resolvedProjectModel,
+        );
+
+        const projectModel = validateDIComposition(
+            layerValidatedProject,
         );
 
         console.log("\nResultado da análise:");
