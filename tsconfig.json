@@ -18,7 +18,6 @@
     "expo-env.d.ts"
   ],
   "exclude": [
-    "backend",
     "example",
     "node_modules"
   ]
