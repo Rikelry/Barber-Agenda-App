@@ -1,5 +1,5 @@
-// Autenticação na API (/auth/...). Converte o LoginResponseDTO do backend
-// (backend/src/usuarios/adapters/dtos/UsuarioDTO.ts) na Session do domínio.
+// Autenticação na API (/auth/...). Converte o LoginResponseDTO do servidor
+// (src/infra/http/dtos/UsuarioDTO.ts) na Session do domínio.
 
 import type { IAuthDataSource, RegisterData } from "@/model/datasources/iAuthDataSource";
 import type { Session, UserRole } from "@/model/entities/session";

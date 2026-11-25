@@ -1,5 +1,5 @@
-// Barbearias, profissionais e serviços da API (/barbershops/...). Converte os DTOs do backend
-// (backend/src/*/adapters/dtos) nas entidades do domínio.
+// Barbearias, profissionais e serviços da API (/barbershops/...). Converte os DTOs do servidor
+// (src/infra/http/dtos) nas entidades do domínio.
 
 import type {
   BarbershopData,

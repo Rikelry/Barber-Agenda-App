@@ -1,4 +1,4 @@
-// Cliente HTTP da API Express (backend/). Envia o token da sessão e traduz erros técnicos
+// Cliente HTTP da API Express (src/infra/http/). Envia o token da sessão e traduz erros técnicos
 // (rede, 400 de validação, 401, 404, 409, 429, 5xx, JSON inválido) em DomainError com
 // mensagem pronta para a tela.
 

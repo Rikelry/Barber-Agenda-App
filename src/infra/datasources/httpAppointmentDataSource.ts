@@ -1,5 +1,5 @@
 // Agendamentos na API (/agendamentos e available-slots). Converte o AgendamentoResponseDTO
-// do backend (backend/src/agendamentos/adapters/dtos/AgendamentoDTO.ts) na entidade.
+// do servidor (src/infra/http/dtos/AgendamentoDTO.ts) na entidade.
 
 import type { AppointmentData, BookingRequest, IAppointmentDataSource } from "@/model/datasources/iAppointmentDataSource";
 import type { AppointmentStatus } from "@/model/entities/appointment";
