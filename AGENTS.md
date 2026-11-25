@@ -34,13 +34,17 @@ src/
 │   ├── services/
 │   └── errors.ts
 ├── infra/
-│   ├── datasources/
-│   └── services/
+│   ├── http/                 # servidor Express: app, routes, controllers, schemas, middlewares
+│   ├── datasources/          # implementações de acesso a dados (app e servidor)
+│   ├── database/             # cliente Supabase
+│   ├── services/             # implementações de serviços (e-mail, notificação)
+│   ├── errors/               # AppError do servidor
+│   └── utils/                # utilitários do servidor (jwt, datas)
 └── di/
     └── container.ts
 ```
 
-Nenhuma outra pasta. Não crie pastas da arquitetura antecipadamente — só o necessário para a funcionalidade atual. Mantenha componentes reutilizáveis e qualquer código que não seja rota fora de `src/app/`.
+O servidor Express foi fundido nas camadas do MVVM (não existe mais como pasta separada): rotas, controllers, schemas e middlewares em `src/infra/http/`; entidades, contratos de dados e de serviços em `src/model/`; casos de uso e seus contratos em `src/usecase/`; implementações de dados em `src/infra/datasources/`. O servidor é um app separado — não é código do MVVM — e por isso cada arquivo dele começa com o marcador `// @servidor`, que o verificador de arquitetura ignora. Nenhuma outra pasta: não crie pastas da arquitetura antecipadamente — só o necessário para a funcionalidade atual. Mantenha componentes reutilizáveis e qualquer código que não seja rota fora de `src/app/`.
 
 ## 3. Regras de ouro (12)
 
