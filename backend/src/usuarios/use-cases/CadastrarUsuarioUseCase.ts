@@ -33,6 +33,10 @@ export class CadastrarUsuarioUseCase implements ICadastrarUsuarioUseCase {
       phone: dados.phone,
       passwordHash,
       role: 'cliente',
+      avatarUrl: null,
+      googleId: null,
+      nameEditedAt: null,
+      avatarEditedAt: null,
     })
 
     // Usuário recém-criado nunca é owner nem profissional ainda — sem

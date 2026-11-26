@@ -82,6 +82,17 @@ const Login = () => {
             {state.loading ? "Entrando..." : "Entrar"}
           </Button>
 
+          <Button
+            variant="outlined"
+            size="medium"
+            fullWidth
+            onPress={actions.loginWithGoogle}
+            disabled={state.loading || state.googleLoading}
+            accessibilityHint="Entra com a sua conta do Google"
+          >
+            {state.googleLoading ? "Conectando..." : "Entrar com Google"}
+          </Button>
+
           <View style={{ flex: 1 }} />
 
           <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: spacing.xs }}>

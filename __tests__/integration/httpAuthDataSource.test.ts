@@ -56,6 +56,31 @@ describe("HttpAuthDataSource", () => {
     fetchMock.mockResolvedValue(resposta({ error: "INVALID_RESET_TOKEN", message: "Token inválido ou expirado." }, 400));
     await expect(fonte().resetPassword("velho", "segredo12")).rejects.toMatchObject({ message: "Token inválido ou expirado." });
   });
+
+  it("login com Google envia POST /auth/google com o idToken e traz foto e nome", async () => {
+    fetchMock.mockResolvedValue(
+      resposta({
+        token: "jwt",
+        usuario: { id: "g1", name: "Ana Souza", email: "ana@mail.com", phone: "", avatarUrl: "https://fotos/ana.png", createdAt: "2024-01-15T10:00:00Z" },
+      }),
+    );
+    const sessao = await fonte().loginWithGoogle("id-token");
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe("http://api.teste/api/v1/auth/google");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body!)).toEqual({ idToken: "id-token" });
+    expect(sessao.user).toMatchObject({ name: "Ana Souza", avatarUrl: "https://fotos/ana.png" });
+  });
+
+  it("token do Google recusado pelo backend vira mensagem clara", async () => {
+    fetchMock.mockResolvedValue(
+      resposta({ error: "INVALID_GOOGLE_TOKEN", message: "Não foi possível validar a sua conta Google. Tente novamente." }, 401),
+    );
+    await expect(fonte().loginWithGoogle("expirado")).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      message: "Não foi possível validar a sua conta Google. Tente novamente.",
+    });
+  });
 });
 
 describe("HttpUserDataSource", () => {

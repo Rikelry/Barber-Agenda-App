@@ -9,6 +9,7 @@ import { HttpPortfolioDataSource } from "@/infra/datasources/httpPortfolioDataSo
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
 import { ExpoImagePickerService } from "@/infra/services/expoImagePickerService";
+import { GoogleAuthService } from "@/infra/services/googleAuthService";
 import { HttpImageStorageService } from "@/infra/services/httpImageStorageService";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
 import { SecureSessionStorageService } from "@/infra/services/secureSessionStorageService";
@@ -50,6 +51,7 @@ export const authUseCases = new AuthUseCases(
   new HttpAuthDataSource(httpClient),
   authSession,
   new SecureSessionStorageService(),
+  new GoogleAuthService(),
 );
 
 export const profileUseCases = new ProfileUseCases(new HttpUserDataSource(httpClient));

@@ -1,11 +1,12 @@
 // modules/usuarios/adapters/UsuarioDTO.ts
 import { z } from 'zod'
-import { cadastroSchema, loginSchema, atualizacaoSchema, esqueciSenhaSchema, redefinirSenhaSchema } from '../schemas/UsuarioSchema'
+import { cadastroSchema, loginSchema, googleLoginSchema, atualizacaoSchema, esqueciSenhaSchema, redefinirSenhaSchema } from '../schemas/UsuarioSchema'
 import { Role } from '../../domain/entidades/Usuario'
 
 // DTOs de entrada — inferidos do Zod, sem retrabalho manual (coding-standards.md)
 export type CadastroDTO = z.infer<typeof cadastroSchema>
 export type LoginDTO = z.infer<typeof loginSchema>
+export type GoogleLoginDTO = z.infer<typeof googleLoginSchema>
 export type AtualizacaoDTO = z.infer<typeof atualizacaoSchema>
 export type EsqueciSenhaDTO = z.infer<typeof esqueciSenhaSchema>
 export type RedefinirSenhaDTO = z.infer<typeof redefinirSenhaSchema>
@@ -18,6 +19,7 @@ export interface UsuarioResponseDTO {
   phone: string
   role: Role
   roles: Role[]
+  avatarUrl: string | null
   createdAt: string
   updatedAt: string
 }

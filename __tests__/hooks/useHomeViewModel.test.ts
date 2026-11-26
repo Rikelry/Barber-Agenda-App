@@ -47,6 +47,9 @@ const autenticado = (logado = true): jest.Mocked<IAuthUseCases> => ({
   login: jest.fn(async () => {
     throw new Error("não usado");
   }),
+  loginWithGoogle: jest.fn(async () => {
+    throw new Error("não usado");
+  }),
   register: jest.fn(async () => {
     throw new Error("não usado");
   }),

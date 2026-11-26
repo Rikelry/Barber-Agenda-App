@@ -9,6 +9,7 @@ import { ISolicitarRecuperacaoSenhaUseCase } from '../../domain/interfaces/ISoli
 import { IRedefinirSenhaUseCase } from '../../domain/interfaces/IRedefinirSenhaUseCase'
 import { IExcluirContaUseCase } from '../../domain/interfaces/IExcluirContaUseCase'
 import { IRenovarTokenUseCase } from '../../domain/interfaces/IRenovarTokenUseCase'
+import { IAutenticarComGoogleUseCase } from '../../domain/interfaces/IAutenticarComGoogleUseCase'
 
 export class UsuarioController {
   constructor(
@@ -20,7 +21,8 @@ export class UsuarioController {
     private readonly solicitarRecuperacaoSenhaUseCase: ISolicitarRecuperacaoSenhaUseCase,
     private readonly redefinirSenhaUseCase: IRedefinirSenhaUseCase,
     private readonly excluirContaUseCase: IExcluirContaUseCase,
-    private readonly renovarTokenUseCase: IRenovarTokenUseCase
+    private readonly renovarTokenUseCase: IRenovarTokenUseCase,
+    private readonly autenticarComGoogleUseCase: IAutenticarComGoogleUseCase
   ) { }
 
   async cadastrar(req: Request, res: Response, next: NextFunction) {
@@ -44,6 +46,15 @@ export class UsuarioController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const resultado = await this.autenticarUsuarioUseCase.executar(req.body)
+      return res.status(200).json(resultado)
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async loginComGoogle(req: Request, res: Response, next: NextFunction) {
+    try {
+      const resultado = await this.autenticarComGoogleUseCase.executar(req.body)
       return res.status(200).json(resultado)
     } catch (err) {
       next(err)

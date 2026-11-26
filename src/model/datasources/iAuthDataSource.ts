@@ -11,6 +11,8 @@ export type RegisterData = {
 export interface IAuthDataSource {
   /** Falha com DomainError UNAUTHORIZED quando e-mail ou senha não conferem. */
   login(email: string, password: string): Promise<Session>;
+  /** Envia o ID token do Google; o backend valida e entra ou cria a conta. */
+  loginWithGoogle(idToken: string): Promise<Session>;
   /** Falha com ValidationError({ email }) quando o e-mail já está cadastrado. */
   register(data: RegisterData): Promise<void>;
   /** Envia por e-mail o link para redefinir a senha. */

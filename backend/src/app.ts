@@ -29,6 +29,8 @@ import { BuscarUsuarioUseCase } from './usuarios/use-cases/BuscarUsuarioUseCase'
 import { EncerrarSessaoUseCase } from './usuarios/use-cases/EncerrarSessaoUseCase'
 import { AtualizarUsuarioUseCase } from './usuarios/use-cases/AtualizarUsuarioUseCase'
 import { RenovarTokenUseCase } from './usuarios/use-cases/RenovarTokenUseCase'
+import { AutenticarComGoogleUseCase } from './usuarios/use-cases/AutenticarComGoogleUseCase'
+import { GoogleTokenVerifier } from './usuarios/infrastructure/services/GoogleTokenVerifier'
 import { SolicitarRecuperacaoSenhaUseCase } from './usuarios/use-cases/SolicitarRecuperacaoSenhaUseCase'
 import { RedefinirSenhaUseCase } from './usuarios/use-cases/RedefinirSenhaUseCase'
 import { ExcluirContaUseCase } from './usuarios/use-cases/ExcluirContaUseCase'
@@ -110,6 +112,13 @@ const encerrarSessaoUseCase = new EncerrarSessaoUseCase()
 const atualizarUsuarioUseCase = new AtualizarUsuarioUseCase(usuarioRepository, barbeariaRepository, profissionalRepository)
 const excluirContaUseCase = new ExcluirContaUseCase(usuarioRepository)
 const renovarTokenUseCase = new RenovarTokenUseCase(usuarioRepository, barbeariaRepository, profissionalRepository)
+const googleTokenVerifier = new GoogleTokenVerifier()
+const autenticarComGoogleUseCase = new AutenticarComGoogleUseCase(
+  usuarioRepository,
+  googleTokenVerifier,
+  barbeariaRepository,
+  profissionalRepository
+)
 
 // RF030 — Recuperação de senha
 const passwordResetTokenRepository = new SupabasePasswordResetTokenRepository()
@@ -134,7 +143,8 @@ const usuarioController = new UsuarioController(
   solicitarRecuperacaoSenhaUseCase,
   redefinirSenhaUseCase,
   excluirContaUseCase,
-  renovarTokenUseCase
+  renovarTokenUseCase,
+  autenticarComGoogleUseCase
 )
 
 const criarBarbeariaUseCase = new CriarBarbeariaUseCase(barbeariaRepository, usuarioRepository)

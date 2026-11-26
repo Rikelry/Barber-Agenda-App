@@ -15,7 +15,8 @@ export type DomainErrorCode =
   | "NETWORK"
   | "SERVER"
   | "INVALID_DATA"
-  | "VALIDATION";
+  | "VALIDATION"
+  | "CANCELLED";
 
 /** Campos inválidos de um formulário, cada um com a mensagem que aparece abaixo dele. */
 export class ValidationError<Campo extends string = string> extends DomainError {

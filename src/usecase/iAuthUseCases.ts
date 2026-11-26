@@ -21,6 +21,8 @@ export interface IAuthUseCases {
   /** Ao abrir o app: recupera a sessão guardada no aparelho, se houver. */
   restoreSession(): Promise<Session | null>;
   login(form: LoginForm): Promise<Session>;
+  /** Entra com a conta Google do aparelho; cria a conta automaticamente se ainda não existir. */
+  loginWithGoogle(): Promise<Session>;
   /** Cria a conta e já entra nela. */
   register(form: RegisterForm): Promise<Session>;
   requestPasswordReset(email: string): Promise<void>;

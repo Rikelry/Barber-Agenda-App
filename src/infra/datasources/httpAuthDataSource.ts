@@ -45,6 +45,10 @@ export class HttpAuthDataSource implements IAuthDataSource {
     return toSession(await this.api.post<LoginDto>("/auth/login", { email, password }));
   }
 
+  async loginWithGoogle(idToken: string): Promise<Session> {
+    return toSession(await this.api.post<LoginDto>("/auth/google", { idToken }));
+  }
+
   async register(data: RegisterData): Promise<void> {
     await this.api.post("/auth/register", data);
   }

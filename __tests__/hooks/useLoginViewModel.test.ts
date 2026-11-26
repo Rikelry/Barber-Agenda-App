@@ -42,10 +42,22 @@ describe("useLoginViewModel", () => {
     expect(auth.login).toHaveBeenLastCalledWith({ email: "l@mail.com", password: "" });
   });
 
-  it("links levam para recuperar senha e criar conta", async () => {
-    const { result } = await renderHook(() => useLoginViewModel(authFalso()));
+  it("links levam para recuperar senha e criar conta", async () => {    const { result } = await renderHook(() => useLoginViewModel(authFalso()));
     await agir(() => result.current[1].goRecoverPassword());
     await agir(() => result.current[1].goRegister());
     expect(mockPush.mock.calls).toEqual([["/recuperar-senha"], ["/cadastro"]]);
+  });
+
+  it("entrar com Google mostra o erro e, ao dar certo, vai para a Home", async () => {
+    const auth = authFalso();
+    auth.loginWithGoogle.mockRejectedValueOnce(new DomainError("Login com Google cancelado.", "CANCELLED"));
+    const { result } = await renderHook(() => useLoginViewModel(auth));
+
+    await agir(() => result.current[1].loginWithGoogle());
+    await waitFor(() => expect(result.current[0].errorMessage).toBe("Login com Google cancelado."));
+
+    await agir(() => result.current[1].loginWithGoogle());
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/"));
+    expect(auth.loginWithGoogle).toHaveBeenCalledTimes(2);
   });
 });

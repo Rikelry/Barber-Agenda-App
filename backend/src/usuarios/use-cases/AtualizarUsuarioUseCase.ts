@@ -29,15 +29,22 @@ export class AtualizarUsuarioUseCase implements IAtualizarUsuarioUseCase {
       throw new AppError('Usuário não encontrado.', 404, 'USER_NOT_FOUND')
     }
 
-    const payload: Partial<{ name: string; phone: string; passwordHash: string }> = {}
+    const payload: Partial<{ name: string; phone: string; passwordHash: string; nameEditedAt: string }> = {}
 
-    if (dados.name !== undefined) payload.name = dados.name
+    if (dados.name !== undefined) {
+      payload.name = dados.name
+      // Marca a edição manual do nome — usada pelo login com Google para não
+      // sobrescrever o nome escolhido pelo usuário (ver AutenticarComGoogleUseCase).
+      if (dados.name !== usuario.name) payload.nameEditedAt = new Date().toISOString()
+    }
     if (dados.phone !== undefined) payload.phone = dados.phone
 
     if (dados.newPassword) {
       // O schema (atualizacaoSchema) já garante que currentPassword veio
       // junto com newPassword — aqui validamos se ela está correta.
-      const senhaAtualValida = await bcrypt.compare(dados.currentPassword!, usuario.passwordHash)
+      const senhaAtualValida = usuario.passwordHash
+        ? await bcrypt.compare(dados.currentPassword!, usuario.passwordHash)
+        : false
 
       if (!senhaAtualValida) {
         throw new AppError('Senha atual incorreta.', 401, 'INVALID_CURRENT_PASSWORD')

@@ -15,6 +15,7 @@ export const authFalso = (): jest.Mocked<IAuthUseCases> => ({
   getSession: jest.fn(() => null),
   restoreSession: jest.fn(async () => null),
   login: jest.fn(async () => SESSAO),
+  loginWithGoogle: jest.fn(async () => SESSAO),
   register: jest.fn(async () => SESSAO),
   requestPasswordReset: jest.fn(async () => undefined),
   resetPassword: jest.fn(async () => undefined),

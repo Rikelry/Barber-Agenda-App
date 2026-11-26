@@ -21,7 +21,9 @@ export class AutenticarUsuarioUseCase implements IAutenticarUsuarioUseCase {
     const usuario = await this.usuarioRepository.buscarPorEmail(email)
 
     // Credenciais incorretas retornam 401 sem indicar qual campo está errado (usuarios.md)
-    if (!usuario) {
+    // Contas criadas via Google não têm senha (passwordHash nulo) — nunca chamamos
+    // bcrypt nesse caso, tratando como credenciais inválidas.
+    if (!usuario || !usuario.passwordHash) {
       throw new AppError('E-mail ou senha inválidos.', 401, 'INVALID_CREDENTIALS')
     }
 

@@ -47,6 +47,10 @@ export class CadastrarProfissionalUseCase implements ICadastrarProfissionalUseCa
       phone: dados.phone,
       passwordHash,
       role: 'profissional',
+      avatarUrl: null,
+      googleId: null,
+      nameEditedAt: null,
+      avatarEditedAt: null,
     })
 
     const profissionalCriado = await this.profissionalRepository.criar({

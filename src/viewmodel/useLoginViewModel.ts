@@ -9,6 +9,8 @@ export type LoginState = {
   form: LoginForm;
   fieldErrors: Partial<Record<LoginField, string>>;
   loading: boolean;
+  /** Login com Google em andamento (seletor de contas aberto ou validando no servidor). */
+  googleLoading: boolean;
   /** Erro geral (credenciais, rede), mostrado acima do botão. */
   errorMessage: string | null;
 };
@@ -16,6 +18,7 @@ export type LoginState = {
 export type LoginActions = {
   setField: (field: LoginField, value: string) => void;
   submit: () => void;
+  loginWithGoogle: () => void;
   goRecoverPassword: () => void;
   goRegister: () => void;
 };
@@ -24,10 +27,11 @@ export function useLoginViewModel(auth: IAuthUseCases = authUseCases): [LoginSta
   const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<LoginField, string>>>({});
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const submit = () => {
-    if (loading) return;
+    if (loading || googleLoading) return;
     setLoading(true);
     setErrorMessage(null);
     auth
@@ -42,8 +46,22 @@ export function useLoginViewModel(auth: IAuthUseCases = authUseCases): [LoginSta
       .finally(() => setLoading(false));
   };
 
+  const loginWithGoogle = () => {
+    if (loading || googleLoading) return;
+    setGoogleLoading(true);
+    setErrorMessage(null);
+    auth
+      .loginWithGoogle()
+      .then(
+        () => router.replace("/"),
+        (erro: unknown) =>
+          setErrorMessage(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo."),
+      )
+      .finally(() => setGoogleLoading(false));
+  };
+
   return [
-    { form, fieldErrors, loading, errorMessage },
+    { form, fieldErrors, loading, googleLoading, errorMessage },
     {
       setField: (field, value) => {
         setForm((atual) => ({ ...atual, [field]: value }));
@@ -51,6 +69,7 @@ export function useLoginViewModel(auth: IAuthUseCases = authUseCases): [LoginSta
         setErrorMessage(null);
       },
       submit,
+      loginWithGoogle,
       goRecoverPassword: () => router.push("/recuperar-senha"),
       goRegister: () => router.push("/cadastro"),
     },

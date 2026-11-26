@@ -2,6 +2,7 @@ import type { IAuthDataSource } from "@/model/datasources/iAuthDataSource";
 import type { Session } from "@/model/entities/session";
 import { DomainError, ValidationError } from "@/model/errors";
 import type { IAuthSessionService } from "@/model/services/iAuthSessionService";
+import type { IGoogleAuthService } from "@/model/services/iGoogleAuthService";
 import type { ISessionStorageService } from "@/model/services/iSessionStorageService";
 import type {
   IAuthUseCases,
@@ -36,6 +37,7 @@ export class AuthUseCases implements IAuthUseCases {
     private readonly dataSource: IAuthDataSource,
     private readonly session: IAuthSessionService,
     private readonly storage: ISessionStorageService,
+    private readonly google: IGoogleAuthService,
   ) {}
 
   getSession(): Session | null {
@@ -57,6 +59,14 @@ export class AuthUseCases implements IAuthUseCases {
     falhaSeHouver(erros);
 
     const sessao = await this.dataSource.login(form.email.trim().toLowerCase(), form.password);
+    this.session.setSession(sessao);
+    await this.storage.save(sessao);
+    return sessao;
+  }
+
+  async loginWithGoogle(): Promise<Session> {
+    const credencial = await this.google.signIn();
+    const sessao = await this.dataSource.loginWithGoogle(credencial.idToken);
     this.session.setSession(sessao);
     await this.storage.save(sessao);
     return sessao;

@@ -4,6 +4,7 @@ import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionServ
 import type { IAuthDataSource } from "@/model/datasources/iAuthDataSource";
 import type { Session } from "@/model/entities/session";
 import { DomainError, ValidationError } from "@/model/errors";
+import type { IGoogleAuthService } from "@/model/services/iGoogleAuthService";
 import { AuthUseCases } from "@/usecase/authUseCases";
 
 const SESSAO: Session = {
@@ -15,11 +16,13 @@ const SESSAO: Session = {
 const montar = () => {
   const fonte: jest.Mocked<IAuthDataSource> = {
     login: jest.fn(async () => SESSAO),
+    loginWithGoogle: jest.fn(async () => SESSAO),
     register: jest.fn(async () => undefined),
     requestPasswordReset: jest.fn(async () => undefined),
     resetPassword: jest.fn(async () => undefined),
     refreshToken: jest.fn(async () => ({ ...SESSAO, token: "jwt-novo", roles: ["cliente", "owner"] as Session["roles"] })),
   };
+  const google: jest.Mocked<IGoogleAuthService> = { signIn: jest.fn(async () => ({ idToken: "id-token" })) };
   const sessao = new MemoryAuthSessionService();
   let guardada: Session | null = null;
   const armazenamento = {
@@ -28,7 +31,7 @@ const montar = () => {
       guardada = s;
     }),
   };
-  return { fonte, sessao, armazenamento, casos: new AuthUseCases(fonte, sessao, armazenamento) };
+  return { fonte, google, sessao, armazenamento, casos: new AuthUseCases(fonte, sessao, armazenamento, google) };
 };
 
 const campos = async (p: Promise<unknown>) => ((await p.catch((e: unknown) => e)) as ValidationError).fields;
@@ -49,12 +52,12 @@ describe("AuthUseCases", () => {
   });
 
   it("guarda a sessão ao entrar e a recupera ao abrir o app; sair apaga", async () => {
-    const { armazenamento, casos } = montar();
+    const { google, armazenamento, casos } = montar();
     expect(await casos.restoreSession()).toBeNull();
     await casos.login({ email: "lucas@mail.com", password: "12345678" });
     expect(armazenamento.save).toHaveBeenLastCalledWith(SESSAO);
 
-    const reaberto = new AuthUseCases(montar().fonte, new MemoryAuthSessionService(), armazenamento);
+    const reaberto = new AuthUseCases(montar().fonte, new MemoryAuthSessionService(), armazenamento, google);
     expect((await reaberto.restoreSession())?.token).toBe("jwt");
     expect(reaberto.getSession()?.user.name).toBe("Lucas");
 
@@ -92,8 +95,7 @@ describe("AuthUseCases", () => {
     expect(sessao.token).toBe("jwt");
   });
 
-  it("recuperação e redefinição de senha validam antes de chamar a API", async () => {
-    const { fonte, casos } = montar();
+  it("recuperação e redefinição de senha validam antes de chamar a API", async () => {    const { fonte, casos } = montar();
     expect(await campos(casos.requestPasswordReset("errado"))).toEqual({ email: "Informe um e-mail válido." });
     await casos.requestPasswordReset("lucas@mail.com");
     expect(fonte.requestPasswordReset).toHaveBeenCalledWith("lucas@mail.com");
@@ -106,5 +108,20 @@ describe("AuthUseCases", () => {
     });
     await casos.resetPassword("tk", { newPassword: "senhaForte1", confirmPassword: "senhaForte1" });
     expect(fonte.resetPassword).toHaveBeenCalledWith("tk", "senhaForte1");
+  });
+
+  it("login com Google usa o ID token do aparelho e guarda a sessão", async () => {
+    const { fonte, google, casos } = montar();
+    await casos.loginWithGoogle();
+    expect(google.signIn).toHaveBeenCalledTimes(1);
+    expect(fonte.loginWithGoogle).toHaveBeenCalledWith("id-token");
+    expect(casos.getSession()?.token).toBe("jwt");
+  });
+
+  it("login com Google propaga o cancelamento sem chamar a API", async () => {
+    const { fonte, google, casos } = montar();
+    google.signIn.mockRejectedValueOnce(new DomainError("Login com Google cancelado.", "CANCELLED"));
+    await expect(casos.loginWithGoogle()).rejects.toMatchObject({ code: "CANCELLED" });
+    expect(fonte.loginWithGoogle).not.toHaveBeenCalled();
   });
 });

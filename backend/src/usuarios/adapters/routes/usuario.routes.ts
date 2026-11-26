@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { UsuarioController } from '../controllers/UsuarioController'
 import { validate } from '../../../shared/middlewares/validate'
 import { autenticar } from '../../../shared/middlewares/autenticar'
-import { cadastroSchema, loginSchema, atualizacaoSchema, esqueciSenhaSchema, redefinirSenhaSchema } from '../schemas/UsuarioSchema'
+import { cadastroSchema, loginSchema, googleLoginSchema, atualizacaoSchema, esqueciSenhaSchema, redefinirSenhaSchema } from '../schemas/UsuarioSchema'
 
 /** Monta-se em app.use('/auth', routerAuth(controller)) */
 export function routerAuth(controller: UsuarioController) {
@@ -16,6 +16,11 @@ export function routerAuth(controller: UsuarioController) {
   // RF002 — Autenticação (rate limit dedicado contra força bruta, security-guide.md)
   router.post('/login', validate(loginSchema), (req, res, next) =>
     controller.login(req, res, next)
+  )
+
+  // Login com Google — valida o ID token no Google e autentica/cria a conta
+  router.post('/google', validate(googleLoginSchema), (req, res, next) =>
+    controller.loginComGoogle(req, res, next)
   )
 
   // RF018 — Encerramento de sessão (client-side no MVP, ver usuarios.md)

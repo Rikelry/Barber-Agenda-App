@@ -114,10 +114,9 @@ export class HttpClient implements IApiService {
       throw new ValidationError({ currentPassword: messageFrom(body) ?? "Senha atual incorreta." });
     }
     if (response.status === 401) {
-      throw new DomainError(
-        error === "INVALID_CREDENTIALS" ? (messageFrom(body) ?? "E-mail ou senha inválidos.") : "Entre na sua conta para continuar.",
-        "UNAUTHORIZED",
-      );
+      const padrao =
+        error === "INVALID_CREDENTIALS" ? "E-mail ou senha inválidos." : "Entre na sua conta para continuar.";
+      throw new DomainError(messageFrom(body) ?? padrao, "UNAUTHORIZED");
     }
     if (response.status === 403) {
       throw new DomainError(messageFrom(body) ?? "Você não tem permissão para fazer isso.", "UNAUTHORIZED");
@@ -130,6 +129,12 @@ export class HttpClient implements IApiService {
     }
     if (response.status === 400 || response.status === 409 || response.status === 429) {
       throw new DomainError(messageFrom(body) ?? "Não foi possível concluir. Confira os dados.", "INVALID_DATA");
+    }
+    if (response.status === 503) {
+      throw new DomainError(
+        messageFrom(body) ?? "O serviço está indisponível agora. Tente de novo em instantes.",
+        "SERVER",
+      );
     }
     throw new DomainError("O servidor teve um problema. Tente de novo em instantes.", "SERVER");
   }
