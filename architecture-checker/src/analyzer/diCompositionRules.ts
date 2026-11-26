@@ -52,13 +52,30 @@ function collectBindings(
 ): ImportedBinding[] {
     const bindings: ImportedBinding[] = [];
 
-    for (const namedImport of importInfo.namedImports) {
+    const exportedClassNamesSet = new Set(exportedClassNames);
+    const typeOnlyNames = new Set(importInfo.typeOnlyNames ?? []);
+
+    importInfo.namedImports.forEach((localName, index) => {
+        // Bindings importados apenas como tipo não são composição.
+        if (typeOnlyNames.has(localName)) {
+            return;
+        }
+
+        // O nome exportado (com alias, `import { A as B }` → "A") precisa
+        // corresponder a uma classe exportada pelo arquivo do Use Case; a
+        // instanciação é procurada pelo nome local (namedImports → "B").
+        const exportedName = importInfo.importedNames?.[index] ?? localName;
+
+        if (!exportedClassNamesSet.has(exportedName)) {
+            return;
+        }
+
         bindings.push({
-            referenceName: namedImport,
-            newName: namedImport,
-            label: namedImport,
+            referenceName: localName,
+            newName: localName,
+            label: localName,
         });
-    }
+    });
 
     if (importInfo.defaultImport) {
         bindings.push({
@@ -110,7 +127,19 @@ export function validateDIComposition(
             continue;
         }
 
-        const source = readSource(containerFile.absolutePath);
+        // Leitura preguiçosa: o disco só é lido se a heurística de uso como
+        // tipo (A7) for realmente necessária para um binding não instanciado.
+        let sourceLoaded = false;
+        let source: string | undefined;
+
+        const getSource = (): string | undefined => {
+            if (!sourceLoaded) {
+                source = readSource(containerFile.absolutePath);
+                sourceLoaded = true;
+            }
+
+            return source;
+        };
 
         for (const importInfo of containerFile.imports) {
             if (
@@ -153,10 +182,12 @@ export function validateDIComposition(
                 );
 
                 if (!instantiated) {
+                    const sourceContent = getSource();
+
                     const referenced =
-                        source !== undefined &&
+                        sourceContent !== undefined &&
                         isReferencedOutsideImports(
-                            source,
+                            sourceContent,
                             binding.referenceName,
                         );
 
