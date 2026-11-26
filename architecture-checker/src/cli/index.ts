@@ -7,8 +7,16 @@ import { extractProjectAst } from "../parser/astExtractor.js";
 import { buildProjectModel } from "../analyzer/projectModelBuilder.js";
 import { loadProjectTypeScriptConfig } from "../analyzer/projectConfigLoader.js";
 import { resolveProjectImports } from "../analyzer/importResolver.js";
+import { validateHeuristics } from "../analyzer/heuristicRules.js";
 import { validateLayerDependencies } from "../analyzer/layerDependencyRules.js";
 import { validateDIComposition } from "../analyzer/diCompositionRules.js";
+import {
+    SEVERITY_ORDER,
+    computeExitCode,
+    countBySeverity,
+    countFilesByLayer,
+    groupViolationsBySeverity,
+} from "./report.js";
 
 const args = process.argv.slice(2);
 
@@ -96,9 +104,16 @@ async function main(): Promise<void> {
             resolvedProjectModel,
         );
 
-        const projectModel = validateDIComposition(
+        const diValidatedProject = validateDIComposition(
             layerValidatedProject,
         );
+        const projectModel = {
+            ...diValidatedProject,
+            violations: [
+                ...diValidatedProject.violations,
+                ...validateHeuristics(diValidatedProject),
+            ],
+        };
 
         console.log("\nResultado da análise:");
 
@@ -108,6 +123,14 @@ async function main(): Promise<void> {
             "Declarações registradas:",
             projectModel.statistics.totalDeclarations,
         );
+
+        const filesByLayer = countFilesByLayer(projectModel.files);
+
+        console.log("\nArquivos por camada:");
+
+        for (const layer of projectModel.detectedLayers) {
+            console.log(`- ${layer}: ${filesByLayer[layer]}`);
+        }
 
         const resolutionStats = projectModel.files.reduce(
             (stats, file) => {
@@ -168,30 +191,40 @@ async function main(): Promise<void> {
             }
         }
 
-        console.log("\nResultado das regras arquiteturais:");
-
-        console.log(
-            "Violações encontradas:",
-            projectModel.violations.length,
+        const violationCounts = countBySeverity(projectModel.violations);
+        const violationsBySeverity = groupViolationsBySeverity(
+            projectModel.violations,
         );
 
-        for (const violation of projectModel.violations) {
-            console.log(
-                `[${violation.severity.toUpperCase()}] ${violation.ruleId}`,
-            );
+        console.log("\nResultado das regras arquiteturais:");
+        console.log("Total:", violationCounts.total);
+        console.log("Erros:", violationCounts.errors);
+        console.log("Warnings:", violationCounts.warnings);
+        console.log("Informações:", violationCounts.infos);
 
-            console.log(`Arquivo: ${violation.filePath}`);
-            console.log(`Linha: ${violation.line ?? "Não identificada"}`);
-            console.log(`Descrição: ${violation.message}`);
-            console.log(`Sugestão: ${violation.suggestion}`);
-            console.log("");
+        for (const severity of SEVERITY_ORDER) {
+            const violations = violationsBySeverity[severity];
+
+            if (violations.length === 0) {
+                continue;
+            }
+
+            console.log(`\n${severity.toUpperCase()} (${violations.length}):`);
+
+            for (const violation of violations) {
+                console.log(`- ${violation.ruleId}`);
+                console.log(`  Arquivo: ${violation.filePath}`);
+                console.log(`  Linha: ${violation.line ?? "Não identificada"}`);
+                console.log(`  Descrição: ${violation.message}`);
+
+                if (violation.suggestion) {
+                    console.log(`  Sugestão: ${violation.suggestion}`);
+                }
+            }
         }
 
-        console.log("\nCamadas disponíveis no modelo:");
-
-        for (const layer of projectModel.detectedLayers) {
-            console.log(`- ${layer}`);
-        }
+        process.exitCode = computeExitCode(projectModel.violations);
+        console.log(`\nCódigo de saída: ${process.exitCode}`);
 
         console.log("\nProject Model construído com sucesso.");
     } catch (error) {
