@@ -135,6 +135,53 @@ describe("parseTypeScriptFile — imports", () => {
     });
 });
 
+describe("parseTypeScriptFile — referências de imports", () => {
+    it("distingue uma referência usada apenas como tipo", async () => {
+        const parsed = await parseSource(
+            `import { A } from "./a";\nlet value: A;`,
+        );
+
+        expect(parsed.imports[0].typeReferences).toEqual(["A"]);
+        expect(parsed.imports[0].valueReferences).toBeUndefined();
+    });
+
+    it("distingue uma referência usada como valor", async () => {
+        const parsed = await parseSource(
+            `import { A } from "./a";\nconst value = A;`,
+        );
+
+        expect(parsed.imports[0].valueReferences).toEqual(["A"]);
+        expect(parsed.imports[0].typeReferences).toBeUndefined();
+    });
+
+    it("registra os usos de alias e namespace nos contextos de tipo e valor", async () => {
+        const parsed = await parseSource(`
+            import { A as Alias } from "./a";
+            import * as ns from "./namespace";
+            let aliasType: Alias;
+            const aliasValue = Alias;
+            let namespaceType: ns.A;
+            const namespaceValue = ns.A;
+        `);
+
+        expect(parsed.imports[0].typeReferences).toEqual(["Alias"]);
+        expect(parsed.imports[0].valueReferences).toEqual(["Alias"]);
+        expect(parsed.imports[1].typeReferences).toEqual(["ns"]);
+        expect(parsed.imports[1].valueReferences).toEqual(["ns"]);
+    });
+
+    it("não considera comentários ou strings como referências", async () => {
+        const parsed = await parseSource(`
+            import { A } from "./a";
+            // A aparece apenas neste comentário.
+            const message = "A aparece apenas nesta string";
+        `);
+
+        expect(parsed.imports[0].typeReferences).toBeUndefined();
+        expect(parsed.imports[0].valueReferences).toBeUndefined();
+    });
+});
+
 describe("parseTypeScriptFile — exports", () => {
     it("export const a = new A() marca a variável como exportada", async () => {
         const parsed = await parseSource(`export const a = new A();`);

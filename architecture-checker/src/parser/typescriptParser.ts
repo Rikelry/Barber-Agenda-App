@@ -76,6 +76,133 @@ function extractImports(sourceFile: ts.SourceFile): ImportInfo[] {
         });
     }
 
+    return collectImportReferences(sourceFile, imports);
+}
+
+function isImportBindingDeclaration(node: ts.Identifier): boolean {
+    const parent = node.parent;
+
+    if (
+        (ts.isVariableDeclaration(parent) && parent.name === node) ||
+        (ts.isParameter(parent) && parent.name === node) ||
+        (ts.isBindingElement(parent) && parent.name === node) ||
+        (ts.isFunctionDeclaration(parent) && parent.name === node) ||
+        (ts.isClassDeclaration(parent) && parent.name === node) ||
+        (ts.isInterfaceDeclaration(parent) && parent.name === node) ||
+        (ts.isTypeAliasDeclaration(parent) && parent.name === node) ||
+        (ts.isEnumDeclaration(parent) && parent.name === node) ||
+        (ts.isModuleDeclaration(parent) && parent.name === node) ||
+        (ts.isTypeParameterDeclaration(parent) && parent.name === node) ||
+        (ts.isPropertyDeclaration(parent) && parent.name === node) ||
+        (ts.isPropertySignature(parent) && parent.name === node) ||
+        (ts.isMethodDeclaration(parent) && parent.name === node) ||
+        (ts.isMethodSignature(parent) && parent.name === node) ||
+        (ts.isGetAccessorDeclaration(parent) && parent.name === node) ||
+        (ts.isSetAccessorDeclaration(parent) && parent.name === node) ||
+        (ts.isEnumMember(parent) && parent.name === node) ||
+        (ts.isPropertyAssignment(parent) &&
+            parent.name === node &&
+            !ts.isComputedPropertyName(parent.name)) ||
+        (ts.isPropertyAccessExpression(parent) && parent.name === node) ||
+        (ts.isQualifiedName(parent) && parent.right === node) ||
+        (ts.isJsxAttribute(parent) && parent.name === node)
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+function isInsideImportDeclaration(node: ts.Node): boolean {
+    for (let current: ts.Node | undefined = node; current; current = current.parent) {
+        if (ts.isImportDeclaration(current)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function isTypeReference(node: ts.Identifier): boolean {
+    for (
+        let current: ts.Node | undefined = node.parent;
+        current && !ts.isSourceFile(current);
+        current = current.parent
+    ) {
+        if (ts.isTypeNode(current)) {
+            return true;
+        }
+
+        if (ts.isExpressionWithTypeArguments(current)) {
+            const heritageClause = current.parent;
+
+            if (
+                ts.isHeritageClause(heritageClause) &&
+                (heritageClause.token === ts.SyntaxKind.ImplementsKeyword ||
+                    ts.isInterfaceDeclaration(heritageClause.parent))
+            ) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    return false;
+}
+
+function collectImportReferences(
+    sourceFile: ts.SourceFile,
+    imports: ImportInfo[],
+): ImportInfo[] {
+    const importsByLocalName = new Map<string, ImportInfo[]>();
+
+    const addBinding = (name: string | undefined, importInfo: ImportInfo) => {
+        if (!name) {
+            return;
+        }
+
+        const matchingImports = importsByLocalName.get(name) ?? [];
+        matchingImports.push(importInfo);
+        importsByLocalName.set(name, matchingImports);
+    };
+
+    for (const importInfo of imports) {
+        addBinding(importInfo.defaultImport, importInfo);
+        addBinding(importInfo.namespaceImport, importInfo);
+
+        for (const name of importInfo.namedImports) {
+            addBinding(name, importInfo);
+        }
+    }
+
+    function visit(node: ts.Node): void {
+        if (
+            ts.isIdentifier(node) &&
+            !isInsideImportDeclaration(node) &&
+            !isImportBindingDeclaration(node)
+        ) {
+            const matchingImports = importsByLocalName.get(node.text);
+
+            if (matchingImports) {
+                const referencesAsType = isTypeReference(node);
+
+                for (const importInfo of matchingImports) {
+                    const references = referencesAsType
+                        ? (importInfo.typeReferences ??= [])
+                        : (importInfo.valueReferences ??= []);
+
+                    if (!references.includes(node.text)) {
+                        references.push(node.text);
+                    }
+                }
+            }
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
     return imports;
 }
 

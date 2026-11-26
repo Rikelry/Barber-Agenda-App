@@ -1,5 +1,3 @@
-import fs from "node:fs";
-
 import type {
     AnalyzedProjectFile,
     ProjectModel,
@@ -16,34 +14,6 @@ interface ImportedBinding {
     newName: string;
     /** Rótulo exibido nas mensagens. */
     label: string;
-}
-
-function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function readSource(absolutePath: string): string | undefined {
-    try {
-        return fs.readFileSync(absolutePath, "utf-8");
-    } catch {
-        return undefined;
-    }
-}
-
-/**
- * Heurística conservadora: considera o símbolo "referenciado" se o seu nome
- * aparece no arquivo fora das declarações de import. Serve para não reportar
- * imports usados apenas como tipo (evitando falsos positivos).
- */
-function isReferencedOutsideImports(source: string, name: string): boolean {
-    const withoutImports = source
-        .replace(
-            /^[ \t]*import[\s\S]*?from[ \t]*["'][^"']*["'][ \t]*;?/gm,
-            "",
-        )
-        .replace(/^[ \t]*import[ \t]*["'][^"']*["'][ \t]*;?/gm, "");
-
-    return new RegExp(`\\b${escapeRegExp(name)}\\b`).test(withoutImports);
 }
 
 function collectBindings(
@@ -127,20 +97,6 @@ export function validateDIComposition(
             continue;
         }
 
-        // Leitura preguiçosa: o disco só é lido se a heurística de uso como
-        // tipo (A7) for realmente necessária para um binding não instanciado.
-        let sourceLoaded = false;
-        let source: string | undefined;
-
-        const getSource = (): string | undefined => {
-            if (!sourceLoaded) {
-                source = readSource(containerFile.absolutePath);
-                sourceLoaded = true;
-            }
-
-            return source;
-        };
-
         for (const importInfo of containerFile.imports) {
             if (
                 importInfo.isTypeOnly ||
@@ -182,17 +138,16 @@ export function validateDIComposition(
                 );
 
                 if (!instantiated) {
-                    const sourceContent = getSource();
-
                     const referenced =
-                        sourceContent !== undefined &&
-                        isReferencedOutsideImports(
-                            sourceContent,
+                        importInfo.valueReferences?.includes(
+                            binding.referenceName,
+                        ) ||
+                        importInfo.typeReferences?.includes(
                             binding.referenceName,
                         );
 
-                    // Import usado apenas como tipo (ou de forma ambígua):
-                    // não reporta para evitar falso positivo.
+                    // Referências de tipo e padrões de composição/factory
+                    // podem ser válidos mesmo sem um `new` direto no container.
                     if (referenced) {
                         continue;
                     }

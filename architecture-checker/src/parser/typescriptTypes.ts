@@ -13,6 +13,8 @@ export interface ImportInfo {
   namedImports: string[];
   importedNames?: string[];
   typeOnlyNames?: string[];
+  valueReferences?: string[];
+  typeReferences?: string[];
   defaultImport?: string;
   namespaceImport?: string;
   isTypeOnly: boolean;
