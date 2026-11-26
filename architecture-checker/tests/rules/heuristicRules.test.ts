@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
     validateDomainContracts,
+    validateHeuristics,
     validateInfraErrorHandling,
+    validateViewBusinessLogic,
     validateViewHasViewModel,
     validateViewModelDI,
     validateViewModelUseCaseValueImport,
@@ -385,6 +387,81 @@ describe("HEUR_VIEW_001 — View (tela) deve depender de um ViewModel", () => {
         ]);
 
         expect(validateViewHasViewModel(project)).toHaveLength(0);
+    });
+});
+
+describe("HEUR_VIEW_BUSINESS_001 — View deve delegar regras temporais", () => {
+    it("deve gerar warning para criação de Date diretamente em uma tela", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/agenda.tsx",
+                layer: "view",
+                instantiations: [newExpression("Date", 18)],
+            },
+        ]);
+
+        const violations = validateViewBusinessLogic(project);
+
+        expect(violations).toHaveLength(1);
+        expect(violations[0]).toMatchObject({
+            ruleId: "HEUR_VIEW_BUSINESS_001",
+            severity: "warning",
+            filePath: "src/view/agenda.tsx",
+            line: 18,
+        });
+        expect(violations[0].suggestion).toBeTruthy();
+    });
+
+    it("não deve gerar warning para Date em camadas que não são View", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/viewmodel/useAgendaViewModel.ts",
+                layer: "viewmodel",
+                instantiations: [newExpression("Date", 12)],
+            },
+        ]);
+
+        expect(validateViewBusinessLogic(project)).toHaveLength(0);
+    });
+
+    it("não deve gerar warning para componentes reutilizáveis", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/components/DateLabel.tsx",
+                layer: "view",
+                instantiations: [newExpression("Date", 7)],
+            },
+        ]);
+
+        expect(validateViewBusinessLogic(project)).toHaveLength(0);
+    });
+
+    it("deve incluir a regra no agregador de heurísticas", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/agenda.tsx",
+                layer: "view",
+                imports: [
+                    importFrom(
+                        "@/viewmodel/useAgendaViewModel",
+                        "/project/src/viewmodel/useAgendaViewModel.ts",
+                        { namedImports: ["useAgendaViewModel"] },
+                    ),
+                ],
+                instantiations: [newExpression("Date", 18)],
+            },
+            {
+                relativePath: "src/viewmodel/useAgendaViewModel.ts",
+                layer: "viewmodel",
+            },
+        ]);
+
+        expect(
+            validateHeuristics(project).some(
+                (violation) =>
+                    violation.ruleId === "HEUR_VIEW_BUSINESS_001",
+            ),
+        ).toBe(true);
     });
 });
 

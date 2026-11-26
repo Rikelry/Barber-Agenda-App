@@ -13,6 +13,7 @@ const RULE_ID = {
     vmUseCaseValueImport: "HEUR_VM_USECASE_001",
     domain: "HEUR_DOMAIN_001",
     view: "HEUR_VIEW_001",
+    viewBusinessLogic: "HEUR_VIEW_BUSINESS_001",
     error: "HEUR_ERROR_001",
 } as const;
 
@@ -292,6 +293,49 @@ export function validateViewHasViewModel(
 }
 
 /**
+ * HEUR_VIEW_BUSINESS_001: criar datas diretamente em telas pode indicar
+ * cálculos de regras temporais que deveriam ficar fora da View.
+ */
+export function validateViewBusinessLogic(
+    project: ProjectModel,
+    options: ViewRuleOptions = {},
+): ArchitectureViolation[] {
+    const { ignoredFolders = ["components"] } = options;
+    const violations: ArchitectureViolation[] = [];
+
+    for (const file of project.files) {
+        if (
+            file.layer !== "view" ||
+            isInIgnoredFolder(file.relativePath, ignoredFolders)
+        ) {
+            continue;
+        }
+
+        for (const instantiation of file.instantiations) {
+            if (
+                instantiation.kind !== "new" ||
+                instantiation.name !== "Date"
+            ) {
+                continue;
+            }
+
+            violations.push({
+                ruleId: RULE_ID.viewBusinessLogic,
+                severity: "warning",
+                message:
+                    "A View cria objetos Date diretamente; isso pode indicar cálculos de regras temporais na camada de apresentação.",
+                filePath: file.relativePath,
+                line: instantiation.line,
+                suggestion:
+                    "Mova cálculos e regras temporais para um Use Case e deixe a View renderizar o resultado; se for apenas formatação, centralize-a em um formatador de apresentação.",
+            });
+        }
+    }
+
+    return violations;
+}
+
+/**
  * HEUR_ERROR_001: a camada Infra deve lançar erros de domínio (DomainError),
  * não `Error` genérico.
  */
@@ -330,7 +374,7 @@ export function validateInfraErrorHandling(
 }
 
 /**
- * Executa as cinco heurísticas e retorna todas as violações encontradas.
+ * Executa as heurísticas e retorna todas as violações encontradas.
  */
 export function validateHeuristics(
     project: ProjectModel,
@@ -341,6 +385,7 @@ export function validateHeuristics(
         ...validateViewModelUseCaseValueImport(project),
         ...validateDomainContracts(project, options),
         ...validateViewHasViewModel(project, options),
+        ...validateViewBusinessLogic(project, options),
         ...validateInfraErrorHandling(project),
     ];
 }
