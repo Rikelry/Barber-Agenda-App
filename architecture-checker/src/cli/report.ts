@@ -4,12 +4,32 @@ import type {
     ProjectFile,
     ViolationSeverity,
 } from "../core/types.js";
+import type { ProjectModel } from "../core/projectModel.js";
 
 export interface SeverityCounts {
     total: number;
     errors: number;
     warnings: number;
     infos: number;
+}
+
+export interface JsonReport {
+    rootPath: string;
+    detectedLayers: ArchitectureLayer[];
+    statistics: {
+        totalFiles: number;
+        totalImports: number;
+        totalDeclarations: number;
+        filesByLayer: Record<ArchitectureLayer, number>;
+        importsByResolution: {
+            internal: number;
+            external: number;
+            assets: number;
+            unresolved: number;
+        };
+    };
+    summary: SeverityCounts;
+    violations: ArchitectureViolation[];
 }
 
 export const SEVERITY_ORDER: ViolationSeverity[] = [
@@ -95,4 +115,44 @@ export function computeExitCode(
     }
 
     return 0;
+}
+
+export function buildJsonReport(project: ProjectModel): JsonReport {
+    const importsByResolution = {
+        internal: 0,
+        external: 0,
+        assets: 0,
+        unresolved: 0,
+    };
+
+    for (const file of project.files) {
+        for (const importInfo of file.imports) {
+            switch (importInfo.resolutionStatus) {
+                case "internal":
+                    importsByResolution.internal++;
+                    break;
+                case "external":
+                    importsByResolution.external++;
+                    break;
+                case "asset":
+                    importsByResolution.assets++;
+                    break;
+                case "unresolved":
+                    importsByResolution.unresolved++;
+                    break;
+            }
+        }
+    }
+
+    return {
+        rootPath: project.rootPath,
+        detectedLayers: project.detectedLayers,
+        statistics: {
+            ...project.statistics,
+            filesByLayer: countFilesByLayer(project.files),
+            importsByResolution,
+        },
+        summary: countBySeverity(project.violations),
+        violations: project.violations,
+    };
 }

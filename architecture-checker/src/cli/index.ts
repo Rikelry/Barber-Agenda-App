@@ -15,10 +15,18 @@ import {
     computeExitCode,
     countBySeverity,
     countFilesByLayer,
+    buildJsonReport,
     groupViolationsBySeverity,
 } from "./report.js";
 
 const args = process.argv.slice(2);
+const jsonMode = args.includes("--json");
+
+function log(...values: unknown[]): void {
+    if (!jsonMode) {
+        console.log(...values);
+    }
+}
 
 function showHelp(): void {
     console.log(`
@@ -30,9 +38,10 @@ Uso:
 Opções:
   --help       Exibe esta ajuda
   --version    Exibe a versão
+  --json       Emite o relatório em JSON
 
 Exemplo:
-  architecture-checker ../meu-app
+  architecture-checker ../meu-app [--json]
 `);
 }
 
@@ -47,7 +56,7 @@ async function main(): Promise<void> {
         return;
     }
 
-    const projectPath = args[0];
+    const projectPath = args.find((arg) => !arg.startsWith("--"));
 
     if (!projectPath || projectPath.startsWith("--")) {
         console.error("Informe o caminho do projeto.");
@@ -56,44 +65,44 @@ async function main(): Promise<void> {
     }
 
     try {
-        console.log("\nArchitecture Checker");
-        console.log("Iniciando varredura...\n");
+        log("\nArchitecture Checker");
+        log("Iniciando varredura...\n");
 
         const scanResult = await scanProject(projectPath);
 
-        console.log("\nCarregando configuração TypeScript...");
+        log("\nCarregando configuração TypeScript...");
 
         const projectConfig = loadProjectTypeScriptConfig(
             scanResult.rootPath,
         );
 
-        console.log("Configuração TypeScript carregada com sucesso.");
-        console.log(
+        log("Configuração TypeScript carregada com sucesso.");
+        log(
             "Resolução de módulos:",
             ts.ModuleResolutionKind[projectConfig.options.moduleResolution ?? ts.ModuleResolutionKind.Node10],
         );
 
-        console.log("Arquivos encontrados:", scanResult.files.length);
-        console.log("Diretórios encontrados:", scanResult.directories.length);
+        log("Arquivos encontrados:", scanResult.files.length);
+        log("Diretórios encontrados:", scanResult.directories.length);
 
-        console.log("\nCamadas identificadas:");
+        log("\nCamadas identificadas:");
 
         for (const layer of scanResult.detectedLayers) {
-            console.log(`- ${layer}`);
+            log(`- ${layer}`);
         }
 
-        console.log("\nAnalisando código TypeScript...");
+        log("\nAnalisando código TypeScript...");
 
         const parsedFiles = await extractProjectAst(scanResult.files);
 
-        console.log("\nConstruindo Project Model...");
+        log("\nConstruindo Project Model...");
 
         const initialProjectModel = buildProjectModel(
             scanResult,
             parsedFiles,
         );
 
-        console.log("\nResolvendo imports...");
+        log("\nResolvendo imports...");
 
         const resolvedProjectModel = resolveProjectImports(
             initialProjectModel,
@@ -115,21 +124,21 @@ async function main(): Promise<void> {
             ],
         };
 
-        console.log("\nResultado da análise:");
+        log("\nResultado da análise:");
 
-        console.log("Arquivos no modelo:", projectModel.statistics.totalFiles);
-        console.log("Imports registrados:", projectModel.statistics.totalImports);
-        console.log(
+        log("Arquivos no modelo:", projectModel.statistics.totalFiles);
+        log("Imports registrados:", projectModel.statistics.totalImports);
+        log(
             "Declarações registradas:",
             projectModel.statistics.totalDeclarations,
         );
 
         const filesByLayer = countFilesByLayer(projectModel.files);
 
-        console.log("\nArquivos por camada:");
+        log("\nArquivos por camada:");
 
         for (const layer of projectModel.detectedLayers) {
-            console.log(`- ${layer}: ${filesByLayer[layer]}`);
+            log(`- ${layer}: ${filesByLayer[layer]}`);
         }
 
         const resolutionStats = projectModel.files.reduce(
@@ -161,20 +170,20 @@ async function main(): Promise<void> {
             },
         );
 
-        console.log("\nResultado da resolução de imports:");
-        console.log("Internos:", resolutionStats.internal);
-        console.log("Externos:", resolutionStats.external);
-        console.log("Recursos:", resolutionStats.assets);
-        console.log("Não resolvidos:", resolutionStats.unresolved);
+        log("\nResultado da resolução de imports:");
+        log("Internos:", resolutionStats.internal);
+        log("Externos:", resolutionStats.external);
+        log("Recursos:", resolutionStats.assets);
+        log("Não resolvidos:", resolutionStats.unresolved);
 
-        console.log("\nExemplos de imports não resolvidos:");
+        log("\nExemplos de imports não resolvidos:");
 
         let unresolvedCount = 0;
 
         for (const file of projectModel.files) {
             for (const importInfo of file.imports) {
                 if (importInfo.resolutionStatus === "unresolved") {
-                    console.log(
+                    log(
                         `${file.relativePath} -> ${importInfo.moduleSpecifier} (linha ${importInfo.line})`,
                     );
 
@@ -196,11 +205,11 @@ async function main(): Promise<void> {
             projectModel.violations,
         );
 
-        console.log("\nResultado das regras arquiteturais:");
-        console.log("Total:", violationCounts.total);
-        console.log("Erros:", violationCounts.errors);
-        console.log("Warnings:", violationCounts.warnings);
-        console.log("Informações:", violationCounts.infos);
+        log("\nResultado das regras arquiteturais:");
+        log("Total:", violationCounts.total);
+        log("Erros:", violationCounts.errors);
+        log("Warnings:", violationCounts.warnings);
+        log("Informações:", violationCounts.infos);
 
         for (const severity of SEVERITY_ORDER) {
             const violations = violationsBySeverity[severity];
@@ -209,24 +218,28 @@ async function main(): Promise<void> {
                 continue;
             }
 
-            console.log(`\n${severity.toUpperCase()} (${violations.length}):`);
+            log(`\n${severity.toUpperCase()} (${violations.length}):`);
 
             for (const violation of violations) {
-                console.log(`- ${violation.ruleId}`);
-                console.log(`  Arquivo: ${violation.filePath}`);
-                console.log(`  Linha: ${violation.line ?? "Não identificada"}`);
-                console.log(`  Descrição: ${violation.message}`);
+                log(`- ${violation.ruleId}`);
+                log(`  Arquivo: ${violation.filePath}`);
+                log(`  Linha: ${violation.line ?? "Não identificada"}`);
+                log(`  Descrição: ${violation.message}`);
 
                 if (violation.suggestion) {
-                    console.log(`  Sugestão: ${violation.suggestion}`);
+                    log(`  Sugestão: ${violation.suggestion}`);
                 }
             }
         }
 
         process.exitCode = computeExitCode(projectModel.violations);
-        console.log(`\nCódigo de saída: ${process.exitCode}`);
+        if (jsonMode) {
+            console.log(JSON.stringify(buildJsonReport(projectModel), null, 2));
+            return;
+        }
 
-        console.log("\nProject Model construído com sucesso.");
+        log(`\nCódigo de saída: ${process.exitCode}`);
+        log("\nProject Model construído com sucesso.");
     } catch (error) {
         console.error("\nErro completo durante a análise:");
         console.error(error);

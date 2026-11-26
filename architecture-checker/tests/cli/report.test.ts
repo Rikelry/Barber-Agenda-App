@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
     SEVERITY_ORDER,
+    buildJsonReport,
     computeExitCode,
     countBySeverity,
     countFilesByLayer,
@@ -12,6 +13,7 @@ import type {
     ArchitectureViolation,
     ViolationSeverity,
 } from "../../src/core/types.js";
+import type { ProjectModel } from "../../src/core/projectModel.js";
 
 function violation(
     severity: ViolationSeverity,
@@ -24,6 +26,69 @@ function violation(
         filePath: "src/view/example.tsx",
         line: 4,
         suggestion: "Review this dependency.",
+    };
+}
+
+function projectModel(
+    violations: ArchitectureViolation[],
+): ProjectModel {
+    return {
+        rootPath: "/project",
+        directories: [],
+        detectedLayers: ["view", "infra"],
+        statistics: {
+            totalFiles: 2,
+            totalImports: 3,
+            totalDeclarations: 1,
+        },
+        violations,
+        files: [
+            {
+                absolutePath: "/project/src/view/example.tsx",
+                relativePath: "src/view/example.tsx",
+                extension: ".tsx",
+                layer: "view",
+                imports: [
+                    {
+                        moduleSpecifier: "./viewmodel",
+                        namedImports: ["useExampleViewModel"],
+                        isTypeOnly: false,
+                        line: 1,
+                        resolutionStatus: "internal",
+                    },
+                    {
+                        moduleSpecifier: "react",
+                        namedImports: ["useState"],
+                        isTypeOnly: false,
+                        line: 2,
+                        resolutionStatus: "external",
+                    },
+                ],
+                declarations: [],
+                constructors: [],
+                instantiations: [],
+                variables: [],
+            },
+            {
+                absolutePath: "/project/src/infra/client.ts",
+                relativePath: "src/infra/client.ts",
+                extension: ".ts",
+                layer: "infra",
+                imports: [
+                    {
+                        moduleSpecifier: "./missing",
+                        namedImports: [],
+                        isTypeOnly: false,
+                        line: 1,
+                        resolutionStatus: "unresolved",
+                    },
+                ],
+                declarations: [],
+                constructors: [],
+                instantiations: [],
+                variables: [],
+            },
+        ],
     };
 }
 
@@ -106,5 +171,43 @@ describe("relatório da CLI", () => {
                 violation("error"),
             ]),
         ).toBe(2);
+    });
+
+    it("monta um relatório JSON com estatísticas, severidades e violações", () => {
+        const report = buildJsonReport(
+            projectModel([
+                violation("error", "LAYER_001"),
+                violation("warning", "HEUR_001"),
+            ]),
+        );
+
+        expect(report.rootPath).toBe("/project");
+        expect(report.detectedLayers).toEqual(["view", "infra"]);
+        expect(report.statistics).toMatchObject({
+            totalFiles: 2,
+            totalImports: 3,
+            totalDeclarations: 1,
+            filesByLayer: {
+                view: 1,
+                infra: 1,
+                model: 0,
+            },
+            importsByResolution: {
+                internal: 1,
+                external: 1,
+                assets: 0,
+                unresolved: 1,
+            },
+        });
+        expect(report.summary).toEqual({
+            total: 2,
+            errors: 1,
+            warnings: 1,
+            infos: 0,
+        });
+        expect(report.violations.map((item) => item.ruleId)).toEqual([
+            "LAYER_001",
+            "HEUR_001",
+        ]);
     });
 });
