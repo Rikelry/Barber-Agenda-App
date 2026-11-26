@@ -4,13 +4,30 @@ import type { ProjectModel } from "../core/projectModel.js";
 const FORBIDDEN_DEPENDENCIES: Partial<
     Record<ArchitectureLayer, ArchitectureLayer[]>
 > = {
-    view: ["usecase", "infra"],
-    viewmodel: ["infra"],
-    usecase: ["infra"],
+    view: ["usecase", "infra", "di"],
+    viewmodel: ["view", "infra"],
+    usecase: ["view", "viewmodel", "di", "infra"],
     model: ["infra"],
     infra: ["view", "viewmodel", "usecase", "di"],
-    routes: ["viewmodel", "usecase", "infra"],
+    di: ["view", "viewmodel"],
+    routes: ["viewmodel", "usecase", "infra", "di", "model"],
 };
+
+const TYPE_ONLY_ALLOWED: Partial<
+    Record<ArchitectureLayer, ArchitectureLayer[]>
+> = {
+    view: ["model"],
+    viewmodel: ["model", "usecase"],
+};
+
+function isTypeOnlyAllowed(
+    sourceLayer: ArchitectureLayer,
+    targetLayer: ArchitectureLayer,
+): boolean {
+    const allowedTargets = TYPE_ONLY_ALLOWED[sourceLayer] ?? [];
+
+    return allowedTargets.includes(targetLayer);
+}
 
 export function validateLayerDependencies(
     projectModel: ProjectModel,
@@ -45,6 +62,13 @@ export function validateLayerDependencies(
                 FORBIDDEN_DEPENDENCIES[file.layer] ?? [];
 
             if (!forbiddenTargets.includes(targetFile.layer)) {
+                continue;
+            }
+
+            if (
+                importInfo.isTypeOnly &&
+                isTypeOnlyAllowed(file.layer, targetFile.layer)
+            ) {
                 continue;
             }
 
