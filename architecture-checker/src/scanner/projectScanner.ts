@@ -23,7 +23,8 @@ const IGNORED_PATHS = [
 
 function identifyLayer(relativePath: string): ArchitectureLayer {
   const segments = relativePath
-    .split(path.sep)
+    .replace(/\\/g, "/")
+    .split("/")
     .map((segment) => segment.toLowerCase());
 
   // viewmodel precisa vir antes de view.
@@ -92,7 +93,7 @@ export async function scanProject(
   ]);
 
   const files: ProjectFile[] = filePaths.map((filePath) => {
-    const relativePath = filePath.split(path.sep).join(path.sep);
+    const relativePath = filePath.replace(/\\/g, "/");
 
     return {
       absolutePath: path.join(rootPath, filePath),
@@ -103,7 +104,7 @@ export async function scanProject(
   });
 
   const directories = directoryPaths.map((directoryPath) =>
-    directoryPath.split(path.sep).join(path.sep),
+    directoryPath.replace(/\\/g, "/"),
   );
 
   const detectedLayers = [
