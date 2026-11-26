@@ -97,8 +97,9 @@ Model; e Routes pode encaminhar para Views.
 | `HEUR_VM_DI_001` | warning | ViewModel instancia diretamente uma classe de Use Case com `new`. |
 | `HEUR_VM_USECASE_001` | warning | ViewModel importa valores de um módulo de Use Case. |
 | `HEUR_DOMAIN_001` | warning | Model declara classes, exceto arquivos de erro de domínio reconhecidos pelo padrão `error` no caminho. |
-| `HEUR_VIEW_001` | warning | View não possui import resolvido de um ViewModel; pastas `components` são ignoradas. |
+| `HEUR_VIEW_001` | warning | View não usa por valor nenhum binding de um ViewModel; pastas `components` são ignoradas. |
 | `HEUR_VIEW_BUSINESS_001` | warning | View cria objetos `Date`, o que pode indicar regra temporal na apresentação. |
+| `HEUR_VIEW_NAV_001` | warning | View importa `expo-router` diretamente, em vez de delegar a navegação ao ViewModel. |
 | `HEUR_ERROR_001` | warning | Infra instancia `Error` genérico em vez de um erro de domínio. |
 
 As heurísticas indicam possíveis problemas, não provas definitivas. Ajuste de

@@ -14,6 +14,7 @@ const RULE_ID = {
     domain: "HEUR_DOMAIN_001",
     view: "HEUR_VIEW_001",
     viewBusinessLogic: "HEUR_VIEW_BUSINESS_001",
+    viewNavigation: "HEUR_VIEW_NAV_001",
     error: "HEUR_ERROR_001",
 } as const;
 
@@ -345,6 +346,46 @@ export function validateViewBusinessLogic(
 }
 
 /**
+ * HEUR_VIEW_NAV_001: a View não deve importar `expo-router` diretamente; toda a
+ * navegação deve ser delegada ao ViewModel.
+ */
+export function validateViewNavigation(
+    project: ProjectModel,
+    options: ViewRuleOptions = {},
+): ArchitectureViolation[] {
+    const { ignoredFolders = ["components"] } = options;
+    const violations: ArchitectureViolation[] = [];
+
+    for (const file of project.files) {
+        if (
+            file.layer !== "view" ||
+            isInIgnoredFolder(file.relativePath, ignoredFolders)
+        ) {
+            continue;
+        }
+
+        for (const importInfo of file.imports) {
+            if (importInfo.moduleSpecifier !== "expo-router") {
+                continue;
+            }
+
+            violations.push({
+                ruleId: RULE_ID.viewNavigation,
+                severity: "warning",
+                message:
+                    "A View importa 'expo-router' diretamente; a navegação deve ser delegada ao ViewModel.",
+                filePath: file.relativePath,
+                line: importInfo.line,
+                suggestion:
+                    "Remova o import de 'expo-router' da View e exponha a navegação pelas ações do ViewModel (Link, router e useLocalSearchParams ficam na ViewModel).",
+            });
+        }
+    }
+
+    return violations;
+}
+
+/**
  * HEUR_ERROR_001: a camada Infra deve lançar erros de domínio (DomainError),
  * não `Error` genérico.
  */
@@ -395,6 +436,7 @@ export function validateHeuristics(
         ...validateDomainContracts(project, options),
         ...validateViewHasViewModel(project, options),
         ...validateViewBusinessLogic(project, options),
+        ...validateViewNavigation(project, options),
         ...validateInfraErrorHandling(project),
     ];
 }

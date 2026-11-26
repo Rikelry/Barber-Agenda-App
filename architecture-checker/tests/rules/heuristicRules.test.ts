@@ -6,6 +6,7 @@ import {
     validateInfraErrorHandling,
     validateViewBusinessLogic,
     validateViewHasViewModel,
+    validateViewNavigation,
     validateViewModelDI,
     validateViewModelUseCaseValueImport,
 } from "../../src/analyzer/heuristicRules.js";
@@ -518,6 +519,101 @@ describe("HEUR_VIEW_BUSINESS_001 — View deve delegar regras temporais", () => 
             validateHeuristics(project).some(
                 (violation) =>
                     violation.ruleId === "HEUR_VIEW_BUSINESS_001",
+            ),
+        ).toBe(true);
+    });
+});
+
+describe("HEUR_VIEW_NAV_001 — View não deve importar expo-router", () => {
+    it("deve gerar violação quando a View importa expo-router", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/agenda.tsx",
+                layer: "view",
+                imports: [
+                    importFrom("expo-router", "expo-router", {
+                        namedImports: ["router"],
+                        line: 3,
+                        resolvedFilePath: undefined,
+                        resolutionStatus: "external",
+                    }),
+                ],
+            },
+        ]);
+
+        const violations = validateViewNavigation(project);
+
+        expect(violations).toHaveLength(1);
+        expect(violations[0]).toMatchObject({
+            ruleId: "HEUR_VIEW_NAV_001",
+            severity: "warning",
+            filePath: "src/view/agenda.tsx",
+            line: 3,
+        });
+        expect(violations[0].suggestion).toBeTruthy();
+    });
+
+    it("não deve gerar violação quando a View não importa expo-router", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/agenda.tsx",
+                layer: "view",
+                imports: [
+                    importFrom(
+                        "@/viewmodel/useAgendaViewModel",
+                        "/project/src/viewmodel/useAgendaViewModel.ts",
+                        {
+                            namedImports: ["useAgendaViewModel"],
+                            valueReferences: ["useAgendaViewModel"],
+                        },
+                    ),
+                ],
+            },
+            {
+                relativePath: "src/viewmodel/useAgendaViewModel.ts",
+                layer: "viewmodel",
+            },
+        ]);
+
+        expect(validateViewNavigation(project)).toHaveLength(0);
+    });
+
+    it("não deve gerar violação quando a navegação fica no ViewModel", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/viewmodel/useAgendaViewModel.ts",
+                layer: "viewmodel",
+                imports: [
+                    importFrom("expo-router", "expo-router", {
+                        namedImports: ["router"],
+                        resolvedFilePath: undefined,
+                        resolutionStatus: "external",
+                    }),
+                ],
+            },
+        ]);
+
+        expect(validateViewNavigation(project)).toHaveLength(0);
+    });
+
+    it("deve incluir a regra no agregador de heurísticas", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/agenda.tsx",
+                layer: "view",
+                imports: [
+                    importFrom("expo-router", "expo-router", {
+                        namedImports: ["router"],
+                        resolvedFilePath: undefined,
+                        resolutionStatus: "external",
+                    }),
+                ],
+            },
+        ]);
+
+        expect(
+            validateHeuristics(project).some(
+                (violation) => violation.ruleId === "HEUR_VIEW_NAV_001",
             ),
         ).toBe(true);
     });
