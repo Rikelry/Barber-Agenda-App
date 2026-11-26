@@ -11,6 +11,8 @@ export type ImportResolutionStatus =
 export interface ImportInfo {
   moduleSpecifier: string;
   namedImports: string[];
+  importedNames?: string[];
+  typeOnlyNames?: string[];
   defaultImport?: string;
   namespaceImport?: string;
   isTypeOnly: boolean;
@@ -18,6 +20,14 @@ export interface ImportInfo {
 
   resolvedFilePath?: string;
   resolutionStatus?: ImportResolutionStatus;
+}
+
+export interface ExportInfo {
+  exportedName: string;
+  localName?: string;
+  moduleSpecifier?: string;
+  isTypeOnly: boolean;
+  isNamespace: boolean;
 }
 
 export interface DeclarationInfo {
@@ -36,6 +46,7 @@ export interface ParsedFile {
   constructors: ConstructorInfo[];
   instantiations: ExpressionInfo[];
   variables: VariableInfo[];
+  exports: ExportInfo[];
 }
 
 export interface ConstructorParameterInfo {

@@ -5,6 +5,7 @@ import type { ProjectFile } from "../core/types.js";
 import type {
     ConstructorInfo,
     DeclarationInfo,
+    ExportInfo,
     ExpressionInfo,
     ImportInfo,
     ParsedFile,
@@ -33,6 +34,8 @@ function extractImports(sourceFile: ts.SourceFile): ImportInfo[] {
         const importClause = statement.importClause;
 
         const namedImports: string[] = [];
+        const importedNames: string[] = [];
+        const typeOnlyNames: string[] = [];
         let defaultImport: string | undefined;
         let namespaceImport: string | undefined;
 
@@ -47,7 +50,16 @@ function extractImports(sourceFile: ts.SourceFile): ImportInfo[] {
 
             if (bindings && ts.isNamedImports(bindings)) {
                 for (const element of bindings.elements) {
-                    namedImports.push(element.name.text);
+                    const localName = element.name.text;
+
+                    namedImports.push(localName);
+                    importedNames.push(
+                        (element.propertyName ?? element.name).text,
+                    );
+
+                    if (element.isTypeOnly) {
+                        typeOnlyNames.push(localName);
+                    }
                 }
             }
         }
@@ -55,6 +67,8 @@ function extractImports(sourceFile: ts.SourceFile): ImportInfo[] {
         imports.push({
             moduleSpecifier: moduleSpecifier.text,
             namedImports,
+            importedNames,
+            typeOnlyNames,
             defaultImport,
             namespaceImport,
             isTypeOnly: importClause?.isTypeOnly ?? false,
@@ -67,6 +81,7 @@ function extractImports(sourceFile: ts.SourceFile): ImportInfo[] {
 
 function extractDeclarations(
     sourceFile: ts.SourceFile,
+    locallyExportedNames: Set<string>,
 ): DeclarationInfo[] {
     const declarations: DeclarationInfo[] = [];
 
@@ -106,7 +121,7 @@ function extractDeclarations(
             ? ts.getModifiers(statement)
             : undefined;
 
-        const isExported =
+        const hasExportModifier =
             modifiers?.some(
                 (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
             ) ?? false;
@@ -115,7 +130,7 @@ function extractDeclarations(
             name,
             kind,
             line: getLine(sourceFile, statement),
-            isExported,
+            isExported: hasExportModifier || locallyExportedNames.has(name),
             heritage,
         });
     }
@@ -204,6 +219,7 @@ function extractInstantiations(
 
 function extractVariables(
     sourceFile: ts.SourceFile,
+    locallyExportedNames: Set<string>,
 ): VariableInfo[] {
     const variables: VariableInfo[] = [];
 
@@ -216,7 +232,7 @@ function extractVariables(
             ? ts.getModifiers(statement)
             : undefined;
 
-        const isExported =
+        const hasExportModifier =
             modifiers?.some(
                 (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
             ) ?? false;
@@ -226,10 +242,13 @@ function extractVariables(
                 continue;
             }
 
+            const name = declaration.name.text;
+
             variables.push({
-                name: declaration.name.text,
+                name,
                 line: getLine(sourceFile, declaration),
-                isExported,
+                isExported:
+                    hasExportModifier || locallyExportedNames.has(name),
                 initializer: declaration.initializer
                     ? extractExpression(declaration.initializer, sourceFile)
                     : undefined,
@@ -238,6 +257,169 @@ function extractVariables(
     }
 
     return variables;
+}
+
+function getDeclarationName(statement: ts.Statement): string | undefined {
+    if (
+        ts.isClassDeclaration(statement) ||
+        ts.isFunctionDeclaration(statement)
+    ) {
+        return statement.name?.text;
+    }
+
+    if (
+        ts.isInterfaceDeclaration(statement) ||
+        ts.isTypeAliasDeclaration(statement) ||
+        ts.isEnumDeclaration(statement)
+    ) {
+        return statement.name.text;
+    }
+
+    return undefined;
+}
+
+function collectLocallyExportedNames(sourceFile: ts.SourceFile): Set<string> {
+    const names = new Set<string>();
+
+    for (const statement of sourceFile.statements) {
+        if (
+            !ts.isExportDeclaration(statement) ||
+            statement.moduleSpecifier ||
+            !statement.exportClause ||
+            !ts.isNamedExports(statement.exportClause)
+        ) {
+            continue;
+        }
+
+        for (const element of statement.exportClause.elements) {
+            names.add((element.propertyName ?? element.name).text);
+        }
+    }
+
+    return names;
+}
+
+function extractExports(sourceFile: ts.SourceFile): ExportInfo[] {
+    const exports: ExportInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (ts.isExportDeclaration(statement)) {
+            const moduleSpecifier =
+                statement.moduleSpecifier &&
+                ts.isStringLiteral(statement.moduleSpecifier)
+                    ? statement.moduleSpecifier.text
+                    : undefined;
+
+            if (!statement.exportClause) {
+                exports.push({
+                    exportedName: "*",
+                    moduleSpecifier,
+                    isTypeOnly: statement.isTypeOnly,
+                    isNamespace: true,
+                });
+                continue;
+            }
+
+            if (ts.isNamespaceExport(statement.exportClause)) {
+                exports.push({
+                    exportedName: statement.exportClause.name.text,
+                    moduleSpecifier,
+                    isTypeOnly: statement.isTypeOnly,
+                    isNamespace: true,
+                });
+                continue;
+            }
+
+            for (const element of statement.exportClause.elements) {
+                exports.push({
+                    exportedName: element.name.text,
+                    localName: (element.propertyName ?? element.name).text,
+                    moduleSpecifier,
+                    isTypeOnly: statement.isTypeOnly || element.isTypeOnly,
+                    isNamespace: false,
+                });
+            }
+
+            continue;
+        }
+
+        if (ts.isExportAssignment(statement)) {
+            exports.push({
+                exportedName: statement.isExportEquals ? "export=" : "default",
+                isTypeOnly: false,
+                isNamespace: false,
+            });
+            continue;
+        }
+
+        if (!ts.canHaveModifiers(statement)) {
+            continue;
+        }
+
+        const modifiers = ts.getModifiers(statement);
+
+        const hasExportModifier =
+            modifiers?.some(
+                (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+            ) ?? false;
+
+        if (!hasExportModifier) {
+            continue;
+        }
+
+        const hasDefaultModifier =
+            modifiers?.some(
+                (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword,
+            ) ?? false;
+
+        if (ts.isVariableStatement(statement)) {
+            for (const declaration of statement.declarationList.declarations) {
+                if (!ts.isIdentifier(declaration.name)) {
+                    continue;
+                }
+
+                const name = declaration.name.text;
+
+                exports.push({
+                    exportedName: name,
+                    localName: name,
+                    isTypeOnly: false,
+                    isNamespace: false,
+                });
+            }
+
+            continue;
+        }
+
+        const name = getDeclarationName(statement);
+
+        if (hasDefaultModifier) {
+            exports.push({
+                exportedName: "default",
+                localName: name,
+                isTypeOnly: false,
+                isNamespace: false,
+            });
+            continue;
+        }
+
+        if (!name) {
+            continue;
+        }
+
+        const isTypeOnly =
+            ts.isInterfaceDeclaration(statement) ||
+            ts.isTypeAliasDeclaration(statement);
+
+        exports.push({
+            exportedName: name,
+            localName: name,
+            isTypeOnly,
+            isNamespace: false,
+        });
+    }
+
+    return exports;
 }
 
 export async function parseTypeScriptFile(
@@ -253,13 +435,16 @@ export async function parseTypeScriptFile(
         file.extension === ".tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
     );
 
+    const locallyExportedNames = collectLocallyExportedNames(sourceFile);
+
     return {
         filePath: file.relativePath,
         layer: file.layer,
         imports: extractImports(sourceFile),
-        declarations: extractDeclarations(sourceFile),
+        declarations: extractDeclarations(sourceFile, locallyExportedNames),
         constructors: extractConstructors(sourceFile),
         instantiations: extractInstantiations(sourceFile),
-        variables: extractVariables(sourceFile),
+        variables: extractVariables(sourceFile, locallyExportedNames),
+        exports: extractExports(sourceFile),
     };
 }
