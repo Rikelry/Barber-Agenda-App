@@ -217,6 +217,29 @@ function extractInstantiations(
     return instantiations;
 }
 
+/**
+ * Extrai todos os nomes ligados por um binding, cobrindo destructuring de
+ * objeto e array (inclusive aninhado). Ex.: `{ a, b: c, ...rest }` → a, c, rest;
+ * `[x, [y]]` → x, y. Buracos de array (`[, b]`) são ignorados.
+ */
+function collectBindingNames(name: ts.BindingName): string[] {
+    if (ts.isIdentifier(name)) {
+        return [name.text];
+    }
+
+    const names: string[] = [];
+
+    for (const element of name.elements) {
+        if (ts.isOmittedExpression(element)) {
+            continue;
+        }
+
+        names.push(...collectBindingNames(element.name));
+    }
+
+    return names;
+}
+
 function extractVariables(
     sourceFile: ts.SourceFile,
     locallyExportedNames: Set<string>,
@@ -238,21 +261,24 @@ function extractVariables(
             ) ?? false;
 
         for (const declaration of statement.declarationList.declarations) {
-            if (!ts.isIdentifier(declaration.name)) {
-                continue;
-            }
-
-            const name = declaration.name.text;
-
-            variables.push({
-                name,
-                line: getLine(sourceFile, declaration),
-                isExported:
-                    hasExportModifier || locallyExportedNames.has(name),
-                initializer: declaration.initializer
+            // O inicializador só é associado a declarações de identificador
+            // simples; bindings de destructuring não instanciam o RHS, então
+            // omitimos o inicializador para não gerar falsos positivos.
+            const initializer = ts.isIdentifier(declaration.name)
+                ? declaration.initializer
                     ? extractExpression(declaration.initializer, sourceFile)
-                    : undefined,
-            });
+                    : undefined
+                : undefined;
+
+            for (const name of collectBindingNames(declaration.name)) {
+                variables.push({
+                    name,
+                    line: getLine(sourceFile, declaration),
+                    isExported:
+                        hasExportModifier || locallyExportedNames.has(name),
+                    initializer,
+                });
+            }
         }
     }
 
@@ -374,18 +400,14 @@ function extractExports(sourceFile: ts.SourceFile): ExportInfo[] {
 
         if (ts.isVariableStatement(statement)) {
             for (const declaration of statement.declarationList.declarations) {
-                if (!ts.isIdentifier(declaration.name)) {
-                    continue;
+                for (const name of collectBindingNames(declaration.name)) {
+                    exports.push({
+                        exportedName: name,
+                        localName: name,
+                        isTypeOnly: false,
+                        isNamespace: false,
+                    });
                 }
-
-                const name = declaration.name.text;
-
-                exports.push({
-                    exportedName: name,
-                    localName: name,
-                    isTypeOnly: false,
-                    isNamespace: false,
-                });
             }
 
             continue;

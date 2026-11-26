@@ -277,3 +277,68 @@ describe("parseTypeScriptFile — instanciações", () => {
         ).toContain("ns.A");
     });
 });
+
+describe("parseTypeScriptFile — destructuring", () => {
+    it("captura os nomes de um destructuring de objeto", async () => {
+        const parsed = await parseSource(`const { a, b } = obj;`);
+
+        expect(parsed.variables.map((variable) => variable.name)).toEqual([
+            "a",
+            "b",
+        ]);
+    });
+
+    it("captura alias, default e rest em destructuring de objeto", async () => {
+        const parsed = await parseSource(
+            `const { a: c, d = 1, ...resto } = obj;`,
+        );
+
+        expect(
+            parsed.variables.map((variable) => variable.name).sort(),
+        ).toEqual(["c", "d", "resto"]);
+    });
+
+    it("captura nomes aninhados e ignora buracos em destructuring de array", async () => {
+        const parsed = await parseSource(`const [x, [y], , z] = arr;`);
+
+        expect(
+            parsed.variables.map((variable) => variable.name).sort(),
+        ).toEqual(["x", "y", "z"]);
+    });
+
+    it("não associa inicializador a bindings de destructuring", async () => {
+        const parsed = await parseSource(`const { a } = new A();`);
+        const variable = parsed.variables.find((item) => item.name === "a");
+
+        expect(variable).toBeDefined();
+        expect(variable?.initializer).toBeUndefined();
+    });
+
+    it("export const { a, b } = obj marca cada nome como exportado", async () => {
+        const parsed = (await parseSource(
+            `export const { a, b } = obj;`,
+        )) as ParsedFileWithProposedFields;
+
+        expect(parsed.variables.map((variable) => variable.name)).toEqual([
+            "a",
+            "b",
+        ]);
+        expect(
+            parsed.variables.every((variable) => variable.isExported),
+        ).toBe(true);
+        expect(parsed.exports).toEqual([
+            {
+                exportedName: "a",
+                localName: "a",
+                isTypeOnly: false,
+                isNamespace: false,
+            },
+            {
+                exportedName: "b",
+                localName: "b",
+                isTypeOnly: false,
+                isNamespace: false,
+            },
+        ]);
+    });
+});
