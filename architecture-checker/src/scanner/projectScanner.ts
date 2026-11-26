@@ -21,7 +21,7 @@ const IGNORED_PATHS = [
   "architecture-checker",
 ];
 
-function identifyLayer(relativePath: string): ArchitectureLayer {
+export function identifyLayer(relativePath: string): ArchitectureLayer {
   const segments = relativePath
     .replace(/\\/g, "/")
     .split("/")
