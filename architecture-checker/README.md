@@ -100,6 +100,7 @@ Model; e Routes pode encaminhar para Views.
 | `HEUR_VIEW_001` | warning | View não usa por valor nenhum binding de um ViewModel; pastas `components` são ignoradas. |
 | `HEUR_VIEW_BUSINESS_001` | warning | View cria objetos `Date`, o que pode indicar regra temporal na apresentação. |
 | `HEUR_VIEW_NAV_001` | warning | View importa `expo-router` diretamente, em vez de delegar a navegação ao ViewModel. |
+| `HEUR_INFRA_CONTRACT_001` | warning | Classe da camada Infra que não implementa (`implements`) nenhum contrato do domínio. |
 | `HEUR_ERROR_001` | warning | Infra instancia `Error` genérico em vez de um erro de domínio. |
 
 As heurísticas indicam possíveis problemas, não provas definitivas. Ajuste de

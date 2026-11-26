@@ -4,6 +4,7 @@ import {
     validateDomainContracts,
     validateHeuristics,
     validateInfraErrorHandling,
+    validateInfraImplementsContract,
     validateViewBusinessLogic,
     validateViewHasViewModel,
     validateViewNavigation,
@@ -614,6 +615,86 @@ describe("HEUR_VIEW_NAV_001 — View não deve importar expo-router", () => {
         expect(
             validateHeuristics(project).some(
                 (violation) => violation.ruleId === "HEUR_VIEW_NAV_001",
+            ),
+        ).toBe(true);
+    });
+});
+
+describe("HEUR_INFRA_CONTRACT_001 — Infra deve implementar um contrato", () => {
+    it("deve gerar violação para classe em infra sem contrato implementado", () => {
+        const project = createProjectModel([
+            {
+                relativePath:
+                    "src/infra/datasources/httpAppointmentDataSource.ts",
+                layer: "infra",
+                declarations: [
+                    classDeclaration("HttpAppointmentDataSource", 12),
+                ],
+            },
+        ]);
+
+        const violations = validateInfraImplementsContract(project);
+
+        expect(violations).toHaveLength(1);
+        expect(violations[0]).toMatchObject({
+            ruleId: "HEUR_INFRA_CONTRACT_001",
+            severity: "warning",
+            filePath:
+                "src/infra/datasources/httpAppointmentDataSource.ts",
+            line: 12,
+        });
+        expect(violations[0].suggestion).toBeTruthy();
+    });
+
+    it("não deve gerar violação quando a classe implementa um contrato", () => {
+        const project = createProjectModel([
+            {
+                relativePath:
+                    "src/infra/datasources/httpAppointmentDataSource.ts",
+                layer: "infra",
+                declarations: [
+                    {
+                        name: "HttpAppointmentDataSource",
+                        kind: "class",
+                        line: 12,
+                        isExported: true,
+                        heritage: ["IAppointmentDataSource"],
+                    },
+                ],
+            },
+        ]);
+
+        expect(validateInfraImplementsContract(project)).toHaveLength(0);
+    });
+
+    it("não deve gerar violação para classes em outras camadas", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/model/datasources/appointmentDataSource.ts",
+                layer: "model",
+                declarations: [classDeclaration("LegacyDataSource", 4)],
+            },
+        ]);
+
+        expect(validateInfraImplementsContract(project)).toHaveLength(0);
+    });
+
+    it("deve incluir a regra no agregador de heurísticas", () => {
+        const project = createProjectModel([
+            {
+                relativePath:
+                    "src/infra/datasources/httpAppointmentDataSource.ts",
+                layer: "infra",
+                declarations: [
+                    classDeclaration("HttpAppointmentDataSource", 12),
+                ],
+            },
+        ]);
+
+        expect(
+            validateHeuristics(project).some(
+                (violation) =>
+                    violation.ruleId === "HEUR_INFRA_CONTRACT_001",
             ),
         ).toBe(true);
     });

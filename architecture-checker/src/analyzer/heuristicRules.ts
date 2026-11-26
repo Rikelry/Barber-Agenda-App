@@ -15,6 +15,7 @@ const RULE_ID = {
     view: "HEUR_VIEW_001",
     viewBusinessLogic: "HEUR_VIEW_BUSINESS_001",
     viewNavigation: "HEUR_VIEW_NAV_001",
+    infraContract: "HEUR_INFRA_CONTRACT_001",
     error: "HEUR_ERROR_001",
 } as const;
 
@@ -386,6 +387,45 @@ export function validateViewNavigation(
 }
 
 /**
+ * HEUR_INFRA_CONTRACT_001: as implementações da camada Infra devem implementar
+ * (`implements`) um contrato do domínio, preservando a separação entre
+ * contratos (Model) e implementações (Infra).
+ */
+export function validateInfraImplementsContract(
+    project: ProjectModel,
+): ArchitectureViolation[] {
+    const violations: ArchitectureViolation[] = [];
+
+    for (const file of project.files) {
+        if (file.layer !== "infra") {
+            continue;
+        }
+
+        for (const declaration of file.declarations) {
+            if (
+                declaration.kind !== "class" ||
+                declaration.heritage.length > 0
+            ) {
+                continue;
+            }
+
+            violations.push({
+                ruleId: RULE_ID.infraContract,
+                severity: "warning",
+                message:
+                    `A classe ${declaration.name} da camada Infra não implementa nenhum contrato do domínio.`,
+                filePath: file.relativePath,
+                line: declaration.line,
+                suggestion:
+                    `Declare/implemente o contrato correspondente no Model (ex.: "implements I${declaration.name}") para manter a separação entre contratos e implementações.`,
+            });
+        }
+    }
+
+    return violations;
+}
+
+/**
  * HEUR_ERROR_001: a camada Infra deve lançar erros de domínio (DomainError),
  * não `Error` genérico.
  */
@@ -437,6 +477,7 @@ export function validateHeuristics(
         ...validateViewHasViewModel(project, options),
         ...validateViewBusinessLogic(project, options),
         ...validateViewNavigation(project, options),
+        ...validateInfraImplementsContract(project),
         ...validateInfraErrorHandling(project),
     ];
 }
