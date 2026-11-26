@@ -1,0 +1,110 @@
+import { describe, expect, it } from "vitest";
+
+import {
+    SEVERITY_ORDER,
+    computeExitCode,
+    countBySeverity,
+    countFilesByLayer,
+    groupViolationsBySeverity,
+} from "../../src/cli/report.js";
+
+import type {
+    ArchitectureViolation,
+    ViolationSeverity,
+} from "../../src/core/types.js";
+
+function violation(
+    severity: ViolationSeverity,
+    ruleId = "TEST_001",
+): ArchitectureViolation {
+    return {
+        ruleId,
+        severity,
+        message: `Violation ${ruleId}`,
+        filePath: "src/view/example.tsx",
+        line: 4,
+        suggestion: "Review this dependency.",
+    };
+}
+
+describe("relatório da CLI", () => {
+    it("define a ordem de severidade do mais crítico ao informativo", () => {
+        expect(SEVERITY_ORDER).toEqual(["error", "warning", "info"]);
+    });
+
+    it("agrupa violações sem perder sua ordem dentro de cada severidade", () => {
+        const errors = violation("error", "ERROR_001");
+        const warning = violation("warning", "WARNING_001");
+        const info = violation("info", "INFO_001");
+
+        const groups = groupViolationsBySeverity([
+            warning,
+            errors,
+            info,
+        ]);
+
+        expect(groups).toEqual({
+            error: [errors],
+            warning: [warning],
+            info: [info],
+        });
+    });
+
+    it("conta cada severidade e o total", () => {
+        expect(
+            countBySeverity([
+                violation("error"),
+                violation("error", "ERROR_002"),
+                violation("warning"),
+                violation("info"),
+            ]),
+        ).toEqual({
+            total: 4,
+            errors: 2,
+            warnings: 1,
+            infos: 1,
+        });
+    });
+
+    it("retorna contagens zeradas quando não há violações", () => {
+        expect(countBySeverity([])).toEqual({
+            total: 0,
+            errors: 0,
+            warnings: 0,
+            infos: 0,
+        });
+    });
+
+    it("conta arquivos por camada, incluindo camadas sem arquivos", () => {
+        const counts = countFilesByLayer([
+            { layer: "view" },
+            { layer: "view" },
+            { layer: "viewmodel" },
+            { layer: "di" },
+        ]);
+
+        expect(counts.view).toBe(2);
+        expect(counts.viewmodel).toBe(1);
+        expect(counts.di).toBe(1);
+        expect(counts.infra).toBe(0);
+        expect(counts.unknown).toBe(0);
+    });
+
+    it("retorna exit code 0 sem warnings ou erros", () => {
+        expect(computeExitCode([])).toBe(0);
+        expect(computeExitCode([violation("info")])).toBe(0);
+    });
+
+    it("retorna exit code 1 quando há warning sem erro", () => {
+        expect(computeExitCode([violation("warning")])).toBe(1);
+    });
+
+    it("prioriza exit code 2 quando há erro", () => {
+        expect(
+            computeExitCode([
+                violation("warning"),
+                violation("error"),
+            ]),
+        ).toBe(2);
+    });
+});
