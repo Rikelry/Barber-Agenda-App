@@ -241,7 +241,10 @@ function isInIgnoredFolder(
 }
 
 /**
- * HEUR_VIEW_001: toda View (tela) deve depender de um ViewModel.
+ * HEUR_VIEW_001: toda View (tela) deve depender de um ViewModel, delegando a
+ * ele as ações e o estado. Um import apenas de tipo não conta como delegação:
+ * é preciso que algum binding importado do ViewModel seja referenciado como
+ * valor na AST (ex.: `use<Screen>ViewModel()`).
  */
 export function validateViewHasViewModel(
     project: ProjectModel,
@@ -270,7 +273,13 @@ export function validateViewHasViewModel(
                 importInfo.resolvedFilePath,
             );
 
-            return importedFile?.layer === "viewmodel";
+            if (importedFile?.layer !== "viewmodel") {
+                return false;
+            }
+
+            // Só há delegação quando o ViewModel é usado por valor; imports
+            // apenas de tipo não caracterizam dependência de comportamento.
+            return (importInfo.valueReferences?.length ?? 0) > 0;
         });
 
         if (dependsOnViewModel) {

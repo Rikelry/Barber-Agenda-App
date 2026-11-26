@@ -356,7 +356,32 @@ describe("HEUR_VIEW_001 — View (tela) deve depender de um ViewModel", () => {
         expect(violations[0].suggestion).toBeTruthy();
     });
 
-    it("não deve gerar violação quando a tela importa um viewmodel", () => {
+    it("não deve gerar violação quando a tela usa um viewmodel por valor", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/barbeiros.tsx",
+                layer: "view",
+                imports: [
+                    importFrom(
+                        "@/viewmodel/useBarbeirosViewModel",
+                        "/project/src/viewmodel/useBarbeirosViewModel.ts",
+                        {
+                            namedImports: ["useBarbeirosViewModel"],
+                            valueReferences: ["useBarbeirosViewModel"],
+                        },
+                    ),
+                ],
+            },
+            {
+                relativePath: "src/viewmodel/useBarbeirosViewModel.ts",
+                layer: "viewmodel",
+            },
+        ]);
+
+        expect(validateViewHasViewModel(project)).toHaveLength(0);
+    });
+
+    it("deve gerar violação quando a tela só importa o viewmodel (sem usá-lo por valor)", () => {
         const project = createProjectModel([
             {
                 relativePath: "src/view/barbeiros.tsx",
@@ -375,7 +400,40 @@ describe("HEUR_VIEW_001 — View (tela) deve depender de um ViewModel", () => {
             },
         ]);
 
-        expect(validateViewHasViewModel(project)).toHaveLength(0);
+        const violations = validateViewHasViewModel(project);
+
+        expect(violations).toHaveLength(1);
+        expect(violations[0]).toMatchObject({
+            ruleId: "HEUR_VIEW_001",
+            severity: "warning",
+            filePath: "src/view/barbeiros.tsx",
+        });
+    });
+
+    it("deve gerar violação quando a tela importa apenas o tipo do viewmodel", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/barbeiros.tsx",
+                layer: "view",
+                imports: [
+                    importFrom(
+                        "@/viewmodel/useBarbeirosViewModel",
+                        "/project/src/viewmodel/useBarbeirosViewModel.ts",
+                        {
+                            namedImports: ["BarbeirosState"],
+                            typeOnlyNames: ["BarbeirosState"],
+                            typeReferences: ["BarbeirosState"],
+                        },
+                    ),
+                ],
+            },
+            {
+                relativePath: "src/viewmodel/useBarbeirosViewModel.ts",
+                layer: "viewmodel",
+            },
+        ]);
+
+        expect(validateViewHasViewModel(project)).toHaveLength(1);
     });
 
     it("não deve gerar violação para arquivos em pasta 'components'", () => {
