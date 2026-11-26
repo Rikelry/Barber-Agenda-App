@@ -11,19 +11,7 @@ import type {
     ParsedFile,
 } from "../../src/parser/typescriptTypes.js";
 
-/**
- * Campos propostos que ainda NÃO existem no modelo. Os testes abaixo validam
- * o comportamento esperado contra estes nomes; enquanto o parser não os
- * preencher, os cenários correspondentes permanecem falhando (sem skip).
- *
- * @todo ImportInfo.importedNames — nomes originais/exportados de cada binding
- *       nomeado (necessário para `import { A as B }`).
- * @todo ImportInfo.typeOnlyNames — bindings importados como tipo por
- *       especificador (`import { type A, B }`).
- * @todo ParsedFile.exports — coleção de `export ...` e reexports
- *       (`export { a }`, `export { a as b }`, `export { A } from`, `export * from`,
- *       `export default`).
- */
+/** Vistas de tipo que tornam explícitos os campos obrigatórios nas asserções. */
 interface ProposedExportInfo {
     exportedName: string;
     localName?: string;
@@ -273,6 +261,58 @@ describe("parseTypeScriptFile — exports", () => {
                 isNamespace: false,
             },
         ]);
+    });
+});
+
+describe("parseTypeScriptFile — declarações aninhadas", () => {
+    it("captura declarações aninhadas com escopo sem tratá-las como exports do módulo", async () => {
+        const parsed = await parseSource(`
+            export namespace UseCases {
+                export class NestedUseCase {}
+
+                export function create() {
+                    class LocalHelper {}
+                    type LocalType = string;
+                    return new LocalHelper();
+                }
+            }
+
+            export class TopLevelUseCase {}
+        `);
+
+        const nestedUseCase = parsed.declarations.find(
+            (declaration) => declaration.name === "NestedUseCase",
+        );
+        const localHelper = parsed.declarations.find(
+            (declaration) => declaration.name === "LocalHelper",
+        );
+        const localType = parsed.declarations.find(
+            (declaration) => declaration.name === "LocalType",
+        );
+        const topLevelUseCase = parsed.declarations.find(
+            (declaration) => declaration.name === "TopLevelUseCase",
+        );
+
+        expect(nestedUseCase).toMatchObject({
+            kind: "class",
+            isExported: false,
+            scopePath: ["UseCases"],
+        });
+        expect(localHelper).toMatchObject({
+            kind: "class",
+            isExported: false,
+            scopePath: ["UseCases", "create"],
+        });
+        expect(localType).toMatchObject({
+            kind: "type",
+            isExported: false,
+            scopePath: ["UseCases", "create"],
+        });
+        expect(topLevelUseCase).toMatchObject({
+            kind: "class",
+            isExported: true,
+        });
+        expect(topLevelUseCase?.scopePath).toBeUndefined();
     });
 });
 

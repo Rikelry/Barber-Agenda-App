@@ -38,6 +38,7 @@ export interface DeclarationInfo {
   line: number;
   isExported: boolean;
   heritage: string[];
+  scopePath?: string[];
 }
 
 export interface ParsedFile {

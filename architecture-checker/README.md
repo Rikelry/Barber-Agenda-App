@@ -159,7 +159,9 @@ npm test
   dependências em runtime.
 - A identificação de regras de negócio em Views é heurística; nesta versão, a
   regra específica detecta construções `new Date`.
-- A extração de declarações e variáveis é focada nas declarações de topo.
+- Declarações aninhadas são registradas com `scopePath`, mas `isExported`
+  indica apenas exports diretos do módulo; extração de variáveis e construtores
+  permanece focada nas declarações de topo.
 - A regra DI reconhece padrões de import e instanciação representados pela AST;
   factories e outras composições indiretas podem não ser conclusivas.
 - A resolução de aliases depende das opções TypeScript carregadas do projeto.
@@ -173,4 +175,3 @@ pacote está marcado como `private`. Ele pode ser compilado e usado localmente;
 publicação no npm ou distribuição para outros projetos requer preparação
 adicional, incluindo rever a configuração `private`, licença, versão e arquivos
 publicados.
-

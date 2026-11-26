@@ -212,56 +212,124 @@ function extractDeclarations(
 ): DeclarationInfo[] {
     const declarations: DeclarationInfo[] = [];
 
-    for (const statement of sourceFile.statements) {
+    function getScopeSegment(node: ts.Node): string | undefined {
+        if (ts.isModuleDeclaration(node)) {
+            return node.name.text;
+        }
+
+        if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
+            return node.name?.text;
+        }
+
+        if (ts.isFunctionDeclaration(node)) {
+            return node.name?.text;
+        }
+
+        if (
+            ts.isMethodDeclaration(node) ||
+            ts.isGetAccessorDeclaration(node) ||
+            ts.isSetAccessorDeclaration(node)
+        ) {
+            return node.name.getText(sourceFile);
+        }
+
+        if (ts.isConstructorDeclaration(node)) {
+            return "constructor";
+        }
+
+        if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+            const parent = node.parent;
+
+            if (
+                ts.isVariableDeclaration(parent) &&
+                ts.isIdentifier(parent.name)
+            ) {
+                return parent.name.text;
+            }
+
+            if (ts.isPropertyAssignment(parent)) {
+                return parent.name.getText(sourceFile);
+            }
+        }
+
+        return undefined;
+    }
+
+    function getScopePath(node: ts.Node): string[] {
+        const scopePath: string[] = [];
+
+        for (
+            let current: ts.Node | undefined = node.parent;
+            current && !ts.isSourceFile(current);
+            current = current.parent
+        ) {
+            const segment = getScopeSegment(current);
+
+            if (segment) {
+                scopePath.push(segment);
+            }
+        }
+
+        return scopePath.reverse();
+    }
+
+    function visit(node: ts.Node): void {
         let kind: DeclarationInfo["kind"] | undefined;
         let name: string | undefined;
         let heritage: string[] = [];
 
-        if (ts.isInterfaceDeclaration(statement)) {
+        if (ts.isInterfaceDeclaration(node)) {
             kind = "interface";
-            name = statement.name.text;
-            heritage = statement.heritageClauses?.flatMap((clause) =>
+            name = node.name.text;
+            heritage = node.heritageClauses?.flatMap((clause) =>
                 clause.types.map((type) => type.expression.getText(sourceFile)),
             ) ?? [];
-        } else if (ts.isClassDeclaration(statement)) {
+        } else if (ts.isClassDeclaration(node)) {
             kind = "class";
-            name = statement.name?.text;
-            heritage = statement.heritageClauses?.flatMap((clause) =>
+            name = node.name?.text;
+            heritage = node.heritageClauses?.flatMap((clause) =>
                 clause.types.map((type) => type.expression.getText(sourceFile)),
             ) ?? [];
-        } else if (ts.isFunctionDeclaration(statement)) {
+        } else if (ts.isFunctionDeclaration(node)) {
             kind = "function";
-            name = statement.name?.text;
-        } else if (ts.isTypeAliasDeclaration(statement)) {
+            name = node.name?.text;
+        } else if (ts.isTypeAliasDeclaration(node)) {
             kind = "type";
-            name = statement.name.text;
-        } else if (ts.isEnumDeclaration(statement)) {
+            name = node.name.text;
+        } else if (ts.isEnumDeclaration(node)) {
             kind = "enum";
-            name = statement.name.text;
+            name = node.name.text;
         }
 
-        if (!kind || !name) {
-            continue;
+        if (kind && name) {
+            const modifiers = ts.canHaveModifiers(node)
+                ? ts.getModifiers(node)
+                : undefined;
+
+            const hasExportModifier =
+                modifiers?.some(
+                    (modifier) =>
+                        modifier.kind === ts.SyntaxKind.ExportKeyword,
+                ) ?? false;
+            const isTopLevel = ts.isSourceFile(node.parent);
+            const scopePath = getScopePath(node);
+
+            declarations.push({
+                name,
+                kind,
+                line: getLine(sourceFile, node),
+                isExported:
+                    isTopLevel &&
+                    (hasExportModifier || locallyExportedNames.has(name)),
+                heritage,
+                ...(scopePath.length > 0 ? { scopePath } : {}),
+            });
         }
 
-        const modifiers = ts.canHaveModifiers(statement)
-            ? ts.getModifiers(statement)
-            : undefined;
-
-        const hasExportModifier =
-            modifiers?.some(
-                (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
-            ) ?? false;
-
-        declarations.push({
-            name,
-            kind,
-            line: getLine(sourceFile, statement),
-            isExported: hasExportModifier || locallyExportedNames.has(name),
-            heritage,
-        });
+        ts.forEachChild(node, visit);
     }
 
+    visit(sourceFile);
     return declarations;
 }
 
