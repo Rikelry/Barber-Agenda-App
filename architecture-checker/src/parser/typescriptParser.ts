@@ -1,0 +1,667 @@
+import * as ts from "typescript";
+import fs from "node:fs/promises";
+
+import type { ProjectFile } from "../core/types.js";
+import type {
+    ConstructorInfo,
+    DeclarationInfo,
+    ExportInfo,
+    ExpressionInfo,
+    ImportInfo,
+    ParsedFile,
+    VariableInfo,
+} from "./typescriptTypes.js";
+
+function getLine(sourceFile: ts.SourceFile, node: ts.Node): number {
+    return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+        .line + 1;
+}
+
+function extractImports(sourceFile: ts.SourceFile): ImportInfo[] {
+    const imports: ImportInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (!ts.isImportDeclaration(statement)) {
+            continue;
+        }
+
+        const moduleSpecifier = statement.moduleSpecifier;
+
+        if (!ts.isStringLiteral(moduleSpecifier)) {
+            continue;
+        }
+
+        const importClause = statement.importClause;
+
+        const namedImports: string[] = [];
+        const importedNames: string[] = [];
+        const typeOnlyNames: string[] = [];
+        let defaultImport: string | undefined;
+        let namespaceImport: string | undefined;
+
+        if (importClause) {
+            defaultImport = importClause.name?.text;
+
+            const bindings = importClause.namedBindings;
+
+            if (bindings && ts.isNamespaceImport(bindings)) {
+                namespaceImport = bindings.name.text;
+            }
+
+            if (bindings && ts.isNamedImports(bindings)) {
+                for (const element of bindings.elements) {
+                    const localName = element.name.text;
+
+                    namedImports.push(localName);
+                    importedNames.push(
+                        (element.propertyName ?? element.name).text,
+                    );
+
+                    if (element.isTypeOnly) {
+                        typeOnlyNames.push(localName);
+                    }
+                }
+            }
+        }
+
+        imports.push({
+            moduleSpecifier: moduleSpecifier.text,
+            namedImports,
+            importedNames,
+            typeOnlyNames,
+            defaultImport,
+            namespaceImport,
+            isTypeOnly: importClause?.isTypeOnly ?? false,
+            line: getLine(sourceFile, statement),
+        });
+    }
+
+    return collectImportReferences(sourceFile, imports);
+}
+
+function isImportBindingDeclaration(node: ts.Identifier): boolean {
+    const parent = node.parent;
+
+    if (
+        (ts.isVariableDeclaration(parent) && parent.name === node) ||
+        (ts.isParameter(parent) && parent.name === node) ||
+        (ts.isBindingElement(parent) && parent.name === node) ||
+        (ts.isFunctionDeclaration(parent) && parent.name === node) ||
+        (ts.isClassDeclaration(parent) && parent.name === node) ||
+        (ts.isInterfaceDeclaration(parent) && parent.name === node) ||
+        (ts.isTypeAliasDeclaration(parent) && parent.name === node) ||
+        (ts.isEnumDeclaration(parent) && parent.name === node) ||
+        (ts.isModuleDeclaration(parent) && parent.name === node) ||
+        (ts.isTypeParameterDeclaration(parent) && parent.name === node) ||
+        (ts.isPropertyDeclaration(parent) && parent.name === node) ||
+        (ts.isPropertySignature(parent) && parent.name === node) ||
+        (ts.isMethodDeclaration(parent) && parent.name === node) ||
+        (ts.isMethodSignature(parent) && parent.name === node) ||
+        (ts.isGetAccessorDeclaration(parent) && parent.name === node) ||
+        (ts.isSetAccessorDeclaration(parent) && parent.name === node) ||
+        (ts.isEnumMember(parent) && parent.name === node) ||
+        (ts.isPropertyAssignment(parent) &&
+            parent.name === node &&
+            !ts.isComputedPropertyName(parent.name)) ||
+        (ts.isPropertyAccessExpression(parent) && parent.name === node) ||
+        (ts.isQualifiedName(parent) && parent.right === node) ||
+        (ts.isJsxAttribute(parent) && parent.name === node)
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+function isInsideImportDeclaration(node: ts.Node): boolean {
+    for (let current: ts.Node | undefined = node; current; current = current.parent) {
+        if (ts.isImportDeclaration(current)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function isTypeReference(node: ts.Identifier): boolean {
+    for (
+        let current: ts.Node | undefined = node.parent;
+        current && !ts.isSourceFile(current);
+        current = current.parent
+    ) {
+        if (ts.isTypeNode(current)) {
+            return true;
+        }
+
+        if (ts.isExpressionWithTypeArguments(current)) {
+            const heritageClause = current.parent;
+
+            if (
+                ts.isHeritageClause(heritageClause) &&
+                (heritageClause.token === ts.SyntaxKind.ImplementsKeyword ||
+                    ts.isInterfaceDeclaration(heritageClause.parent))
+            ) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    return false;
+}
+
+function collectImportReferences(
+    sourceFile: ts.SourceFile,
+    imports: ImportInfo[],
+): ImportInfo[] {
+    const importsByLocalName = new Map<string, ImportInfo[]>();
+
+    const addBinding = (name: string | undefined, importInfo: ImportInfo) => {
+        if (!name) {
+            return;
+        }
+
+        const matchingImports = importsByLocalName.get(name) ?? [];
+        matchingImports.push(importInfo);
+        importsByLocalName.set(name, matchingImports);
+    };
+
+    for (const importInfo of imports) {
+        addBinding(importInfo.defaultImport, importInfo);
+        addBinding(importInfo.namespaceImport, importInfo);
+
+        for (const name of importInfo.namedImports) {
+            addBinding(name, importInfo);
+        }
+    }
+
+    function visit(node: ts.Node): void {
+        if (
+            ts.isIdentifier(node) &&
+            !isInsideImportDeclaration(node) &&
+            !isImportBindingDeclaration(node)
+        ) {
+            const matchingImports = importsByLocalName.get(node.text);
+
+            if (matchingImports) {
+                const referencesAsType = isTypeReference(node);
+
+                for (const importInfo of matchingImports) {
+                    const references = referencesAsType
+                        ? (importInfo.typeReferences ??= [])
+                        : (importInfo.valueReferences ??= []);
+
+                    if (!references.includes(node.text)) {
+                        references.push(node.text);
+                    }
+                }
+            }
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+    return imports;
+}
+
+function extractDeclarations(
+    sourceFile: ts.SourceFile,
+    locallyExportedNames: Set<string>,
+): DeclarationInfo[] {
+    const declarations: DeclarationInfo[] = [];
+
+    function getScopeSegment(node: ts.Node): string | undefined {
+        if (ts.isModuleDeclaration(node)) {
+            return node.name.text;
+        }
+
+        if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
+            return node.name?.text;
+        }
+
+        if (ts.isFunctionDeclaration(node)) {
+            return node.name?.text;
+        }
+
+        if (
+            ts.isMethodDeclaration(node) ||
+            ts.isGetAccessorDeclaration(node) ||
+            ts.isSetAccessorDeclaration(node)
+        ) {
+            return node.name.getText(sourceFile);
+        }
+
+        if (ts.isConstructorDeclaration(node)) {
+            return "constructor";
+        }
+
+        if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+            const parent = node.parent;
+
+            if (
+                ts.isVariableDeclaration(parent) &&
+                ts.isIdentifier(parent.name)
+            ) {
+                return parent.name.text;
+            }
+
+            if (ts.isPropertyAssignment(parent)) {
+                return parent.name.getText(sourceFile);
+            }
+        }
+
+        return undefined;
+    }
+
+    function getScopePath(node: ts.Node): string[] {
+        const scopePath: string[] = [];
+
+        for (
+            let current: ts.Node | undefined = node.parent;
+            current && !ts.isSourceFile(current);
+            current = current.parent
+        ) {
+            const segment = getScopeSegment(current);
+
+            if (segment) {
+                scopePath.push(segment);
+            }
+        }
+
+        return scopePath.reverse();
+    }
+
+    function visit(node: ts.Node): void {
+        let kind: DeclarationInfo["kind"] | undefined;
+        let name: string | undefined;
+        let heritage: string[] = [];
+
+        if (ts.isInterfaceDeclaration(node)) {
+            kind = "interface";
+            name = node.name.text;
+            heritage = node.heritageClauses?.flatMap((clause) =>
+                clause.types.map((type) => type.expression.getText(sourceFile)),
+            ) ?? [];
+        } else if (ts.isClassDeclaration(node)) {
+            kind = "class";
+            name = node.name?.text;
+            heritage = node.heritageClauses?.flatMap((clause) =>
+                clause.types.map((type) => type.expression.getText(sourceFile)),
+            ) ?? [];
+        } else if (ts.isFunctionDeclaration(node)) {
+            kind = "function";
+            name = node.name?.text;
+        } else if (ts.isTypeAliasDeclaration(node)) {
+            kind = "type";
+            name = node.name.text;
+        } else if (ts.isEnumDeclaration(node)) {
+            kind = "enum";
+            name = node.name.text;
+        }
+
+        if (kind && name) {
+            const modifiers = ts.canHaveModifiers(node)
+                ? ts.getModifiers(node)
+                : undefined;
+
+            const hasExportModifier =
+                modifiers?.some(
+                    (modifier) =>
+                        modifier.kind === ts.SyntaxKind.ExportKeyword,
+                ) ?? false;
+            const isTopLevel = ts.isSourceFile(node.parent);
+            const scopePath = getScopePath(node);
+
+            declarations.push({
+                name,
+                kind,
+                line: getLine(sourceFile, node),
+                isExported:
+                    isTopLevel &&
+                    (hasExportModifier || locallyExportedNames.has(name)),
+                heritage,
+                ...(scopePath.length > 0 ? { scopePath } : {}),
+            });
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+    return declarations;
+}
+
+function extractConstructors(
+    sourceFile: ts.SourceFile,
+): ConstructorInfo[] {
+    const constructors: ConstructorInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (!ts.isClassDeclaration(statement) || !statement.name) {
+            continue;
+        }
+
+        for (const member of statement.members) {
+            if (!ts.isConstructorDeclaration(member)) {
+                continue;
+            }
+
+            constructors.push({
+                className: statement.name.text,
+                line: getLine(sourceFile, member),
+                parameters: member.parameters.map((parameter) => ({
+                    name: parameter.name.getText(sourceFile),
+                    type: parameter.type?.getText(sourceFile),
+                })),
+            });
+        }
+    }
+
+    return constructors;
+}
+
+function extractExpression(
+    expression: ts.Expression,
+    sourceFile: ts.SourceFile,
+): ExpressionInfo {
+    if (ts.isNewExpression(expression)) {
+        return {
+            kind: "new",
+            text: expression.getText(sourceFile),
+            name: expression.expression.getText(sourceFile),
+            arguments: (expression.arguments ?? []).map((argument) =>
+                extractExpression(argument, sourceFile),
+            ),
+            line: getLine(sourceFile, expression),
+        };
+    }
+
+    if (ts.isIdentifier(expression)) {
+        return {
+            kind: "identifier",
+            text: expression.text,
+            name: expression.text,
+            line: getLine(sourceFile, expression),
+        };
+    }
+
+    return {
+        kind: "other",
+        text: expression.getText(sourceFile),
+        line: getLine(sourceFile, expression),
+    };
+}
+
+function extractInstantiations(
+    sourceFile: ts.SourceFile,
+): ExpressionInfo[] {
+    const instantiations: ExpressionInfo[] = [];
+
+    function visit(node: ts.Node): void {
+        if (ts.isNewExpression(node)) {
+            instantiations.push(extractExpression(node, sourceFile));
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+
+    return instantiations;
+}
+
+/**
+ * Extrai todos os nomes ligados por um binding, cobrindo destructuring de
+ * objeto e array (inclusive aninhado). Ex.: `{ a, b: c, ...rest }` → a, c, rest;
+ * `[x, [y]]` → x, y. Buracos de array (`[, b]`) são ignorados.
+ */
+function collectBindingNames(name: ts.BindingName): string[] {
+    if (ts.isIdentifier(name)) {
+        return [name.text];
+    }
+
+    const names: string[] = [];
+
+    for (const element of name.elements) {
+        if (ts.isOmittedExpression(element)) {
+            continue;
+        }
+
+        names.push(...collectBindingNames(element.name));
+    }
+
+    return names;
+}
+
+function extractVariables(
+    sourceFile: ts.SourceFile,
+    locallyExportedNames: Set<string>,
+): VariableInfo[] {
+    const variables: VariableInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (!ts.isVariableStatement(statement)) {
+            continue;
+        }
+
+        const modifiers = ts.canHaveModifiers(statement)
+            ? ts.getModifiers(statement)
+            : undefined;
+
+        const hasExportModifier =
+            modifiers?.some(
+                (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+            ) ?? false;
+
+        for (const declaration of statement.declarationList.declarations) {
+            // O inicializador só é associado a declarações de identificador
+            // simples; bindings de destructuring não instanciam o RHS, então
+            // omitimos o inicializador para não gerar falsos positivos.
+            const initializer = ts.isIdentifier(declaration.name)
+                ? declaration.initializer
+                    ? extractExpression(declaration.initializer, sourceFile)
+                    : undefined
+                : undefined;
+
+            for (const name of collectBindingNames(declaration.name)) {
+                variables.push({
+                    name,
+                    line: getLine(sourceFile, declaration),
+                    isExported:
+                        hasExportModifier || locallyExportedNames.has(name),
+                    initializer,
+                });
+            }
+        }
+    }
+
+    return variables;
+}
+
+function getDeclarationName(statement: ts.Statement): string | undefined {
+    if (
+        ts.isClassDeclaration(statement) ||
+        ts.isFunctionDeclaration(statement)
+    ) {
+        return statement.name?.text;
+    }
+
+    if (
+        ts.isInterfaceDeclaration(statement) ||
+        ts.isTypeAliasDeclaration(statement) ||
+        ts.isEnumDeclaration(statement)
+    ) {
+        return statement.name.text;
+    }
+
+    return undefined;
+}
+
+function collectLocallyExportedNames(sourceFile: ts.SourceFile): Set<string> {
+    const names = new Set<string>();
+
+    for (const statement of sourceFile.statements) {
+        if (
+            !ts.isExportDeclaration(statement) ||
+            statement.moduleSpecifier ||
+            !statement.exportClause ||
+            !ts.isNamedExports(statement.exportClause)
+        ) {
+            continue;
+        }
+
+        for (const element of statement.exportClause.elements) {
+            names.add((element.propertyName ?? element.name).text);
+        }
+    }
+
+    return names;
+}
+
+function extractExports(sourceFile: ts.SourceFile): ExportInfo[] {
+    const exports: ExportInfo[] = [];
+
+    for (const statement of sourceFile.statements) {
+        if (ts.isExportDeclaration(statement)) {
+            const moduleSpecifier =
+                statement.moduleSpecifier &&
+                ts.isStringLiteral(statement.moduleSpecifier)
+                    ? statement.moduleSpecifier.text
+                    : undefined;
+
+            if (!statement.exportClause) {
+                exports.push({
+                    exportedName: "*",
+                    moduleSpecifier,
+                    isTypeOnly: statement.isTypeOnly,
+                    isNamespace: true,
+                });
+                continue;
+            }
+
+            if (ts.isNamespaceExport(statement.exportClause)) {
+                exports.push({
+                    exportedName: statement.exportClause.name.text,
+                    moduleSpecifier,
+                    isTypeOnly: statement.isTypeOnly,
+                    isNamespace: true,
+                });
+                continue;
+            }
+
+            for (const element of statement.exportClause.elements) {
+                exports.push({
+                    exportedName: element.name.text,
+                    localName: (element.propertyName ?? element.name).text,
+                    moduleSpecifier,
+                    isTypeOnly: statement.isTypeOnly || element.isTypeOnly,
+                    isNamespace: false,
+                });
+            }
+
+            continue;
+        }
+
+        if (ts.isExportAssignment(statement)) {
+            exports.push({
+                exportedName: statement.isExportEquals ? "export=" : "default",
+                isTypeOnly: false,
+                isNamespace: false,
+            });
+            continue;
+        }
+
+        if (!ts.canHaveModifiers(statement)) {
+            continue;
+        }
+
+        const modifiers = ts.getModifiers(statement);
+
+        const hasExportModifier =
+            modifiers?.some(
+                (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+            ) ?? false;
+
+        if (!hasExportModifier) {
+            continue;
+        }
+
+        const hasDefaultModifier =
+            modifiers?.some(
+                (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword,
+            ) ?? false;
+
+        if (ts.isVariableStatement(statement)) {
+            for (const declaration of statement.declarationList.declarations) {
+                for (const name of collectBindingNames(declaration.name)) {
+                    exports.push({
+                        exportedName: name,
+                        localName: name,
+                        isTypeOnly: false,
+                        isNamespace: false,
+                    });
+                }
+            }
+
+            continue;
+        }
+
+        const name = getDeclarationName(statement);
+
+        if (hasDefaultModifier) {
+            exports.push({
+                exportedName: "default",
+                localName: name,
+                isTypeOnly: false,
+                isNamespace: false,
+            });
+            continue;
+        }
+
+        if (!name) {
+            continue;
+        }
+
+        const isTypeOnly =
+            ts.isInterfaceDeclaration(statement) ||
+            ts.isTypeAliasDeclaration(statement);
+
+        exports.push({
+            exportedName: name,
+            localName: name,
+            isTypeOnly,
+            isNamespace: false,
+        });
+    }
+
+    return exports;
+}
+
+export async function parseTypeScriptFile(
+    file: ProjectFile,
+): Promise<ParsedFile> {
+    const content = await fs.readFile(file.absolutePath, "utf-8");
+
+    const sourceFile = ts.createSourceFile(
+        file.absolutePath,
+        content,
+        ts.ScriptTarget.Latest,
+        true,
+        file.extension === ".tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    );
+
+    const locallyExportedNames = collectLocallyExportedNames(sourceFile);
+
+    return {
+        filePath: file.relativePath,
+        layer: file.layer,
+        imports: extractImports(sourceFile),
+        declarations: extractDeclarations(sourceFile, locallyExportedNames),
+        constructors: extractConstructors(sourceFile),
+        instantiations: extractInstantiations(sourceFile),
+        variables: extractVariables(sourceFile, locallyExportedNames),
+        exports: extractExports(sourceFile),
+    };
+}
