@@ -58,4 +58,18 @@ describe("resolução de imports do projeto", () => {
         });
         expect(missingImport?.resolvedFilePath).toBeUndefined();
     });
+
+    it("marca como external um pacote que não resolve (sem node_modules)", async () => {
+        const project = await resolveFixtureProject();
+        const viewFile = project.files.find(
+            (file) => file.relativePath === "src/view/ExampleView.ts",
+        );
+        const packageImport = viewFile?.imports.find(
+            (importInfo) => importInfo.moduleSpecifier === "react-native",
+        );
+
+        expect(packageImport).toMatchObject({
+            resolutionStatus: "external",
+        });
+    });
 });

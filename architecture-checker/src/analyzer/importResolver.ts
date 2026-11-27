@@ -34,6 +34,55 @@ function isExternalModule(resolvedFilePath: string): boolean {
   );
 }
 
+/**
+ * Verifica se o especificador casa com algum padrão de `paths` do tsconfig
+ * (ex.: `@/*`). Serve para distinguir um alias interno que não resolveu de um
+ * pacote externo (que não resolve porque o `node_modules` não está instalado).
+ */
+function matchesPathMapping(
+  moduleSpecifier: string,
+  compilerOptions: ts.CompilerOptions,
+): boolean {
+  const paths = compilerOptions.paths;
+
+  if (!paths) {
+    return false;
+  }
+
+  return Object.keys(paths).some((pattern) => {
+    const starIndex = pattern.indexOf("*");
+
+    if (starIndex === -1) {
+      return pattern === moduleSpecifier;
+    }
+
+    const prefix = pattern.slice(0, starIndex);
+    const suffix = pattern.slice(starIndex + 1);
+
+    return (
+      moduleSpecifier.length >= prefix.length + suffix.length &&
+      moduleSpecifier.startsWith(prefix) &&
+      moduleSpecifier.endsWith(suffix)
+    );
+  });
+}
+
+/**
+ * Um especificador é "local" quando aponta para dentro do projeto por caminho
+ * relativo/absoluto ou por alias de `paths`; qualquer outro é tratado como
+ * pacote externo, mesmo sem resolver (ex.: `react-native` sem `node_modules`).
+ */
+function isLocalSpecifier(
+  moduleSpecifier: string,
+  compilerOptions: ts.CompilerOptions,
+): boolean {
+  return (
+    moduleSpecifier.startsWith(".") ||
+    moduleSpecifier.startsWith("/") ||
+    matchesPathMapping(moduleSpecifier, compilerOptions)
+  );
+}
+
 function resolveImport(
   importInfo: ImportInfo,
   containingFile: string,
@@ -59,7 +108,12 @@ function resolveImport(
   if (!resolvedFile) {
     return {
       ...importInfo,
-      resolutionStatus: "unresolved",
+      resolutionStatus: isLocalSpecifier(
+        importInfo.moduleSpecifier,
+        compilerOptions,
+      )
+        ? "unresolved"
+        : "external",
     };
   }
 
