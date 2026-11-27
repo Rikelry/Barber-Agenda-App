@@ -216,8 +216,17 @@ npm test
 
 ## Distribuição
 
-O `package.json` define um executável chamado `architecture-checker`, mas o
-pacote está marcado como `private`. Ele pode ser compilado e usado localmente;
-publicação no npm ou distribuição para outros projetos requer preparação
-adicional, incluindo rever a configuração `private`, licença, versão e arquivos
-publicados.
+O `package.json` define o executável `architecture-checker` em `bin`, e o campo
+`files` restringe o pacote a `dist/`. O script `prepublishOnly` compila antes de
+empacotar, e `engines` exige Node 18 ou superior.
+
+```bash
+npm run build
+npm pack --dry-run
+```
+
+O pacote está marcado como `private`, então é consumido dentro do próprio
+repositório (`npm run dev -- <caminho>` ou `npm start -- <caminho>`). Para
+publicar no npm ou distribuir a outro projeto, remova `private`, defina
+`license` e `version` e rode `npm publish` — os arquivos publicados já ficam
+restritos a `dist/`.

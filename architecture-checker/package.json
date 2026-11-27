@@ -4,8 +4,14 @@
   "private": true,
   "description": "Verificador arquitetural para projetos React Native com MVVM Sofisticado",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "architecture-checker": "./dist/cli/index.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",
@@ -13,7 +19,8 @@
     "start": "node dist/cli/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "fast-glob": "^3.3.3"
