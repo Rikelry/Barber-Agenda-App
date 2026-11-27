@@ -1,0 +1,10 @@
+{
+  "extends": "@pacote-nao-instalado/tsconfig-base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
