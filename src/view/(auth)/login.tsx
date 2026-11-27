@@ -1,17 +1,19 @@
 // Login (padrão 1 de 05-padroes.md): marca, e-mail, senha com mostrar/esconder, link para
 // recuperar a senha, botão Entrar e link para criar conta.
 
+import { Image } from "expo-image";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "@/view/components/button";
-import { Icon } from "@/view/components/icon";
 import { PasswordField } from "@/view/components/passwordField";
 import { TextField } from "@/view/components/textField";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Typography } from "@/view/components/typography";
 import { componentSizes } from "@/view/theme";
 import { useLoginViewModel } from "@/viewmodel/useLoginViewModel";
+
+const LOGO = require("@/assets/images/logo.svg");
 
 const Login = () => {
   const [state, actions] = useLoginViewModel();
@@ -26,18 +28,13 @@ const Login = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={{ alignItems: "center", gap: spacing.md, paddingTop: spacing.xxxl, paddingBottom: spacing.lg }}>
-            <View
-              style={{
-                width: componentSizes.brandMark.size,
-                height: componentSizes.brandMark.size,
-                borderRadius: componentSizes.brandMark.radius,
-                backgroundColor: colors.primaryContainer,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon name="scissors" size={componentSizes.brandMark.size / 2} color={colors.onPrimaryContainer} />
-            </View>
+            <Image
+              source={LOGO}
+              contentFit="contain"
+              accessibilityRole="image"
+              accessibilityLabel="Logo do Barber Agenda"
+              style={{ width: componentSizes.brandMark.size, height: componentSizes.brandMark.size }}
+            />
             <Typography variant="headlineLarge" weight="700" accessibilityRole="header">
               Barber Agenda
             </Typography>

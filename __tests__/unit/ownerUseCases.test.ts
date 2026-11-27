@@ -36,6 +36,7 @@ const montar = () => {
     getBarbershop: jest.fn(async () => ({ ...barbearia("b1", "u1", "Matriz"), address: formatAddress(COMPLETO) })),
     saveBusinessHours: jest.fn(async () => undefined),
     createProfessional: jest.fn(async () => ({})),
+    joinAsProfessional: jest.fn(async () => ({ id: "p-dono" })),
     createService: jest.fn(async () => ({ id: "s9" })),
     updateService: jest.fn(async () => ({})),
   } as unknown as jest.Mocked<IBarbershopDataSource>;
@@ -46,8 +47,23 @@ const montar = () => {
     roles: ["owner"],
     user: { id: "u1", name: "Dono", email: "d@mail.com", phone: "1", avatarUrl: null, memberSince: new Date() },
   });
-  return { fonte, imagens, casos: new OwnerUseCases(fonte, imagens, sessao) };
+  return { fonte, imagens, sessao, casos: new OwnerUseCases(fonte, imagens, sessao) };
 };
+
+describe("OwnerUseCases: o dono também atende", () => {
+  it("entra na equipe uma vez só e limpa a especialidade", async () => {
+    const { fonte, sessao, casos } = montar();
+    expect(casos.canJoinAsProfessional()).toBe(true);
+    await casos.joinAsProfessional("b1", "  Barba  ");
+    expect(fonte.joinAsProfessional).toHaveBeenCalledWith("b1", "Barba");
+    await casos.joinAsProfessional("b1");
+    expect(fonte.joinAsProfessional).toHaveBeenLastCalledWith("b1", undefined);
+    const atual = sessao.getSession()!;
+    sessao.setSession({ ...atual, roles: ["owner", "profissional"] });
+    expect(casos.canJoinAsProfessional()).toBe(false);
+    await expect(casos.joinAsProfessional("b1")).rejects.toThrow("Você já atende em uma barbearia");
+  });
+});
 
 const campos = async (p: Promise<unknown>) => ((await p.catch((e: unknown) => e)) as ValidationError).fields;
 

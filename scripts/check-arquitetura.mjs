@@ -23,7 +23,11 @@ import { execSync } from "node:child_process";
 const root = join(fileURLToPath(import.meta.url), "..", "..");
 const srcDir = join(root, "src");
 
+// O servidor Express foi fundido nas camadas do MVVM e cada arquivo seu leva o
+// marcador abaixo na primeira linha. Não é código do app: as regras do MVVM
+// (nomes, imports, "any", etc.) não se aplicam a arquivos marcados.
 const ALLOWED_SRC_DIRS = ["app", "view", "viewmodel", "usecase", "model", "infra", "di"];
+const SERVER_MARKER = "// @servidor";
 const DATA_LIBS = ["@/infra", "async-storage", "firebase", "axios", "supabase"];
 const TEST_FILE = /(\.(test|spec)\.(t|j)sx?$)|(__tests__[\\/])/;
 const CAMEL_DIRS = ["view/components/", "usecase/", "model/", "infra/", "di/"];
@@ -81,7 +85,12 @@ function eachMatch(content, re) {
 const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const srcFiles = () =>
-  existsSync(srcDir) ? walk(srcDir).filter((f) => /\.(t|j)sx?$/.test(f) && !/\.d\.ts$/.test(f)) : [];
+  existsSync(srcDir)
+    ? walk(srcDir).filter(
+        (f) =>
+          /\.(t|j)sx?$/.test(f) && !/\.d\.ts$/.test(f) && !contentOf(f).includes(SERVER_MARKER),
+      )
+    : [];
 
 /* --------------------------------- regras --------------------------------- */
 

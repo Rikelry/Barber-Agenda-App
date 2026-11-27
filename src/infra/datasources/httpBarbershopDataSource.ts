@@ -1,5 +1,5 @@
-// Barbearias, profissionais e serviços da API (/barbershops/...). Converte os DTOs do backend
-// (backend/src/*/adapters/dtos) nas entidades do domínio.
+// Barbearias, profissionais e serviços da API (/barbershops/...). Converte os DTOs do servidor
+// (src/infra/http/dtos) nas entidades do domínio.
 
 import type {
   BarbershopData,
@@ -139,6 +139,15 @@ export class HttpBarbershopDataSource implements IBarbershopDataSource {
 
   async createProfessional(barbershopId: string, data: ProfessionalData): Promise<Professional> {
     return toProfessional(await this.http.post<ProfessionalDto>(`/barbershops/${segment(barbershopId)}/professionals`, data));
+  }
+
+  async joinAsProfessional(barbershopId: string, specialty?: string): Promise<Professional> {
+    return toProfessional(
+      await this.http.post<ProfessionalDto>(
+        `/barbershops/${segment(barbershopId)}/professionals/me`,
+        specialty ? { specialty } : {},
+      ),
+    );
   }
 
   async updateProfessional(barbershopId: string, professionalId: string, data: ProfessionalUpdate): Promise<Professional> {

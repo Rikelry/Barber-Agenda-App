@@ -43,6 +43,16 @@ const SIMBOLOS: Record<string, Simbolo> = {
     badge: { material: "badge", ios: "person.text.rectangle" },
     camera: { material: "photo_camera", ios: "camera" },
     photos: { material: "photo_library", ios: "photo.on.rectangle" },
+    // Setas e selo dos cards do Início.
+    arrowForward: { material: "arrow_forward", ios: "arrow.right" },
+    checkCircle: { material: "check_circle", ios: "checkmark.circle.fill" },
+    group: { material: "group", ios: "person.2" },
+    // Aba Trabalho: seletor de barbearia, iniciar, não compareceu e motivo.
+    expandMore: { material: "expand_more", ios: "chevron.down" },
+    play: { material: "play_arrow", ios: "play.fill" },
+    personOff: { material: "person_off", ios: "person.slash" },
+    taskAlt: { material: "task_alt", ios: "checkmark.circle" },
+    notes: { material: "notes", ios: "text.alignleft" },
 };
 
 export const Icon = ({ name, size = 24, color, style, children }: IconProps) => {

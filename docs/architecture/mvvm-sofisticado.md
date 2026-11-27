@@ -22,15 +22,19 @@ src/
 │   ├── services/         # Contratos de serviços
 │   └── errors.ts         # Erros de domínio
 ├── infra/
-│   ├── datasources/      # Implementações concretas de acesso a dados
-│   └── services/         # Implementações concretas de serviços
+│   ├── http/             # Servidor Express: app, routes, controllers, schemas, middlewares
+│   ├── datasources/      # Implementações concretas de acesso a dados (app e servidor)
+│   ├── database/         # Cliente Supabase
+│   ├── services/         # Implementações concretas de serviços
+│   ├── errors/           # AppError do servidor
+│   └── utils/            # Utilitários do servidor
 ├── di/
 │   └── container.ts      # Ponto central de composição de dependências
 ├── components/           # Componentes visuais reutilizáveis
 └── theme/                # Tokens e tema visual
 ```
 
-Essa estrutura é uma referência, não uma ordem para criar todas as pastas imediatamente. Adicione somente o necessário para a funcionalidade em questão e respeite os arquivos existentes.
+Essa estrutura é uma referência, não uma ordem para criar todas as pastas imediatamente. Adicione somente o necessário para a funcionalidade em questão e respeite os arquivos existentes. O servidor Express foi fundido nas camadas do MVVM (não existe mais como pasta separada): a camada HTTP vive em `src/infra/http/`, os contratos em `src/model/` e `src/usecase/`, e as implementações de dados em `src/infra/datasources/`. O servidor continua sendo um aplicativo separado, que não segue as regras de camadas e imports do app — por isso cada arquivo dele começa com o marcador `// @servidor`, que o verificador de arquitetura ignora.
 
 ## 2. Responsabilidades
 

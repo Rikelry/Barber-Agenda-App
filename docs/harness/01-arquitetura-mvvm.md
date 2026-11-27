@@ -14,6 +14,8 @@
 | Infra | `src/infra/` | Implementa os contratos do domínio e traduz erros para `DomainError`. |
 | DI | `src/di/container.ts` | Único ponto que importa `@/infra` (com os testes). |
 
+> O servidor Express foi fundido nas camadas do MVVM (camada HTTP em `src/infra/http/`). É um app separado: não é código do MVVM, e as regras do app não se aplicam a ele. Cada arquivo dele começa com o marcador `// @servidor`, que o verificador ignora.
+
 ## Direção das dependências
 
 `View → ViewModel → Use Case → Contrato do domínio ← Infra ← Container DI`

@@ -16,6 +16,8 @@ export type AgendamentosState = {
   /** Agendamento com a confirmação de cancelamento aberta. */
   confirmingCancelId: string | null;
   cancellingId: string | null;
+  /** Sugestão de horário sendo respondida. */
+  answeringId: string | null;
   errorMessage: string | null;
 };
 
@@ -27,6 +29,9 @@ export type AgendamentosActions = {
   dismissCancel: () => void;
   confirmCancel: () => void;
   findBarbershop: () => void;
+  /** Resposta à sugestão de outro horário feita pelo barbeiro. */
+  acceptProposal: (appointment: Appointment) => void;
+  rejectProposal: (appointment: Appointment) => void;
 };
 
 const VAZIO: MyAppointments = { upcoming: [], history: [] };
@@ -42,6 +47,7 @@ export function useAgendamentosViewModel(
   const [appointments, setAppointments] = useState<MyAppointments>(VAZIO);
   const [confirmingCancelId, setConfirmingCancelId] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [answeringId, setAnsweringId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const carregar = useCallback(() => {
@@ -81,8 +87,16 @@ export function useAgendamentosViewModel(
       .finally(() => setCancellingId(null));
   };
 
+  const responder = (appointment: Appointment, acao: Promise<void>) => {
+    setAnsweringId(appointment.id);
+    setErrorMessage(null);
+    acao
+      .then(carregar, (erro: unknown) => setErrorMessage(mensagem(erro)))
+      .finally(() => setAnsweringId(null));
+  };
+
   return [
-    { status, tab, appointments, confirmingCancelId, cancellingId, errorMessage },
+    { status, tab, appointments, confirmingCancelId, cancellingId, answeringId, errorMessage },
     {
       setTab,
       retry: () => {
@@ -97,7 +111,13 @@ export function useAgendamentosViewModel(
       },
       dismissCancel: () => setConfirmingCancelId(null),
       confirmCancel,
-      findBarbershop: () => router.dismissTo("/barbearias"),
+      findBarbershop: () => router.dismissTo("/"),
+      acceptProposal: (a) => {
+        if (!answeringId) responder(a, useCases.acceptProposal(a));
+      },
+      rejectProposal: (a) => {
+        if (!answeringId) responder(a, useCases.rejectProposal(a));
+      },
     },
   ];
 }

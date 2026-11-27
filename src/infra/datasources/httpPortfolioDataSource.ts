@@ -1,4 +1,4 @@
-// Portfólio na API: /portfolio (backend/src/portfolio).
+// Portfólio na API: /portfolio (src/infra/http/controllers/PortfolioController.ts).
 
 import type { NewPortfolioPhoto, IPortfolioDataSource } from "@/model/datasources/iPortfolioDataSource";
 import type { PortfolioPhoto } from "@/model/entities/portfolioPhoto";

@@ -1,7 +1,7 @@
 import type { AppointmentData, IAppointmentDataSource } from "@/model/datasources/iAppointmentDataSource";
 import type { IBarbershopDataSource } from "@/model/datasources/iBarbershopDataSource";
-import type { Appointment } from "@/model/entities/appointment";
-import { ValidationError } from "@/model/errors";
+import { isActiveStatus, type Appointment } from "@/model/entities/appointment";
+import { DomainError, ValidationError } from "@/model/errors";
 import type { BookingForm, IAppointmentUseCases, MyAppointments } from "@/usecase/iAppointmentUseCases";
 
 /** "YYYY-MM-DD" da data no fuso do aparelho. */
@@ -36,7 +36,7 @@ export class AppointmentUseCases implements IAppointmentUseCases {
 
   async listMyAppointments(now: Date = new Date()): Promise<MyAppointments> {
     const todos = await this.comBarbearia(await this.appointments.listMine());
-    const futuro = (a: Appointment) => a.status === "confirmed" && a.startsAt.getTime() >= now.getTime();
+    const futuro = (a: Appointment) => isActiveStatus(a.status) && a.startsAt.getTime() >= now.getTime();
     return {
       upcoming: todos.filter(futuro).sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()),
       history: todos.filter((a) => !futuro(a)).sort((a, b) => b.startsAt.getTime() - a.startsAt.getTime()),
@@ -88,5 +88,19 @@ export class AppointmentUseCases implements IAppointmentUseCases {
 
   cancel(appointmentId: string): Promise<void> {
     return this.appointments.cancel(appointmentId);
+  }
+
+  async acceptProposal(appointment: Appointment): Promise<void> {
+    if (appointment.status !== "awaiting_client" || !appointment.proposal) {
+      throw new DomainError("Não há horário sugerido para este pedido.", "VALIDATION");
+    }
+    await this.appointments.acceptProposal(appointment.id);
+  }
+
+  async rejectProposal(appointment: Appointment): Promise<void> {
+    if (appointment.status !== "awaiting_client") {
+      throw new DomainError("Não há horário sugerido para este pedido.", "VALIDATION");
+    }
+    await this.appointments.rejectProposal(appointment.id);
   }
 }

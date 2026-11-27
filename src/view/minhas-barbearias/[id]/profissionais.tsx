@@ -1,5 +1,5 @@
-// Profissionais da barbearia: lista com editar e o formulário de novo profissional
-// (padrão 5 de 05-padroes.md).
+// Profissionais da barbearia: "Você também atende aqui?" para o dono passar a atender, a lista
+// com editar e o formulário de novo profissional (padrão 5 de 05-padroes.md).
 
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -38,7 +38,52 @@ const ProfissionaisBarbearia = () => {
             onRetry={actions.retry}
             emptyTitle=""
           />
-        ) : state.professionals.length === 0 && !state.editing ? (
+        ) : null}
+        {state.status === "content" && (state.canJoin || state.joinMessage) ? (
+          <View
+            style={{
+              gap: spacing.md,
+              padding: spacing.lg,
+              borderRadius: theme.shapes.large,
+              backgroundColor: colors.primaryContainer,
+            }}
+          >
+            {state.canJoin ? (
+              <>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                  <Icon name="scissors" size={spacing.xxl} color={colors.onPrimaryContainer} />
+                  <View style={{ flex: 1 }}>
+                    <Typography variant="titleMedium" weight="700" color="onPrimaryContainer">
+                      Você também atende aqui?
+                    </Typography>
+                    <Typography variant="bodyMedium" color="onSurfaceVariant">
+                      Entre na equipe com a sua conta: os clientes poderão agendar com você e você aprova os pedidos na sua agenda.
+                    </Typography>
+                  </View>
+                </View>
+                <Button variant="filled" size="small" onPress={actions.joinAsProfessional} disabled={state.joining}>
+                  {state.joining ? "Entrando na equipe..." : "Eu também atendo aqui"}
+                </Button>
+              </>
+            ) : null}
+            {state.joinMessage ? (
+              <Typography variant="bodyMedium" color="onPrimaryContainer" accessibilityLiveRegion="polite">
+                {state.joinMessage}
+              </Typography>
+            ) : null}
+            {!state.canJoin ? (
+              <Button
+                variant="tonal"
+                size="small"
+                onPress={actions.openMyAgenda}
+                leadingIcon={(cor) => <Icon name="calendar" size={spacing.lg + spacing.xs} color={cor} />}
+              >
+                Abrir agenda da barbearia
+              </Button>
+            ) : null}
+          </View>
+        ) : null}
+        {state.status !== "content" ? null : state.professionals.length === 0 && !state.editing ? (
           <Typography variant="bodyMedium" color="onSurfaceVariant">
             Nenhum profissional cadastrado. Toque no + para adicionar.
           </Typography>

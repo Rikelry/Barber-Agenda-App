@@ -1,11 +1,11 @@
-# Tabs (Segmented Control)
+# Tabs
 
 Origem no sistema base: Material 3, Primary tabs. Situação: Adaptado. Motivo da adaptação: Alternância entre grupos de conteúdo na mesma tela (ex: Serviços vs Profissionais).
 
 ## Quando usar
 
-- Para alternar entre categorias de conteúdo relacionadas.
-- Para filtrar visualizações em uma lista (ex: Próximos vs Histórico).
+- Para alternar entre grupos de conteúdo de mesmo nível numa tela longa (abas primárias do Material 3).
+- Para escolher entre 2 a 5 opções (Próximos | Histórico, Serviços | Profissionais, Recorrente | Pontual), use o [Segmented button](segmented-button.md).
 
 ## Quando não usar
 
@@ -22,8 +22,7 @@ Origem no sistema base: Material 3, Primary tabs. Situação: Adaptado. Motivo d
 
 | Variante | Uso | Tokens |
 | --- | --- | --- |
-| Linha | Telas de detalhes (Serviços/Profissionais) | `color.primary`, `color.outline-variant` |
-| Tonal | Filtros de agendamento (Próximos/Histórico) | `color.secondary-container`, `color.on-secondary-container` |
+| Linha | Abas de conteúdo | `color.primary`, `color.outline-variant` |
 
 ## Estados
 

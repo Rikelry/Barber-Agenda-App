@@ -1,23 +1,32 @@
-// Perfil (canvas de telas): foto, nome, "membro desde" e papéis; menu com Dados pessoais e
-// Trocar senha, a área de trabalho de quem é profissional, "Cadastrar minha barbearia" para
-// quem ainda não é dono e Sair da conta.
+// Perfil: central da conta no formato do menu da conta Google (Material 3). Identificação no
+// topo (foto, nome, "membro desde" e as etiquetas dos papéis reais), CONTA (Dados pessoais),
+// TRABALHO (para profissionais), MINHA BARBEARIA (para donos; para os demais, o convite para
+// cadastrar uma) e Sair da conta com confirmação no fim. A agenda fica na aba Trabalho.
 
-import { Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/view/components/avatar";
+import { Button } from "@/view/components/button";
 import { Icon } from "@/view/components/icon";
 import { MainTabBar } from "@/view/components/mainTabBar";
+import { ProfileBarbershopCard, ProfileMenuItem, ProfileSection } from "@/view/components/profileMenu";
 import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Typography } from "@/view/components/typography";
-import { componentSizes } from "@/view/theme";
 import { usePerfilViewModel } from "@/viewmodel/usePerfilViewModel";
 import { useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const membroDesde = (data: Date) => `Membro desde ${MESES[data.getMonth()]} ${data.getFullYear()}`;
+
+/** Etiqueta de cada papel, na ordem em que aparecem. */
+const PAPEIS = [
+  { role: "cliente", label: "Cliente", icon: "person" },
+  { role: "profissional", label: "Profissional", icon: "scissors" },
+  { role: "owner", label: "Dono", icon: "store" },
+] as const;
 
 const Perfil = () => {
   const [state, actions] = usePerfilViewModel();
@@ -26,110 +35,182 @@ const Perfil = () => {
   const { colors, spacing } = theme;
   const { user } = state;
 
-  const secao = (texto: string) => (
-    <Typography
-      variant="labelSmall"
-      weight="700"
-      color="primary"
-      accessibilityRole="header"
-      style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.lg, letterSpacing: 0.5 }}
-    >
-      {texto.toUpperCase()}
-    </Typography>
-  );
-
-  const item = (icone: string, titulo: string, onPress: () => void, subtitulo?: string, perigo = false) => (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={subtitulo ? `${titulo}, ${subtitulo}` : titulo}
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.lg,
-        minHeight: componentSizes.listItem.twoLine,
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.outlineVariant,
-        backgroundColor: pressed ? colors.surfaceContainer : "transparent",
-      })}
-    >
-      <Icon name={icone} color={perigo ? colors.error : colors.primary} />
-      <View style={{ flex: 1 }}>
-        <Typography variant="bodyLarge" color={perigo ? "error" : "onSurface"}>
-          {titulo}
-        </Typography>
-        {subtitulo ? (
-          <Typography variant="bodyMedium" color="onSurfaceVariant">
-            {subtitulo}
-          </Typography>
-        ) : null}
-      </View>
-      {perigo ? null : <Icon name="chevronRight" size={spacing.xl} color={colors.onSurfaceVariant} />}
-    </Pressable>
-  );
-
-  const selo = (texto: string, destaque: boolean) => (
-    <View
-      key={texto}
-      style={{
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs,
-        borderRadius: theme.shapes.extraSmall,
-        backgroundColor: destaque ? colors.primaryContainer : colors.surfaceDim,
-      }}
-    >
-      <Typography variant="labelSmall" weight="700" style={{ color: destaque ? colors.onPrimaryContainer : colors.primary }}>
-        {texto}
-      </Typography>
-    </View>
-  );
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
       <ScreenHeader title="Perfil" />
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.huge, gap: spacing.xxl }}>
         {state.status !== "content" || !user ? (
-          <View style={{ padding: spacing.lg }}>
-            <ScreenState
-              status={state.status === "content" ? "error" : state.status}
-              loadingLabel="Carregando perfil"
-              errorMessage={state.errorMessage}
-              onRetry={actions.retry}
-              emptyTitle=""
-            />
-          </View>
+          <ScreenState
+            status={state.status === "content" ? "error" : state.status}
+            loadingLabel="Carregando perfil"
+            errorMessage={state.errorMessage}
+            onRetry={actions.retry}
+            emptyTitle=""
+          />
         ) : (
           <>
-            <View style={{ alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.lg }}>
+            {/* Identificação */}
+            <View style={{ alignItems: "center", gap: spacing.sm, paddingTop: spacing.sm }}>
               <Avatar name={user.name} uri={user.avatarUrl} size="large" />
-              <Typography variant="titleLarge" weight="500" align="center">
+              <Typography variant="headlineSmall" weight="500" align="center" accessibilityRole="header">
                 {user.name}
               </Typography>
               <Typography variant="bodyMedium" color="onSurfaceVariant" align="center">
                 {membroDesde(user.memberSince)}
               </Typography>
-              <View style={{ flexDirection: "row", gap: spacing.sm }}>
-                {selo("Cliente", true)}
-                {state.isProfessional ? selo("Profissional", false) : null}
-                {state.isOwner ? selo("Dono", false) : null}
+              <View
+                accessible
+                accessibilityLabel={`Funções: ${PAPEIS.filter((p) => state.roles.includes(p.role)).map((p) => p.label).join(", ")}`}
+                style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: spacing.sm, paddingTop: spacing.xs }}
+              >
+                {PAPEIS.filter((p) => state.roles.includes(p.role)).map((p) => (
+                  <View
+                    key={p.role}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: spacing.xs + spacing.xs / 2,
+                      paddingLeft: spacing.sm,
+                      paddingRight: spacing.md,
+                      paddingVertical: spacing.xs + spacing.xs / 2,
+                      borderRadius: theme.shapes.small,
+                      backgroundColor: colors.secondaryContainer,
+                    }}
+                  >
+                    <Icon name={p.icon} size={spacing.lg + spacing.xs / 2} color={colors.onSecondaryContainer} />
+                    <Typography variant="labelLarge" color="onSecondaryContainer">
+                      {p.label}
+                    </Typography>
+                  </View>
+                ))}
               </View>
             </View>
 
-            {secao("Conta")}
-            {item("person", "Dados pessoais", actions.openPersonalData, "Nome, telefone e e-mail")}
-            {item("lock", "Trocar senha", actions.openChangePassword)}
+            {/* Conta */}
+            <ProfileSection title="Conta">
+              <ProfileMenuItem
+                icon="person"
+                title="Dados pessoais"
+                description="Nome, telefone e e-mail"
+                onPress={actions.openPersonalData}
+              />
+            </ProfileSection>
 
-            {state.isProfessional || !state.isOwner ? secao("Trabalho") : null}
-            {state.isProfessional
-              ? item("scissors", "Meu perfil profissional", actions.openWorkplace, "Especialidade, barbearia e horário")
-              : null}
-            {state.isProfessional ? item("camera", "Meu portfólio", actions.openPortfolio, "Fotos dos seus cortes") : null}
-            {state.isOwner ? null : item("store", "Cadastrar minha barbearia", actions.registerBarbershop, "Receba agendamentos pelo app")}
+            {/* Trabalho (profissionais) */}
+            {state.isProfessional ? (
+              <ProfileSection title="Trabalho">
+                <ProfileMenuItem
+                  icon="badge"
+                  title="Meu perfil profissional"
+                  description="Especialidade, barbearia e informações profissionais"
+                  onPress={actions.openWorkplace}
+                />
+                <ProfileMenuItem icon="photos" title="Meu portfólio" description="Fotos dos seus cortes" onPress={actions.openPortfolio} />
+              </ProfileSection>
+            ) : null}
 
-            <View style={{ height: spacing.lg }} />
-            {item("logout", "Sair da conta", actions.logout, undefined, true)}
+            {/* Minha barbearia (donos); quem não é dono vê o convite */}
+            {state.isOwner ? (
+              <View style={{ gap: spacing.md }}>
+                {state.barbershop ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Typography
+                      variant="labelLarge"
+                      weight="700"
+                      color="secondary"
+                      accessibilityRole="header"
+                      style={{ paddingHorizontal: spacing.xs, letterSpacing: 0.8 }}
+                    >
+                      MINHA BARBEARIA
+                    </Typography>
+                    <ProfileBarbershopCard
+                      name={state.barbershop.name}
+                      imageUrl={state.barbershop.avatarUrl}
+                      onPress={actions.openBarbershop}
+                    />
+                  </View>
+                ) : null}
+                <ProfileSection title={state.barbershop ? undefined : "Minha barbearia"}>
+                  <ProfileMenuItem
+                    icon="store"
+                    title="Informações da barbearia"
+                    description="Nome, telefone, endereço e fotografia"
+                    onPress={actions.openBarbershop}
+                  />
+                  <ProfileMenuItem
+                    icon="clock"
+                    title="Horário de funcionamento"
+                    description="Configure os dias e horários de atendimento"
+                    onPress={actions.openHours}
+                  />
+                  <ProfileMenuItem
+                    icon="group"
+                    title="Profissionais"
+                    description="Gerencie os profissionais da sua barbearia"
+                    onPress={actions.openProfessionals}
+                  />
+                  <ProfileMenuItem
+                    icon="scissors"
+                    title="Serviços"
+                    description="Gerencie cortes, preços, duração e imagens"
+                    onPress={actions.openServices}
+                  />
+                </ProfileSection>
+                {state.otherBarbershops > 0 ? (
+                  <Typography variant="bodySmall" color="onSurfaceVariant" style={{ paddingHorizontal: spacing.xs }}>
+                    {state.otherBarbershops === 1
+                      ? "Você tem mais 1 barbearia. A agenda dela fica na aba Trabalho."
+                      : `Você tem mais ${state.otherBarbershops} barbearias. A agenda delas fica na aba Trabalho.`}
+                  </Typography>
+                ) : null}
+              </View>
+            ) : (
+              <ProfileSection title="Minha barbearia">
+                <ProfileMenuItem
+                  icon="store"
+                  title="Cadastrar minha barbearia"
+                  description="Receba agendamentos pelo app"
+                  onPress={actions.registerBarbershop}
+                />
+              </ProfileSection>
+            )}
+
+            {/* Sair da conta */}
+            <View style={{ gap: spacing.md, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.outlineVariant }}>
+              {state.confirmingLogout ? (
+                <View
+                  accessibilityLiveRegion="polite"
+                  style={{ gap: spacing.md, padding: spacing.lg, borderRadius: theme.shapes.extraLarge, backgroundColor: colors.surfaceContainer }}
+                >
+                  <Typography variant="titleMedium" weight="700">
+                    Sair da conta?
+                  </Typography>
+                  <Typography variant="bodyMedium" color="onSurfaceVariant">
+                    Você vai precisar entrar de novo com e-mail e senha.
+                  </Typography>
+                  <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                    <Button variant="text" size="small" style={{ flex: 1 }} onPress={actions.dismissLogout}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="filled"
+                      size="small"
+                      style={{ flex: 1, backgroundColor: colors.error }}
+                      onPress={actions.logout}
+                      accessibilityLabel="Confirmar sair da conta"
+                    >
+                      <Typography variant="labelLarge" color="onError">
+                        Sair
+                      </Typography>
+                    </Button>
+                  </View>
+                </View>
+              ) : (
+                <View style={{ borderRadius: theme.shapes.extraLarge, overflow: "hidden" }}>
+                  <ProfileMenuItem icon="logout" title="Sair da conta" onPress={actions.askLogout} destructive />
+                </View>
+              )}
+            </View>
           </>
         )}
       </ScrollView>

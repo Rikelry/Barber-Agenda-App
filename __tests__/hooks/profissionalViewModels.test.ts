@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { renderHook, waitFor } from "@testing-library/react-native";
 
 import { ValidationError } from "@/model/errors";
+import type { AgendaAppointment } from "@/model/entities/agendaAppointment";
+import type { IAgendaUseCases } from "@/usecase/iAgendaUseCases";
 import type { IProfessionalUseCases, RecurringBlock } from "@/usecase/iProfessionalUseCases";
 import { useIndisponibilidadesViewModel } from "@/viewmodel/useIndisponibilidadesViewModel";
 import { useMeuTrabalhoViewModel } from "@/viewmodel/useMeuTrabalhoViewModel";
@@ -14,7 +16,7 @@ jest.mock("expo-router", () => ({
   router: { push: (...a: unknown[]) => mockPush(...a), canGoBack: () => true, back: jest.fn(), replace: jest.fn() },
   useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
 }));
-jest.mock("@/di/container", () => ({ professionalUseCases: {}, authUseCases: {} }));
+jest.mock("@/di/container", () => ({ professionalUseCases: {}, authUseCases: {}, agendaUseCases: {}, barbershopUseCases: {} }));
 
 const BLOCO: RecurringBlock = { key: "k", ids: ["r1", "r2"], days: [1, 2], startTime: "12:00", endTime: "13:00", reason: "Almoço" };
 
@@ -51,44 +53,123 @@ beforeEach(() => {
   mockPush.mockClear();
 });
 
+const horario = (id: string, status: AgendaAppointment["status"], startsAt: Date): AgendaAppointment => ({
+  id,
+  barbershopId: "b1",
+  professionalId: "p1",
+  professionalName: "Alessandro",
+  clientName: "João Pereira",
+  clientPhone: "11999990001",
+  serviceId: "s1",
+  serviceName: "Corte",
+  durationMinutes: 30,
+  startsAt,
+  endsAt: new Date(startsAt.getTime() + 30 * 60000),
+  status,
+  proposal: null,
+  rejectionReason: null,
+});
+
+const PEDIDO = horario("p1", "pending", new Date(Date.now() + 86400000));
+const MARCADO = horario("a1", "confirmed", new Date(Date.now() - 600000));
+
+const agendaFalsa = (): jest.Mocked<IAgendaUseCases> => ({
+  getOverview: jest.fn(async () => ({
+    requests: [PEDIDO],
+    closed: false,
+    day: [{ kind: "appointment" as const, appointment: MARCADO }],
+    markedDays: [],
+  })),
+  listWorkplaces: jest.fn(async () => [
+    { barbershopId: "b1", name: "Don Corleone" },
+    { barbershopId: "b2", name: "Vintage" },
+  ]),
+  approve: jest.fn(async () => undefined),
+  reject: jest.fn(async () => undefined),
+  getAvailableSlots: jest.fn(async () => ["10:00", "10:30"]),
+  propose: jest.fn(async () => undefined),
+  start: jest.fn(async () => undefined),
+  complete: jest.fn(async () => undefined),
+  noShow: jest.fn(async () => undefined),
+  cancel: jest.fn(async () => undefined),
+});
+
 describe("useMinhaAgendaViewModel", () => {
-  it("carrega hoje, troca de dia e abre as indisponibilidades", async () => {
-    const casos = falso();
+  it("abre a agenda da primeira barbearia, troca de dia e de barbearia e abre os bloqueios", async () => {
+    const casos = agendaFalsa();
     const { result } = await renderHook(() => useMinhaAgendaViewModel(casos));
-    await waitFor(() => expect(result.current[0].status).toBe("content"));
-    expect(result.current[0].week).toHaveLength(7);
-    expect(result.current[0].week[0]?.date.getDay()).toBe(1);
-    expect(result.current[0].week.some((d) => d.today && d.selected)).toBe(true);
-    const outro = result.current[0].week.find((d) => !d.selected)!.iso;
+    await waitFor(() => expect(result.current[0].agenda.status).toBe("content"));
+    expect(casos.getOverview).toHaveBeenCalledWith({ kind: "professional", barbershopId: "b1" }, expect.any(String));
+    expect(result.current[0].workplaces).toHaveLength(2);
+    const { week } = result.current[0].agenda;
+    expect(week).toHaveLength(7);
+    expect(week[0]?.date.getDay()).toBe(1);
+    expect(week.some((d) => d.today && d.selected)).toBe(true);
+    const outro = week.find((d) => !d.selected)!.iso;
     await agir(() => result.current[1].selectDate(outro));
-    await waitFor(() => expect(casos.getDayAgenda).toHaveBeenLastCalledWith(outro));
+    await waitFor(() => expect(casos.getOverview).toHaveBeenLastCalledWith({ kind: "professional", barbershopId: "b1" }, outro));
+    await agir(() => result.current[1].selectBarbershop("b2"));
+    await waitFor(() => expect(casos.getOverview).toHaveBeenLastCalledWith({ kind: "professional", barbershopId: "b2" }, outro));
     await agir(() => result.current[1].openBlocks());
     expect(mockPush).toHaveBeenCalledWith("/indisponibilidades");
   });
 });
 
 describe("ações na agenda", () => {
-  it("tocar no agendamento abre Concluir e Cancelar; cancelar pede confirmação", async () => {
-    const casos = falso();
+  it("aprova, recusa com motivo e sugere outro horário", async () => {
+    const casos = agendaFalsa();
     const { result } = await renderHook(() => useMinhaAgendaViewModel(casos));
-    await waitFor(() => expect(result.current[0].status).toBe("content"));
-    await agir(() => result.current[1].select("a1"));
-    expect(result.current[0].selectedId).toBe("a1");
+    await waitFor(() => expect(result.current[0].agenda.status).toBe("content"));
+    await agir(() => result.current[1].approve(PEDIDO));
+    await waitFor(() => expect(result.current[0].agenda.actionMessage).toBe("Pedido de João aprovado."));
+    expect(casos.approve).toHaveBeenCalledWith(PEDIDO);
+
+    await agir(() => result.current[1].askReject(PEDIDO));
+    expect(casos.reject).not.toHaveBeenCalled();
+    await agir(() => result.current[1].changeRejectReason("Agenda cheia"));
+    await agir(() => result.current[1].confirmReject());
+    await waitFor(() => expect(result.current[0].agenda.actionMessage).toBe("Pedido de João recusado."));
+    expect(casos.reject).toHaveBeenCalledWith(PEDIDO, "Agenda cheia");
+    expect(result.current[0].agenda.rejection).toBeNull();
+
+    await agir(() => result.current[1].openProposal(PEDIDO));
+    await waitFor(() => expect(result.current[0].agenda.proposal?.slotsStatus).toBe("content"));
+    await agir(() => result.current[1].proposalSelectTime("10:30"));
+    await agir(() => result.current[1].sendProposal());
+    await waitFor(() => expect(result.current[0].agenda.actionMessage).toBe("Sugestão enviada para João."));
+    expect(casos.propose).toHaveBeenCalledWith(PEDIDO, expect.any(String), "10:30");
+    expect(result.current[0].agenda.proposal).toBeNull();
+    await agir(() => result.current[1].dismissMessage());
+    expect(result.current[0].agenda.actionMessage).toBeNull();
+  });
+
+  it("os detalhes iniciam e finalizam; cancelar e não compareceu pedem confirmação", async () => {
+    const casos = agendaFalsa();
+    const { result } = await renderHook(() => useMinhaAgendaViewModel(casos));
+    await waitFor(() => expect(result.current[0].agenda.status).toBe("content"));
+    await agir(() => result.current[1].openDetails(MARCADO));
+    expect(result.current[0].agenda.details?.id).toBe("a1");
+    await agir(() => result.current[1].start());
+    await waitFor(() => expect(result.current[0].agenda.actionMessage).toBe("Atendimento de João iniciado."));
+    expect(casos.start).toHaveBeenCalledWith(MARCADO);
+    expect(result.current[0].agenda.details).toBeNull();
+
+    await agir(() => result.current[1].openDetails(MARCADO));
     await agir(() => result.current[1].complete());
-    await waitFor(() => expect(result.current[0].actionMessage).toBe("Atendimento concluído."));
-    expect(casos.completeAppointment).toHaveBeenCalledWith("a1", ATENDIMENTO.startsAt);
-    expect(result.current[0].selectedId).toBeNull();
+    await waitFor(() => expect(result.current[0].agenda.actionMessage).toBe("Atendimento finalizado."));
 
-    await agir(() => result.current[1].select("a1"));
-    await agir(() => result.current[1].askCancel());
-    expect(result.current[0].confirmingCancel).toBe(true);
-    expect(casos.cancelAppointment).not.toHaveBeenCalled();
-    await agir(() => result.current[1].confirmCancel());
-    await waitFor(() => expect(result.current[0].actionMessage).toBe("Agendamento cancelado."));
-    expect(casos.cancelAppointment).toHaveBeenCalledWith("a1");
+    await agir(() => result.current[1].openDetails(MARCADO));
+    await agir(() => result.current[1].askConfirm("cancel"));
+    expect(result.current[0].agenda.confirming).toBe("cancel");
+    expect(casos.cancel).not.toHaveBeenCalled();
+    await agir(() => result.current[1].confirm());
+    await waitFor(() => expect(result.current[0].agenda.actionMessage).toBe("Horário cancelado."));
+    expect(casos.cancel).toHaveBeenCalledWith(MARCADO);
 
-    await agir(() => result.current[1].openWorkplace());
-    expect(mockPush).toHaveBeenCalledWith("/meu-trabalho");
+    await agir(() => result.current[1].openDetails(MARCADO));
+    await agir(() => result.current[1].askConfirm("no_show"));
+    await agir(() => result.current[1].confirm());
+    await waitFor(() => expect(casos.noShow).toHaveBeenCalledWith(MARCADO));
   });
 
   it("meu perfil profissional carrega o local de trabalho", async () => {

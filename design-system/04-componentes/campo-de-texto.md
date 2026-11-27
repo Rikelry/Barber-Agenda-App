@@ -72,3 +72,11 @@ export const TextField = ({ label, error, ...props }) => (
   </View>
 );
 ```
+
+## Variante com rótulo flutuante (Material 3)
+
+`floatingLabel` no `TextField` (usado nos formulários de barbearia):
+
+- **Vazio e sem foco:** o rótulo fica dentro do campo em `bodyLarge`, e o exemplo (placeholder) não aparece.
+- **Com foco ou preenchido:** o rótulo sobe para a borda em `bodySmall`, sobre o fundo `color.surface`, e o exemplo aparece.
+- **Medidas:** 56 dp de altura, contorno de 1 dp (`color.outline`), 2 dp com foco (`color.primary`) ou erro (`color.error`), e canto extra-small de 4 dp.

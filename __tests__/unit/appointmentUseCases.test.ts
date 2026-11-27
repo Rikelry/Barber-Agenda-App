@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 
 import type { AppointmentData, IAppointmentDataSource } from "@/model/datasources/iAppointmentDataSource";
 import type { IBarbershopDataSource } from "@/model/datasources/iBarbershopDataSource";
-import { ValidationError } from "@/model/errors";
+import { DomainError, ValidationError } from "@/model/errors";
 import { AppointmentUseCases, toDateTime, toIsoDate } from "@/usecase/appointmentUseCases";
 
 const AGORA = new Date(2026, 10, 16, 10, 0);
@@ -27,6 +27,8 @@ const montar = (lista: AppointmentData[]) => {
     cancel: jest.fn(async () => undefined),
     reschedule: jest.fn(async (id, date, time) => agendamento(id, toDateTime(date, time), "confirmed")),
     listAvailableSlots: jest.fn(async () => ["15:00", "09:00", "10:30"]),
+    acceptProposal: jest.fn(async () => undefined),
+    rejectProposal: jest.fn(async () => undefined),
   };
   const barbearias = {
     getBarbershop: jest.fn(async (id: string) => ({ id, name: id === "b1" ? "Don Corleone" : "Vintage", address: "", phone: "", avatarUrl: null })),
@@ -85,5 +87,22 @@ describe("AppointmentUseCases", () => {
     expect(novo.barbershopName).toBe("Don Corleone");
     await casos.cancel("a1");
     expect(agendamentos.cancel).toHaveBeenCalledWith("a1");
+  });
+
+  it("aceita ou recusa só uma sugestão de horário pendente", async () => {
+    const { agendamentos, casos } = montar([]);
+    const inicio = new Date(2026, 10, 18, 14);
+    const sugerido = {
+      ...agendamento("a", new Date(2026, 10, 17, 11), "awaiting_client"),
+      barbershopName: "Don Corleone",
+      proposal: { startsAt: inicio, endsAt: new Date(inicio.getTime() + 40 * 60000) },
+    };
+    await casos.acceptProposal(sugerido);
+    expect(agendamentos.acceptProposal).toHaveBeenCalledWith("a");
+    await casos.rejectProposal(sugerido);
+    expect(agendamentos.rejectProposal).toHaveBeenCalledWith("a");
+    const confirmado = { ...agendamento("b", inicio, "confirmed"), barbershopName: "Don Corleone" };
+    await expect(casos.acceptProposal(confirmado)).rejects.toBeInstanceOf(DomainError);
+    await expect(casos.rejectProposal(confirmado)).rejects.toBeInstanceOf(DomainError);
   });
 });

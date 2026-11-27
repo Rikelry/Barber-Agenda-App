@@ -95,7 +95,7 @@ export class ProfessionalUseCases implements IProfessionalUseCases {
     ]);
     const nome = new Map(servicos.map((s) => [s.id, s.name]));
     const doDia = agenda
-      .filter((a) => a.status !== "cancelled" && isoDoDia(a.startsAt) === date)
+      .filter((a) => a.status !== "cancelled" && a.status !== "rejected" && isoDoDia(a.startsAt) === date)
       .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
     const funcionamento = horarios.find((h) => h.dayOfWeek === dia.getDay());
 

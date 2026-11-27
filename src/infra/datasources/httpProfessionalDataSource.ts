@@ -17,15 +17,20 @@ type AgendamentoDto = {
   date: string;
   startTime: string;
   endTime: string;
-  status: "agendado" | "concluido" | "cancelado";
+  status: "pendente" | "aguardando_cliente" | "agendado" | "em_andamento" | "concluido" | "recusado" | "cancelado" | "nao_compareceu";
 };
 type IndisponibilidadeDto = { id: string; startsAt: string; endsAt: string; reason: string | null };
 type RecorrenteDto = { id: string; dayOfWeek: number; startTime: string; endTime: string; reason: string | null };
 
 const STATUS: Record<AgendamentoDto["status"], AppointmentStatus> = {
+  pendente: "pending",
+  aguardando_cliente: "awaiting_client",
   agendado: "confirmed",
+  em_andamento: "in_progress",
   concluido: "completed",
+  recusado: "rejected",
   cancelado: "cancelled",
+  nao_compareceu: "no_show",
 };
 
 const dataHora = (date: string, time: string): Date => {
@@ -46,8 +51,21 @@ const base = (who: ProfessionalIdentity) =>
 export class HttpProfessionalDataSource implements IProfessionalDataSource {
   constructor(private readonly api: IApiService) {}
 
-  async getMe(): Promise<ProfessionalIdentity> {
-    const eu = await this.api.get<{ id?: string; barbershopId?: string; specialty?: string | null }>("/professionals/me");
+  async listMyWorkplaces(): Promise<ProfessionalIdentity[]> {
+    const resposta = await this.api.get<{ vinculos?: { id: string; barbershopId: string; specialty?: string | null }[] }>(
+      "/professionals/me/vinculos",
+    );
+    return lista<{ id: string; barbershopId: string; specialty?: string | null }>(resposta, "vinculos").map((v) => ({
+      professionalId: v.id,
+      barbershopId: v.barbershopId,
+      specialty: v.specialty ?? null,
+    }));
+  }
+
+  async getMe(barbershopId?: string): Promise<ProfessionalIdentity> {
+    const eu = await this.api.get<{ id?: string; barbershopId?: string; specialty?: string | null }>(
+      `/professionals/me${barbershopId ? `?barbershopId=${encodeURIComponent(barbershopId)}` : ""}`,
+    );
     if (!eu?.id || !eu.barbershopId) {
       throw new DomainError("Sua conta não está vinculada a uma barbearia como profissional.", "NOT_FOUND");
     }

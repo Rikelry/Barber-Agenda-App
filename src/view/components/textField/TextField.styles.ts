@@ -13,6 +13,8 @@ export type TextFieldColorsOptions = {
 
 type TextFieldContainerOptions = TextFieldColorsOptions & {
     multiline?: boolean;
+    /** Canto extra-small (4 dp) do outlined text field do Material 3. */
+    compactShape?: boolean;
 };
 
 export function getTextFieldColors({
@@ -106,6 +108,7 @@ export function getTextFieldContainerStyle({
     hasError,
     disabled,
     multiline = false,
+    compactShape = false,
 }: TextFieldContainerOptions): ViewStyle {
     const colors = getTextFieldColors({
         theme,
@@ -135,7 +138,7 @@ export function getTextFieldContainerStyle({
             ? {
                 borderWidth: indicatorWidth,
                 borderColor: colors.borderColor,
-                borderRadius: theme.shapes.small,
+                borderRadius: compactShape ? theme.shapes.extraSmall : theme.shapes.small,
             }
             : {
                 borderBottomWidth: indicatorWidth,

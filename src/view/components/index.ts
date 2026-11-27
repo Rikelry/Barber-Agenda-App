@@ -25,3 +25,7 @@ export * from "@/view/components/screenHeader";
 export * from "@/view/components/tabs";
 export * from "@/view/components/stepProgress";
 export * from "@/view/components/portfolioGrid";
+export * from "@/view/components/segmentedButton";
+export * from "@/view/components/bottomSheet";
+export * from "@/view/components/dialog";
+export * from "@/view/components/snackbar";

@@ -12,7 +12,6 @@ const TabsLayout = () => {
       screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: theme.colors.background } }}
     >
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="barbearias" />
       <Tabs.Screen name="agendamentos" />
       <Tabs.Screen name="agenda" />
       <Tabs.Screen name="gestao" />

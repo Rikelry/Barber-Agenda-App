@@ -1,5 +1,5 @@
 // Agendamentos na API (/agendamentos e available-slots). Converte o AgendamentoResponseDTO
-// do backend (backend/src/agendamentos/adapters/dtos/AgendamentoDTO.ts) na entidade.
+// do servidor (src/infra/http/dtos/AgendamentoDTO.ts) na entidade.
 
 import type { AppointmentData, BookingRequest, IAppointmentDataSource } from "@/model/datasources/iAppointmentDataSource";
 import type { AppointmentStatus } from "@/model/entities/appointment";
@@ -9,18 +9,25 @@ import type { IApiService } from "@/model/services/iApiService";
 type AgendamentoDto = {
   id: string;
   barbershopId: string;
-  status: "agendado" | "concluido" | "cancelado";
+  status: "pendente" | "aguardando_cliente" | "agendado" | "em_andamento" | "concluido" | "recusado" | "cancelado" | "nao_compareceu";
   professional: { id: string; name: string };
   service: { id: string; name: string; duration: number };
   date: string;
   startTime: string;
   endTime: string;
+  rejectionReason?: string | null;
+  proposal?: { date: string; startTime: string; endTime: string } | null;
 };
 
 const STATUS: Record<AgendamentoDto["status"], AppointmentStatus> = {
+  pendente: "pending",
+  aguardando_cliente: "awaiting_client",
   agendado: "confirmed",
+  em_andamento: "in_progress",
   concluido: "completed",
+  recusado: "rejected",
   cancelado: "cancelled",
+  nao_compareceu: "no_show",
 };
 
 const dataHora = (date: string, time: string): Date => {
@@ -40,6 +47,10 @@ export const toAppointment = (dto: AgendamentoDto): AppointmentData => ({
   startsAt: dataHora(dto.date, dto.startTime),
   endsAt: dataHora(dto.date, dto.endTime),
   status: STATUS[dto.status] ?? "confirmed",
+  proposal: dto.proposal
+    ? { startsAt: dataHora(dto.proposal.date, dto.proposal.startTime), endsAt: dataHora(dto.proposal.date, dto.proposal.endTime) }
+    : null,
+  rejectionReason: dto.rejectionReason ?? null,
 });
 
 const lista = <T>(dados: unknown, chave: string): T[] => {
@@ -63,6 +74,14 @@ export class HttpAppointmentDataSource implements IAppointmentDataSource {
 
   async cancel(appointmentId: string): Promise<void> {
     await this.api.patch(`/agendamentos/${segmento(appointmentId)}/cancelar`);
+  }
+
+  async acceptProposal(appointmentId: string): Promise<void> {
+    await this.api.patch(`/agendamentos/${segmento(appointmentId)}/aceitar-sugestao`);
+  }
+
+  async rejectProposal(appointmentId: string): Promise<void> {
+    await this.api.patch(`/agendamentos/${segmento(appointmentId)}/recusar-sugestao`);
   }
 
   async reschedule(appointmentId: string, date: string, time: string): Promise<AppointmentData> {

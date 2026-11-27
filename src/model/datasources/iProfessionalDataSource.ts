@@ -14,7 +14,10 @@ export type AgendaAppointmentData = {
 };
 
 export interface IProfessionalDataSource {
-  getMe(): Promise<ProfessionalIdentity>;
+  /** Com barbershopId, o vínculo naquela barbearia; sem, o primeiro. */
+  getMe(barbershopId?: string): Promise<ProfessionalIdentity>;
+  /** Todos os vínculos (uma barbearia por linha) do profissional logado. */
+  listMyWorkplaces(): Promise<ProfessionalIdentity[]>;
   listMyAgenda(): Promise<AgendaAppointmentData[]>;
   completeAppointment(appointmentId: string): Promise<void>;
   cancelAppointment(appointmentId: string): Promise<void>;

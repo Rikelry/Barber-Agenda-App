@@ -7,7 +7,6 @@ import type { IImagePickerService } from "@/model/services/iImagePickerService";
 import type { DayHours, IOwnerUseCases } from "@/usecase/iOwnerUseCases";
 import { useEditarBarbeariaViewModel } from "@/viewmodel/useEditarBarbeariaViewModel";
 import { mascararHora, useHorariosBarbeariaViewModel } from "@/viewmodel/useHorariosBarbeariaViewModel";
-import { useMinhasBarbeariasViewModel } from "@/viewmodel/useMinhasBarbeariasViewModel";
 import { useNovaBarbeariaViewModel } from "@/viewmodel/useNovaBarbeariaViewModel";
 import { useProfissionaisBarbeariaViewModel } from "@/viewmodel/useProfissionaisBarbeariaViewModel";
 import { useServicosBarbeariaViewModel } from "@/viewmodel/useServicosBarbeariaViewModel";
@@ -47,6 +46,8 @@ const donoFalso = (): jest.Mocked<IOwnerUseCases> => ({
   addProfessional: jest.fn(async () => ({}) as never),
   updateProfessional: jest.fn(async () => ({}) as never),
   removeProfessional: jest.fn(async () => undefined),
+  canJoinAsProfessional: jest.fn(() => true),
+  joinAsProfessional: jest.fn(async () => ({}) as never),
   listServices: jest.fn(async () => []),
   addService: jest.fn(async () => ({}) as never),
   updateService: jest.fn(async () => ({}) as never),
@@ -63,15 +64,6 @@ beforeEach(() => {
 });
 
 describe("telas do dono", () => {
-  it("minhas barbearias carrega ao aparecer, abre uma e cria outra", async () => {
-    const dono = donoFalso();
-    const { result } = await renderHook(() => useMinhasBarbeariasViewModel(dono));
-    await waitFor(() => expect(result.current[0].status).toBe("content"));
-    await agir(() => result.current[1].open("b1"));
-    await agir(() => result.current[1].create());
-    expect(mockPush.mock.calls).toEqual([[{ pathname: "/minhas-barbearias/[id]", params: { id: "b1" } }], ["/minhas-barbearias/nova"]]);
-  });
-
   it("nova barbearia envia o logo escolhido, atualiza os papéis e volta para a lista", async () => {
     const dono = donoFalso();
     const auth = authFalso();
@@ -88,7 +80,7 @@ describe("telas do dono", () => {
     expect(auth.refreshSession).toHaveBeenCalled();
   });
 
-  it("editar mostra o telefone formatado, salva e o menu abre as telas de gestão", async () => {
+  it("editar mostra o telefone formatado e salva", async () => {
     mockParams = { id: "b1" };
     const dono = donoFalso();
     const picker = seletor();
@@ -98,12 +90,6 @@ describe("telas do dono", () => {
     await agir(() => result.current[1].save());
     await waitFor(() => expect(result.current[0].successMessage).toBe("Alterações salvas."));
     expect(result.current[0].logoUri).toBe("https://cdn/x.png");
-    await agir(() => result.current[1].openHours());
-    await agir(() => result.current[1].openServices());
-    expect(mockPush.mock.calls.map((c) => (c[0] as { pathname: string }).pathname)).toEqual([
-      "/minhas-barbearias/[id]/horarios",
-      "/minhas-barbearias/[id]/servicos",
-    ]);
   });
 
   it("horários: máscara HH:mm, erro por dia e salvar", async () => {
@@ -142,6 +128,18 @@ describe("telas do dono", () => {
     await agir(() => pro.current[1].confirmRemove());
     await waitFor(() => expect(pro.current[0].confirmingRemoveId).toBeNull());
     expect(dono.removeProfessional).toHaveBeenCalledWith("b1", "p9");
+
+    // O dono entra na equipe: atualiza os papéis e some o convite.
+    const auth = { refreshSession: jest.fn(async () => null) } as unknown as Parameters<typeof useProfissionaisBarbeariaViewModel>[1];
+    const dono2 = donoFalso();
+    const { result: eu } = await renderHook(() => useProfissionaisBarbeariaViewModel(dono2, auth));
+    await waitFor(() => expect(eu.current[0].status).toBe("content"));
+    expect(eu.current[0].canJoin).toBe(true);
+    dono2.canJoinAsProfessional.mockReturnValue(false);
+    await agir(() => eu.current[1].joinAsProfessional());
+    await waitFor(() => expect(eu.current[0].joinMessage).toContain("Você agora atende aqui"));
+    expect(dono2.joinAsProfessional).toHaveBeenCalledWith("b1");
+    expect(eu.current[0].canJoin).toBe(false);
 
     const { result: srv } = await renderHook(() => useServicosBarbeariaViewModel(dono));
     await waitFor(() => expect(srv.current[0].status).toBe("content"));

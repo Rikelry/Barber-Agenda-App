@@ -32,3 +32,9 @@ export const formatDayLabel = (date: Date, now: Date = new Date()): string => {
 /** 15:00 */
 export const formatTime = (date: Date): string =>
     `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+
+/** Rótulo do dia no meio de uma frase ("hoje, 27 Nov" em vez de "Hoje, 27 Nov"). */
+export const formatDayLabelInline = (date: Date, now: Date = new Date()): string => {
+  const rotulo = formatDayLabel(date, now);
+  return rotulo.charAt(0).toLowerCase() + rotulo.slice(1);
+};

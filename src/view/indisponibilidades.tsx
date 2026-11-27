@@ -11,6 +11,7 @@ import { formatDayLabel, formatTime } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
 import { IconButton } from "@/view/components/iconButton";
 import { ScreenHeader } from "@/view/components/screenHeader";
+import { SegmentedButton } from "@/view/components/segmentedButton";
 import { ScreenState } from "@/view/components/screenState";
 import { TextField } from "@/view/components/textField";
 import { useDesignSystem } from "@/view/components/themeProvider";
@@ -66,22 +67,6 @@ const Indisponibilidades = () => {
     actions.setDate(iso < hojeIso ? hojeIso : iso);
   };
 
-  const aba = (valor: "recorrente" | "pontual", rotulo: string) => {
-    const ativa = state.tab === valor;
-    return (
-      <Button
-        variant={ativa ? "elevated" : "text"}
-        size="small"
-        onPress={() => actions.setTab(valor)}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: ativa }}
-        style={{ flex: 1 }}
-      >
-        {rotulo}
-      </Button>
-    );
-  };
-
   const confirmar = (chave: string, remover: () => void, nome: string) =>
     state.confirmingRemove === chave ? (
       <View style={{ flexDirection: "row", gap: spacing.sm }}>
@@ -106,19 +91,15 @@ const Indisponibilidades = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScreenHeader title="Indisponibilidades" onBack={actions.goBack} />
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }} keyboardShouldPersistTaps="handled">
-        <View
-          accessibilityRole="tablist"
-          style={{
-            flexDirection: "row",
-            gap: spacing.xs,
-            padding: spacing.xs,
-            borderRadius: theme.shapes.medium,
-            backgroundColor: colors.surfaceContainerHigh,
-          }}
-        >
-          {aba("recorrente", "Recorrente")}
-          {aba("pontual", "Pontual")}
-        </View>
+        <SegmentedButton
+          accessibilityLabel="Tipo de bloqueio"
+          segments={[
+            { value: "recorrente", label: "Recorrente" },
+            { value: "pontual", label: "Pontual" },
+          ]}
+          selected={state.tab}
+          onSelect={actions.setTab}
+        />
 
         <Card variant="filled" style={{ gap: spacing.md }}>
           <Typography variant="titleSmall" weight="700" accessibilityRole="header">

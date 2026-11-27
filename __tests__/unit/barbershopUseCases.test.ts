@@ -69,6 +69,10 @@ describe("BarbershopUseCases", () => {
     expect(detalhe.hoursToday).toEqual({ dayOfWeek: 1, openTime: "09:00", closeTime: "20:00" });
     const domingo = await new BarbershopUseCases(fonteFalsa()).getBarbershopDetail("b1", new Date(2026, 10, 15, 10));
     expect(domingo.hoursToday).toBeNull();
+    expect(domingo.openNow).toBe(false);
+    expect(detalhe.openNow).toBe(true);
+    const segundaNoite = await new BarbershopUseCases(fonteFalsa()).getBarbershopDetail("b1", new Date(2026, 10, 16, 20, 30));
+    expect(segundaNoite.openNow).toBe(false);
     expect(detalhe.barbershop.name).toBe("Barbearia Central");
     expect(detalhe.services.map((s) => s.name)).toEqual(["Corte", "Combo"]);
     expect(detalhe.professionals.map((p) => p.name)).toEqual(["André Lima", "Zé Tesoura"]);
