@@ -41,9 +41,12 @@ export class BarbershopUseCases implements IBarbershopUseCases {
       // Sem horários cadastrados a tela ainda mostra a barbearia.
       this.dataSource.listBusinessHours(barbershopId).catch(() => []),
     ]);
+    const hoje = hours.find((h) => h.dayOfWeek === now.getDay()) ?? null;
+    const agora = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
     return {
       barbershop,
-      hoursToday: hours.find((h) => h.dayOfWeek === now.getDay()) ?? null,
+      hoursToday: hoje,
+      openNow: hoje !== null && hoje.openTime <= agora && agora < hoje.closeTime,
       services: [...services].sort((a, b) => a.price - b.price),
       professionals: [...professionals].sort((a, b) => byName(a.name, b.name)),
     };

@@ -1,5 +1,6 @@
 // Meus agendamentos (padrão 7 de 05-padroes.md): abas Próximos e Histórico; nos próximos,
-// Reagendar e Cancelar (com confirmação no próprio card).
+// Reagendar e Cancelar (com confirmação no próprio card). Quando o barbeiro sugere outro
+// horário, o card mostra a sugestão com Aceitar e Recusar.
 
 import { FlatList, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,7 +10,7 @@ import { Card } from "@/view/components/card";
 import { formatDayLabel, formatTime } from "@/view/components/format";
 import { Icon } from "@/view/components/icon";
 import { MainTabBar } from "@/view/components/mainTabBar";
-import { Tabs } from "@/view/components/tabs";
+import { SegmentedButton } from "@/view/components/segmentedButton";
 import { ScreenState } from "@/view/components/screenState";
 import { STATUS_LABEL, StatusBadge } from "@/view/components/statusBadge";
 import { useDesignSystem } from "@/view/components/themeProvider";
@@ -36,11 +37,11 @@ const Agendamentos = () => {
             <Typography variant="headlineSmall" weight="700" accessibilityRole="header">
               Meus agendamentos
             </Typography>
-            <Tabs
-              variant="segmented"
-              items={[
-                { key: "proximos", label: "Próximos" },
-                { key: "historico", label: "Histórico" },
+            <SegmentedButton
+              accessibilityLabel="Mostrar agendamentos"
+              segments={[
+                { value: "proximos", label: "Próximos" },
+                { value: "historico", label: "Histórico" },
               ]}
               selected={state.tab}
               onSelect={actions.setTab}
@@ -96,9 +97,48 @@ const Agendamentos = () => {
                 <Typography variant="bodyMedium" color="onSurfaceVariant">
                   {item.serviceName} com {item.professionalName}
                 </Typography>
+                {item.status === "rejected" && item.rejectionReason ? (
+                  <Typography variant="bodySmall" color="onSurfaceVariant">
+                    Motivo: {item.rejectionReason}
+                  </Typography>
+                ) : null}
               </View>
 
-              {proximos && !confirmando && (
+              {proximos && item.status === "awaiting_client" && item.proposal ? (
+                <View
+                  accessibilityLiveRegion="polite"
+                  style={{ gap: spacing.sm, padding: spacing.md, borderRadius: theme.shapes.medium, backgroundColor: colors.surfaceContainer }}
+                >
+                  <Typography variant="labelLarge">{item.professionalName} sugeriu outro horário</Typography>
+                  <Typography variant="bodyMedium" weight="700">
+                    {formatDayLabel(item.proposal.startsAt)} · {formatTime(item.proposal.startsAt)}
+                  </Typography>
+                  <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      style={{ flex: 1 }}
+                      onPress={() => actions.rejectProposal(item)}
+                      disabled={state.answeringId === item.id}
+                      accessibilityLabel="Recusar o horário sugerido e cancelar o pedido"
+                    >
+                      Recusar
+                    </Button>
+                    <Button
+                      variant="filled"
+                      size="small"
+                      style={{ flex: 1 }}
+                      onPress={() => actions.acceptProposal(item)}
+                      disabled={state.answeringId === item.id}
+                      accessibilityLabel={`Aceitar ${formatDayLabel(item.proposal.startsAt)} às ${formatTime(item.proposal.startsAt)}`}
+                    >
+                      Aceitar
+                    </Button>
+                  </View>
+                </View>
+              ) : null}
+
+              {proximos && !confirmando && item.status !== "awaiting_client" && item.status !== "in_progress" && (
                 <View style={{ flexDirection: "row", gap: spacing.sm }}>
                   <Button variant="outlined" size="small" style={{ flex: 1 }} onPress={() => actions.reschedule(item)}>
                     Reagendar

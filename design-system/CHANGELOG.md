@@ -48,3 +48,39 @@ Versões no formato `MAIOR.MENOR.CORREÇÃO`. Mudança grande = versão nova (ex
   - Definição dos padrões de autenticação e agendamento de serviços.
   - Documentação dos critérios de acessibilidade, incluindo contraste, áreas de toque, foco e leitores de tela.
 - **Ajustes feitos após o teste com IA:** Revisão da consistência entre os arquivos, padronização dos nomes dos tokens e verificação das combinações de contraste nos modos claro e escuro. Foram documentadas melhorias para manter a navegação simples, os feedbacks claros e os fluxos de agendamento confiáveis.
+
+## 0.3.0 · 24/11/26
+
+- Redesign da tela Início com nova paleta marrom, bege e creme.
+- **Responsáveis:** @jose2gabriel e assistente de IA
+- **Mudanças:**
+  - Primitivos novos `brown-950`, `brown-800`, `brown-900`, `beige-100/200/300`, `cream-50`, `taupe-500` e `green-600`; o modo claro de `src/view/theme.ts` passa a usá-los em todo o app.
+  - `green-600` vira o verde semântico de "Confirmado" (substitui o `#2E7D32` pendente).
+  - Tokens novos `color.container`, `color.secondary-container`, `color.success` e de sobreposição (`overlay.scrim`, `overlay.status-tint`).
+  - Barra inferior com fundo bege, cantos superiores arredondados e traço sob a aba ativa.
+  - Conflitos de contraste do `taupe-500` e do texto verde registrados em `02-tokens.md`.
+  - Cabeçalho do Início com arcos decorativos (`overlay.header-pattern`) e categorias com ilustrações SVG próprias (Cabelo, Barba, Combo, Sobrancelha), no lugar dos ícones genéricos.
+  - Categorias do Início trocadas por chips em cápsula (Tudo, Cabelo, Barba, Combo, Sobrancelha), sem ícones; as ilustrações SVG das categorias foram removidas.
+  - Detalhe da barbearia redesenhado: foto em largura total com informações sobre degradê, voltar sobre a foto, galeria de trabalhos, abas preenchidas (`Tabs` variante `filled`), cards de serviço com foto e cards de profissional com "Escolher". Token novo `overlay.control-scrim`.
+  - Cabeçalho do Início com o nome do app ("Barber Agenda") no lugar de "Encontre seu estilo" e barra de busca que filtra as barbearias por nome ou endereço.
+  - Logo do app (calendário com pente e tesoura, `assets/images/logo.svg`) aplicado ao ícone do app (Android adaptativo com fundo `#27100A`, iOS e web), à splash (fundo `cream-50`) e à marca do login (112 dp).
+  - Agenda com pedidos de horário: status "Aguardando aprovação" e "Recusado", cards de solicitação com Aprovar/Recusar/Sugerir outro horário, agenda da barbearia para o dono e tela Remarcar (`design-system/04-componentes/agenda.md`).
+  - Dono que também atende: card "Você também atende aqui?" na tela Profissionais; ao entrar na equipe ganha a aba Trabalho com a própria agenda e os pedidos dele.
+  - Segmented button do Material 3 (`segmented-button.md`, tokens oficiais: 40 dp, pontas arredondadas, contorno de 1 dp, selecionado em `secondary-container` com ✓) em Próximos | Histórico, Serviços | Profissionais e Recorrente | Pontual; as variantes "segmentada" e "preenchida" das Tabs saíram.
+  - Texto secundário (`color.on-surface-variant`) passa a `brown-700` `#79583F`, mais suave, com contraste acima de 4,5:1 nos fundos claros e bege.
+  - Perfil reorganizado como central da conta (`perfil-menu.md`): Identificação, CONTA, TRABALHO e MINHA BARBEARIA por papel, com itens de duas linhas no estilo do menu da conta Google; saiu "Trocar senha"; Sair da conta com confirmação.
+  - Editar e Nova barbearia: identificação com foto, nome e botão de câmera; seções INFORMAÇÕES GERAIS e ENDEREÇO; outlined text fields com rótulo flutuante do Material 3 (`floatingLabel`); Número ao lado do Complemento/Bairro e Cidade ao lado do Estado.
+  - Aba Gestão do dono passa a ser a "Agenda e solicitações" da barbearia (chips para trocar entre barbearias); a lista "Minhas barbearias" saiu (edição pelo Perfil).
+  - Aba do dono renomeada para "Trabalho" (ícone de relógio, igual à do barbeiro); o dono que também atende tem uma aba só, e os pedidos dele aparecem na agenda da barbearia.
+
+## 0.4.0 · 27/11/26
+
+- Aba Trabalho redesenhada (barbeiro e dono).
+- **Responsáveis:** @jose2gabriel e assistente de IA
+- **Mudanças:**
+  - **Telas:** seletor compacto de barbearia (menu M3), calendário semanal com ponto nos dias com horários, solicitações do dia em cards compactos e agenda do dia em linha do tempo enxuta.
+  - **Indicadores:** os quatro cards de indicadores saíram da tela.
+  - **Componentes novos:** Bottom sheet (detalhes e sugerir outro horário), Dialog (recusar com motivo) e Snackbar (avisos das ações). As specs estão em `04-componentes/`.
+  - **Status:** oito, sempre com texto (Pendente, Aguardando cliente, Confirmado, Em andamento, Concluído, Não compareceu, Recusado, Cancelado), com o token novo `color.pending` (`amber-200` com `amber-900`, 9,1:1).
+  - **Tamanhos:** `componentSizes.agenda` (ponto do dia, coluna da hora, trilho, alça e limites do sheet).
+  - **Telas removidas:** "Remarcar horário" e "Agenda da barbearia" (substituídas pelos bottom sheets da aba Trabalho).

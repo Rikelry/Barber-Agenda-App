@@ -3,7 +3,7 @@ import { useRef, useState, type ComponentRef } from "react";
 import { TextInput, View, type TextInputProps } from "react-native";
 
 import { useDesignSystem } from "@/view/components/themeProvider";
-import { getPlatformFontFamily } from "@/view/theme";
+import { componentSizes, getPlatformFontFamily } from "@/view/theme";
 import { Typography } from "@/view/components/typography";
 
 import {
@@ -19,6 +19,8 @@ export const TextField = ({
     errorText,
 
     variant = "outlined",
+    floatingLabel = false,
+    labelBackgroundColor,
 
     leadingIcon,
     trailingIcon,
@@ -67,6 +69,10 @@ export const TextField = ({
         disabled,
     });
 
+    // Rótulo flutuante (M3): grande dentro do campo vazio, pequeno sobre a borda ao focar ou preencher.
+    const flutuante = Boolean(label) && floatingLabel && variant === "outlined";
+    const rotuloNaBorda = flutuante && (isFocused || String(currentValue).length > 0);
+
     const containerResolvedStyle = getTextFieldContainerStyle({
         theme,
         variant,
@@ -74,6 +80,7 @@ export const TextField = ({
         hasError,
         disabled,
         multiline,
+        compactShape: flutuante,
     });
 
     const handleChangeText = (text: string) => {
@@ -116,7 +123,7 @@ export const TextField = ({
             ]}
         >
             {/* Rótulo fixo acima do campo (canvas de telas): 12/16, cor de texto secundário. */}
-            {label ? (
+            {label && !flutuante ? (
                 <Typography
                     variant="bodySmall"
                     style={{ color: colors.labelColor }}
@@ -129,6 +136,28 @@ export const TextField = ({
             ) : null}
 
             <View style={containerResolvedStyle}>
+                {flutuante ? (
+                    <Typography
+                        variant={rotuloNaBorda ? "bodySmall" : "bodyLarge"}
+                        numberOfLines={1}
+                        onPress={() => inputRef.current?.focus()}
+                        accessibilityElementsHidden
+                        importantForAccessibility="no"
+                        style={{
+                            position: "absolute",
+                            left: theme.spacing.md - theme.spacing.xs,
+                            maxWidth: "90%",
+                            paddingHorizontal: theme.spacing.xs,
+                            color: colors.labelColor,
+                            backgroundColor: labelBackgroundColor ?? theme.colors.background,
+                            ...(rotuloNaBorda
+                                ? { top: -(theme.typography.bodySmall.lineHeight / 2) }
+                                : { top: (componentSizes.textField.height - theme.typography.bodyLarge.lineHeight) / 2 - 1 }),
+                        }}
+                    >
+                        {label}
+                    </Typography>
+                ) : null}
                 {leadingIcon && (
                     <View
                         style={{
@@ -165,7 +194,8 @@ export const TextField = ({
                             ...accessibilityState,
                             disabled,
                         }}
-                        placeholder={placeholder}
+                        // No rótulo flutuante o exemplo só aparece com o campo focado (M3).
+                        placeholder={flutuante && !isFocused ? undefined : placeholder}
                         placeholderTextColor={theme.colors.onSurfaceVariant}
                         style={[
                             {

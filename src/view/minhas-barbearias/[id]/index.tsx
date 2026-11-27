@@ -1,5 +1,5 @@
-// Editar barbearia: foto, dados e endereço completo; o menu ⋮ leva a horários,
-// profissionais e serviços (padrão 5 de 05-padroes.md).
+// Editar barbearia: foto, dados e endereço completo (padrão 5 de 05-padroes.md). Horários,
+// profissionais e serviços ficam no Perfil (Minha barbearia); a agenda, na Gestão.
 
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,7 +7,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BarbershopFields } from "@/view/components/barbershopFields";
 import { Button } from "@/view/components/button";
 import { FormScreen } from "@/view/components/formScreen";
-import { OverflowMenu } from "@/view/components/overflowMenu";
 import { PhotoPicker } from "@/view/components/photoPicker";
 import { ScreenHeader } from "@/view/components/screenHeader";
 import { ScreenState } from "@/view/components/screenState";
@@ -21,21 +20,7 @@ const EditarBarbearia = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <ScreenHeader
-        title="Editar barbearia"
-        onBack={actions.goBack}
-        right={
-          state.status === "content" ? (
-            <OverflowMenu
-              items={[
-                { key: "horarios", label: "Horário de funcionamento", onPress: actions.openHours },
-                { key: "profissionais", label: "Profissionais", onPress: actions.openProfessionals },
-                { key: "servicos", label: "Serviços", onPress: actions.openServices },
-              ]}
-            />
-          ) : null
-        }
-      />
+      <ScreenHeader title="Editar barbearia" onBack={actions.goBack} />
       {state.status !== "content" ? (
         <View style={{ padding: theme.spacing.lg }}>
           <ScreenState
@@ -66,7 +51,13 @@ const EditarBarbearia = () => {
             </>
           }
         >
-          <PhotoPicker uri={state.logoUri} label="Adicionar foto da barbearia" onPick={actions.pickLogo} />
+          <PhotoPicker
+            uri={state.logoUri}
+            label="Foto da barbearia"
+            onPick={actions.pickLogo}
+            title={state.form.name.trim()}
+            subtitle="Toque na foto para trocar"
+          />
           <BarbershopFields values={state.form} errors={state.fieldErrors} onChange={actions.setField} full />
         </FormScreen>
       )}

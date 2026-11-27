@@ -30,6 +30,13 @@ export interface IOwnerUseCases {
   saveWeekHours(barbershopId: string, week: DayHours[]): Promise<void>;
   listProfessionals(barbershopId: string): Promise<Professional[]>;
   addProfessional(barbershopId: string, form: ProfessionalForm): Promise<Professional>;
+  /** O dono ainda não atende em nenhuma barbearia (pode passar a atender nesta). */
+  canJoinAsProfessional(): boolean;
+  /**
+   * O dono passa a atender na própria barbearia, com a mesma conta: ganha a agenda e os
+   * pedidos de horário como qualquer profissional. Só dá para atender em uma barbearia.
+   */
+  joinAsProfessional(barbershopId: string, specialty?: string): Promise<Professional>;
   /** Na edição a senha e o e-mail não mudam. */
   updateProfessional(barbershopId: string, professionalId: string, form: ProfessionalForm): Promise<Professional>;
   removeProfessional(barbershopId: string, professionalId: string): Promise<void>;

@@ -9,6 +9,8 @@ export type BarbershopDetail = {
   professionals: Professional[];
   /** Horário de hoje; null quando a barbearia não abre hoje ou não cadastrou horários. */
   hoursToday: BusinessHours | null;
+  /** Aberta agora: a hora atual está entre a abertura e o fechamento de hoje. */
+  openNow: boolean;
 };
 
 /** Barbeiro com a barbearia onde trabalha (lista geral de barbeiros). */

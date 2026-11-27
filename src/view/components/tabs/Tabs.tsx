@@ -1,9 +1,8 @@
-// Abas da tela (tabs.md): variante "linha" para telas de detalhe (Serviços, Profissionais) e
-// "segmentada" para filtros (Próximos, Histórico), como no canvas de telas.
+// Abas da tela (tabs.md, Material 3 primary tabs): linha inferior na aba ativa. Para escolher
+// entre 2 a 5 opções (Próximos | Histórico, Serviços | Profissionais) use o SegmentedButton.
 
 import { Pressable, View } from "react-native";
 
-import { Icon } from "@/view/components/icon";
 import { useDesignSystem } from "@/view/components/themeProvider";
 import { Typography } from "@/view/components/typography";
 import { componentSizes } from "@/view/theme";
@@ -14,23 +13,14 @@ export type TabsProps<K extends string> = {
     items: TabsItem<K>[];
     selected: K;
     onSelect: (key: K) => void;
-    variant?: "line" | "segmented";
 };
 
-export const Tabs = <K extends string>({ items, selected, onSelect, variant = "line" }: TabsProps<K>) => {
+export const Tabs = <K extends string>({ items, selected, onSelect }: TabsProps<K>) => {
     const { theme } = useDesignSystem();
     const { colors, spacing } = theme;
-    const segmentada = variant === "segmented";
 
     return (
-        <View
-            accessibilityRole="tablist"
-            style={
-                segmentada
-                    ? { flexDirection: "row", borderWidth: 1, borderColor: colors.outline, borderRadius: theme.shapes.small, overflow: "hidden" }
-                    : { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: colors.outlineVariant }
-            }
-        >
+        <View accessibilityRole="tablist" style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: colors.outlineVariant }}>
             {items.map((item, i) => {
                 const ativo = item.key === selected;
                 return (
@@ -43,33 +33,14 @@ export const Tabs = <K extends string>({ items, selected, onSelect, variant = "l
                         style={{
                             flex: 1,
                             minHeight: componentSizes.touchTarget,
-                            flexDirection: "row",
                             alignItems: "center",
                             justifyContent: "center",
                             gap: spacing.xs,
-                            ...(segmentada
-                                ? {
-                                      backgroundColor: ativo ? colors.secondaryContainer : "transparent",
-                                      borderLeftWidth: i > 0 ? 1 : 0,
-                                      borderLeftColor: colors.outline,
-                                  }
-                                : {
-                                      borderBottomWidth: componentSizes.tabs.indicator,
-                                      borderBottomColor: ativo ? colors.primary : "transparent",
-                                  }),
+                            borderBottomWidth: componentSizes.tabs.indicator,
+                            borderBottomColor: ativo ? colors.primary : "transparent",
                         }}
                     >
-                        {segmentada && ativo ? <Icon name="checkmark" size={spacing.lg} color={colors.onSecondaryContainer} /> : null}
-                        <Typography
-                            variant="labelLarge"
-                            style={{
-                                color: segmentada
-                                    ? colors.onSurface
-                                    : ativo
-                                      ? colors.primary
-                                      : colors.onSurfaceVariant,
-                            }}
-                        >
+                        <Typography variant="labelLarge" style={{ color: ativo ? colors.primary : colors.onSurfaceVariant }}>
                             {item.label}
                         </Typography>
                     </Pressable>

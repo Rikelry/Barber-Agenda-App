@@ -3,7 +3,7 @@
 
 import { TabBar } from "@/view/components/tabBar";
 
-export type MainTabKey = "inicio" | "buscar" | "agendas" | "agenda" | "gestao" | "perfil";
+export type MainTabKey = "inicio" | "agendas" | "agenda" | "gestao" | "perfil";
 
 export type MainTabBarProps = {
     active: MainTabKey;
@@ -13,10 +13,10 @@ export type MainTabBarProps = {
 
 const ABAS: Record<MainTabKey, { label: string; icon: string }> = {
     inicio: { label: "Início", icon: "home" },
-    buscar: { label: "Buscar", icon: "search" },
     agendas: { label: "Agendas", icon: "calendar" },
     agenda: { label: "Trabalho", icon: "clock" },
-    gestao: { label: "Gestão", icon: "gear" },
+    // Agenda e solicitações da barbearia: mesmo nome e ícone da aba do barbeiro.
+    gestao: { label: "Trabalho", icon: "clock" },
     perfil: { label: "Perfil", icon: "person" },
 };
 

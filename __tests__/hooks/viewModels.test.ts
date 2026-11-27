@@ -13,6 +13,7 @@ let mockParams: Record<string, string> = {};
 jest.mock("expo-router", () => ({
   router: { push: (...args: unknown[]) => mockPush(...args) },
   useLocalSearchParams: () => mockParams,
+  useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
 }));
 jest.mock("@/di/container", () => ({
   barbershopUseCases: {},
@@ -33,7 +34,7 @@ const BARBEIRO: Professional = {
 
 const casosFalsos = (): jest.Mocked<IBarbershopUseCases> => ({
   listBarbershops: jest.fn(async () => [BARBEARIA]),
-  getBarbershopDetail: jest.fn(async () => ({ barbershop: BARBEARIA, services: [], professionals: [BARBEIRO], hoursToday: null })),
+  getBarbershopDetail: jest.fn(async () => ({ barbershop: BARBEARIA, services: [], professionals: [BARBEIRO], hoursToday: null, openNow: false })),
   listBarbers: jest.fn(async () => [{ professional: BARBEIRO, barbershop: BARBEARIA }]),
   getBarberProfile: jest.fn(async () => ({ professional: BARBEIRO, barbershop: BARBEARIA, services: [] })),
 });
@@ -73,6 +74,39 @@ describe("useDetalheBarbeariaViewModel", () => {
     await waitFor(() => expect(result.current[0].status).toBe("content"));
     expect(casos.getBarbershopDetail).toHaveBeenLastCalledWith("b1");
     expect(result.current[0].detail?.professionals).toEqual([BARBEIRO]);
+  });
+
+  it("escolher um profissional volta para os serviços e o Agendar já vai com ele", async () => {
+    mockParams = { id: "b1" };
+    const casos = casosFalsos();
+    const { result } = await renderHook(() => useDetalheBarbeariaViewModel(casos));
+    await waitFor(() => expect(result.current[0].status).toBe("content"));
+    await act(async () => {
+      result.current[1].setTab("profissionais");
+    });
+    await act(async () => {
+      result.current[1].selectProfessional(BARBEIRO);
+    });
+    expect(result.current[0].tab).toBe("servicos");
+    expect(result.current[0].selectedProfessional?.id).toBe("p1");
+    await act(async () => {
+      result.current[1].book("s1");
+    });
+    expect(mockPush).toHaveBeenLastCalledWith({
+      pathname: "/agendamento/novo",
+      params: { barbershopId: "b1", serviceId: "s1", professionalId: "p1" },
+    });
+    await act(async () => {
+      result.current[1].clearProfessional();
+    });
+    await act(async () => {
+      result.current[1].book("s1");
+    });
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: "/agendamento/novo", params: { barbershopId: "b1", serviceId: "s1" } });
+    await act(async () => {
+      result.current[1].openAllPhotos();
+    });
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: "/inspiracoes", params: { barbershopId: "b1" } });
   });
 });
 

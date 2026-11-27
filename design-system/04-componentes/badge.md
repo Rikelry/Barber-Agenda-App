@@ -4,7 +4,7 @@ Origem no sistema base: Material 3, Badge/Assist Chip. Situação: Adaptado. Mot
 
 ## Quando usar
 
-- Para indicar o status de um agendamento (Confirmado, Pendente, Cancelado).
+- Para indicar o status de um agendamento: Pendente, Aguardando cliente, Confirmado, Em andamento, Concluído, Não compareceu, Recusado e Cancelado. As cores de cada um estão em [agenda.md](agenda.md#estados-do-agendamento).
 - Para indicar se uma barbearia está Aberta ou Fechada.
 - Para destacar informações curtas e importantes (ex: "Novo").
 
@@ -23,7 +23,7 @@ Origem no sistema base: Material 3, Badge/Assist Chip. Situação: Adaptado. Mot
 | Variante | Uso | Tokens |
 | --- | --- | --- |
 | Sucesso | Status "Confirmado" ou "Aberto" | `neutral.white` sobre fundo `#2E7D32` (pendente de token semântico de status) |
-| Alerta | Status "Pendente" | `color.secondary-container`, `color.on-secondary-container` |
+| Alerta | Status "Pendente" e "Aguardando cliente" | `color.pending` (`amber-200`), texto `amber-900` |
 | Erro | Status "Cancelado" ou "Fechado" | `color.error`, `color.on-error` |
 
 ## Estados

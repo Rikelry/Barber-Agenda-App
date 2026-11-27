@@ -206,6 +206,22 @@ export class OwnerUseCases implements IOwnerUseCases {
     return this.barbershops.listProfessionals(barbershopId);
   }
 
+  canJoinAsProfessional(): boolean {
+    return !(this.session.getSession()?.roles ?? []).includes("profissional");
+  }
+
+  async joinAsProfessional(barbershopId: string, specialty = ""): Promise<Professional> {
+    this.usuarioId();
+    if (!this.canJoinAsProfessional()) {
+      throw new DomainError("Você já atende em uma barbearia. Cada conta atende em uma só.", "VALIDATION");
+    }
+    const especialidade = specialty.trim();
+    if (especialidade.length > 100) {
+      throw new ValidationError({ specialty: "Use até 100 caracteres." });
+    }
+    return this.barbershops.joinAsProfessional(barbershopId, especialidade || undefined);
+  }
+
   async addProfessional(barbershopId: string, form: ProfessionalForm): Promise<Professional> {
     validarProfissional(form, true);
     return this.barbershops.createProfessional(barbershopId, {

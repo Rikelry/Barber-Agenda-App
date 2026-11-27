@@ -1,10 +1,13 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 
-import { authUseCases, profileUseCases } from "@/di/container";
+import { authUseCases, ownerUseCases, profileUseCases } from "@/di/container";
+import type { Barbershop } from "@/model/entities/barbershop";
+import type { UserRole } from "@/model/entities/session";
 import type { User } from "@/model/entities/user";
 import { DomainError, ValidationError } from "@/model/errors";
 import type { IAuthUseCases } from "@/usecase/iAuthUseCases";
+import type { IOwnerUseCases } from "@/usecase/iOwnerUseCases";
 import type { IProfileUseCases, ProfileField, ProfileForm } from "@/usecase/iProfileUseCases";
 
 export type PerfilStatus = "loading" | "error" | "content";
@@ -20,10 +23,18 @@ export type PerfilState = {
   /** Erro ao carregar ou ao salvar (fora dos campos). */
   errorMessage: string | null;
   successMessage: string | null;
-  /** Dono já tem a aba Gestão; quem não é dono vê "Cadastrar minha barbearia". */
+  /** Papéis reais da sessão (Cliente, Profissional, Dono): decidem as seções e as etiquetas. */
+  roles: UserRole[];
+  /** Dono: mostra MINHA BARBEARIA; quem não é dono vê só o convite "Cadastrar minha barbearia". */
   isOwner: boolean;
-  /** Profissional de alguma barbearia: mostra "Meu perfil profissional" (a agenda é uma aba). */
+  /** Profissional de alguma barbearia: mostra TRABALHO (a agenda é a aba Trabalho). */
   isProfessional: boolean;
+  /** Barbearia do dono mostrada em MINHA BARBEARIA (a primeira, em ordem alfabética). */
+  barbershop: Barbershop | null;
+  /** Quantas outras barbearias o dono tem (a agenda delas fica na aba Trabalho). */
+  otherBarbershops: number;
+  /** Confirmação de "Sair da conta" aberta. */
+  confirmingLogout: boolean;
 };
 
 export type PerfilActions = {
@@ -34,10 +45,16 @@ export type PerfilActions = {
   retry: () => void;
   registerBarbershop: () => void;
   openPersonalData: () => void;
-  openChangePassword: () => void;
   goBack: () => void;
   openWorkplace: () => void;
   openPortfolio: () => void;
+  /** Informações da barbearia (nome, telefone, endereço e foto). */
+  openBarbershop: () => void;
+  openHours: () => void;
+  openProfessionals: () => void;
+  openServices: () => void;
+  askLogout: () => void;
+  dismissLogout: () => void;
   /** Sai da conta e volta para o login. */
   logout: () => void;
 };
@@ -60,9 +77,14 @@ const mensagem = (erro: unknown) =>
 export function usePerfilViewModel(
   useCases: IProfileUseCases = profileUseCases,
   auth: IAuthUseCases = authUseCases,
+  owner: IOwnerUseCases = ownerUseCases,
 ): [PerfilState, PerfilActions] {
-  const isOwner = auth.getSession()?.roles.includes("owner") ?? false;
-  const isProfessional = auth.getSession()?.roles.includes("profissional") ?? false;
+  const [roles, setRoles] = useState<UserRole[]>(() => [...(auth.getSession()?.roles ?? [])]);
+  const isOwner = roles.includes("owner");
+  const isProfessional = roles.includes("profissional");
+  const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
+  const [otherBarbershops, setOtherBarbershops] = useState(0);
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [status, setStatus] = useState<PerfilStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [form, setForm] = useState<ProfileForm>(FORM_VAZIO);
@@ -74,6 +96,19 @@ export function usePerfilViewModel(
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const carregar = useCallback(() => {
+    // Papéis podem mudar enquanto o app está aberto (ex.: o dono passou a atender).
+    const papeis = auth.getSession()?.roles ?? [];
+    setRoles((antes) => (antes.join() === papeis.join() ? antes : [...papeis]));
+    if (papeis.includes("owner")) {
+      // A barbearia é um extra do Perfil: se falhar, a seção mostra só os módulos sem o cartão.
+      owner.listMyBarbershops().then(
+        (minhas) => {
+          setBarbershop(minhas[0]?.barbershop ?? null);
+          setOtherBarbershops(Math.max(0, minhas.length - 1));
+        },
+        () => setBarbershop(null),
+      );
+    }
     useCases.getProfile().then(
       (dados) => {
         setUser(dados);
@@ -86,7 +121,7 @@ export function usePerfilViewModel(
         setStatus("error");
       },
     );
-  }, [useCases]);
+  }, [useCases, auth, owner]);
 
   // Recarrega ao voltar para a tela: o menu do Perfil mostra o nome salvo em Dados pessoais.
   useFocusEffect(
@@ -128,8 +163,12 @@ export function usePerfilViewModel(
       saving,
       errorMessage,
       successMessage,
+      roles,
       isOwner,
       isProfessional,
+      barbershop,
+      otherBarbershops,
+      confirmingLogout,
     },
     {
       setField: (field, value) => {
@@ -144,7 +183,20 @@ export function usePerfilViewModel(
       openPortfolio: () => router.push("/portfolio"),
       registerBarbershop: () => router.push("/minhas-barbearias/nova"),
       openPersonalData: () => router.push("/perfil/dados"),
-      openChangePassword: () => router.push("/perfil/senha"),
+      openBarbershop: () => {
+        if (barbershop) router.push({ pathname: "/minhas-barbearias/[id]", params: { id: barbershop.id } });
+      },
+      openHours: () => {
+        if (barbershop) router.push({ pathname: "/minhas-barbearias/[id]/horarios", params: { id: barbershop.id } });
+      },
+      openProfessionals: () => {
+        if (barbershop) router.push({ pathname: "/minhas-barbearias/[id]/profissionais", params: { id: barbershop.id } });
+      },
+      openServices: () => {
+        if (barbershop) router.push({ pathname: "/minhas-barbearias/[id]/servicos", params: { id: barbershop.id } });
+      },
+      askLogout: () => setConfirmingLogout(true),
+      dismissLogout: () => setConfirmingLogout(false),
       goBack: () => (router.canGoBack() ? router.back() : router.replace("/perfil")),
       logout: () => {
         auth.logout();

@@ -32,7 +32,13 @@ const NovaBarbearia = () => {
           </>
         }
       >
-        <PhotoPicker uri={state.logoUri} label="Adicionar foto da barbearia" onPick={actions.pickLogo} />
+        <PhotoPicker
+          uri={state.logoUri}
+          label="Foto da barbearia"
+          onPick={actions.pickLogo}
+          title={state.form.name.trim()}
+          subtitle={state.logoUri ? "Toque na foto para trocar" : "Toque para adicionar uma foto"}
+        />
         <BarbershopFields values={state.form} errors={state.fieldErrors} onChange={actions.setField} />
       </FormScreen>
     </SafeAreaView>

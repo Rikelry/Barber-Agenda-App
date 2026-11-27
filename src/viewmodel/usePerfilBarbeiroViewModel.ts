@@ -79,7 +79,7 @@ export function usePerfilBarbeiroViewModel(
         if (barbershopId) router.push({ pathname: "/barbearia/[id]", params: { id: barbershopId } });
       },
       openPhoto: (photoId) => router.push({ pathname: "/portfolio/[id]", params: { id: photoId, professionalId: id } }),
-      goBack: () => (router.canGoBack() ? router.back() : router.replace("/barbearias")),
+      goBack: () => (router.canGoBack() ? router.back() : router.replace("/")),
     },
   ];
 }

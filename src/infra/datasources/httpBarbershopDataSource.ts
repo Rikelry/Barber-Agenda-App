@@ -141,6 +141,15 @@ export class HttpBarbershopDataSource implements IBarbershopDataSource {
     return toProfessional(await this.http.post<ProfessionalDto>(`/barbershops/${segment(barbershopId)}/professionals`, data));
   }
 
+  async joinAsProfessional(barbershopId: string, specialty?: string): Promise<Professional> {
+    return toProfessional(
+      await this.http.post<ProfessionalDto>(
+        `/barbershops/${segment(barbershopId)}/professionals/me`,
+        specialty ? { specialty } : {},
+      ),
+    );
+  }
+
   async updateProfessional(barbershopId: string, professionalId: string, data: ProfessionalUpdate): Promise<Professional> {
     return toProfessional(
       await this.http.patch<ProfessionalDto>(

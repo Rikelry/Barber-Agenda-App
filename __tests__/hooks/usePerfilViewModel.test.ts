@@ -14,7 +14,7 @@ jest.mock("expo-router", () => ({
   router: { navigate: jest.fn(), replace: (...a: unknown[]) => mockReplace(...a), push: (...a: unknown[]) => mockPush(...a) },
   useFocusEffect: (efeito: () => void) => require("react").useEffect(efeito, [efeito]),
 }));
-jest.mock("@/di/container", () => ({ profileUseCases: {}, authUseCases: { getSession: () => null } }));
+jest.mock("@/di/container", () => ({ profileUseCases: {}, authUseCases: { getSession: () => null }, ownerUseCases: {} }));
 
 const USUARIO: User = {
   id: "u1",
@@ -80,14 +80,54 @@ describe("usePerfilViewModel", () => {
     expect(mockPush).toHaveBeenCalledWith("/minhas-barbearias/nova");
     await act(async () => {
       result.current[1].openPersonalData();
-      result.current[1].openChangePassword();
     });
     expect(mockPush).toHaveBeenCalledWith("/perfil/dados");
-    expect(mockPush).toHaveBeenCalledWith("/perfil/senha");
+    // Sair pede confirmação antes.
+    await act(async () => {
+      result.current[1].askLogout();
+    });
+    expect(result.current[0].confirmingLogout).toBe(true);
+    expect(auth.logout).not.toHaveBeenCalled();
     await act(async () => {
       result.current[1].logout();
     });
     expect(auth.logout).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalledWith("/login");
+  });
+
+  it("dono e profissional: mostra as seções pelos papéis reais e abre a gestão da barbearia", async () => {
+    const casos: jest.Mocked<IProfileUseCases> = {
+      getProfile: jest.fn(async () => USUARIO),
+      saveProfile: jest.fn(async () => USUARIO),
+    };
+    const auth = authFalso();
+    auth.getSession.mockReturnValue({ token: "t", user: USUARIO, roles: ["cliente", "profissional", "owner"] });
+    const dono = {
+      listMyBarbershops: jest.fn(async () => [
+        { barbershop: { id: "b1", name: "Don Corleone", address: "Rua A", phone: "1", avatarUrl: null }, openNow: true },
+        { barbershop: { id: "b2", name: "Vintage", address: "Rua B", phone: "1", avatarUrl: null }, openNow: false },
+      ]),
+    } as unknown as Parameters<typeof usePerfilViewModel>[2];
+    const { result } = await renderHook(() => usePerfilViewModel(casos, auth, dono));
+    await waitFor(() => expect(result.current[0].barbershop?.id).toBe("b1"));
+    expect(result.current[0].roles).toEqual(["cliente", "profissional", "owner"]);
+    expect(result.current[0].isOwner && result.current[0].isProfessional).toBe(true);
+    expect(result.current[0].otherBarbershops).toBe(1);
+    await act(async () => {
+      result.current[1].openBarbershop();
+      result.current[1].openHours();
+      result.current[1].openProfessionals();
+      result.current[1].openServices();
+      result.current[1].openWorkplace();
+      result.current[1].openPortfolio();
+    });
+    expect(mockPush.mock.calls.slice(-6)).toEqual([
+      [{ pathname: "/minhas-barbearias/[id]", params: { id: "b1" } }],
+      [{ pathname: "/minhas-barbearias/[id]/horarios", params: { id: "b1" } }],
+      [{ pathname: "/minhas-barbearias/[id]/profissionais", params: { id: "b1" } }],
+      [{ pathname: "/minhas-barbearias/[id]/servicos", params: { id: "b1" } }],
+      ["/meu-trabalho"],
+      ["/portfolio"],
+    ]);
   });
 });

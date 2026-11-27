@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
-import { ownerUseCases } from "@/di/container";
+import { authUseCases, ownerUseCases } from "@/di/container";
 import type { Professional } from "@/model/entities/professional";
 import { DomainError, ValidationError } from "@/model/errors";
+import type { IAuthUseCases } from "@/usecase/iAuthUseCases";
 import type { IOwnerUseCases, ProfessionalField, ProfessionalForm } from "@/usecase/iOwnerUseCases";
 
 export type ProfissionaisBarbeariaStatus = "loading" | "error" | "content";
@@ -18,10 +19,18 @@ export type ProfissionaisBarbeariaState = {
   saving: boolean;
   /** Profissional com a confirmação de remover aberta. */
   confirmingRemoveId: string | null;
+  /** O dono ainda não atende: mostra "Eu também atendo aqui". */
+  canJoin: boolean;
+  joining: boolean;
+  /** Aviso depois de o dono passar a atender (ou o erro ao tentar). */
+  joinMessage: string | null;
   errorMessage: string | null;
 };
 
 export type ProfissionaisBarbeariaActions = {
+  /** O dono passa a atender nesta barbearia e ganha a própria agenda. */
+  joinAsProfessional: () => void;
+  openMyAgenda: () => void;
   openNew: () => void;
   openEdit: (professional: Professional) => void;
   closeForm: () => void;
@@ -41,6 +50,7 @@ const mensagem = (erro: unknown) =>
 
 export function useProfissionaisBarbeariaViewModel(
   useCases: IOwnerUseCases = ownerUseCases,
+  auth: IAuthUseCases = authUseCases,
 ): [ProfissionaisBarbeariaState, ProfissionaisBarbeariaActions] {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [status, setStatus] = useState<ProfissionaisBarbeariaStatus>("loading");
@@ -51,6 +61,9 @@ export function useProfissionaisBarbeariaViewModel(
   const [saving, setSaving] = useState(false);
   const [confirmingRemoveId, setConfirmingRemoveId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [canJoin, setCanJoin] = useState(() => useCases.canJoinAsProfessional());
+  const [joining, setJoining] = useState(false);
+  const [joinMessage, setJoinMessage] = useState<string | null>(null);
 
   const carregar = useCallback(() => {
     useCases.listProfessionals(id).then(
@@ -98,8 +111,28 @@ export function useProfissionaisBarbeariaViewModel(
   };
 
   return [
-    { status, professionals, editing, form, fieldErrors, saving, confirmingRemoveId, errorMessage },
+    { status, professionals, editing, form, fieldErrors, saving, confirmingRemoveId, canJoin, joining, joinMessage, errorMessage },
     {
+      joinAsProfessional: () => {
+        if (joining) return;
+        setJoining(true);
+        setJoinMessage(null);
+        useCases
+          .joinAsProfessional(id)
+          // Novo token com o papel de profissional: a aba Trabalho aparece.
+          .then(() => auth.refreshSession().catch(() => null))
+          .then(
+            () => {
+              setCanJoin(useCases.canJoinAsProfessional());
+              setJoinMessage("Pronto! Você agora atende aqui. Seus pedidos e horários ficam na aba Trabalho.");
+              carregar();
+            },
+            (erro: unknown) => setJoinMessage(mensagem(erro)),
+          )
+          .finally(() => setJoining(false));
+      },
+      // Os pedidos do dono que atende aparecem na agenda da barbearia (aba Trabalho).
+      openMyAgenda: () => router.navigate("/gestao"),
       openNew: () => abrir("novo", VAZIO),
       openEdit: (p) =>
         abrir(p.id, { name: p.name, phone: p.phone, email: p.email, password: "", specialty: p.specialty ?? "" }),

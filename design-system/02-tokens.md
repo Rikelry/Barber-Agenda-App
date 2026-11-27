@@ -26,6 +26,19 @@
 | `brown-pressed`       | `#4A321F` | Novo     |
 | `brown-light-hover`   | `#D8BBA3` | Novo     |
 | `brown-light-pressed` | `#B5835A` | Novo     |
+| `brown-950`           | `#39200F` | Novo     |
+| `brown-800`           | `#603514` | Novo     |
+| `brown-700`           | `#79583F` | Novo     |
+| `brown-900`           | `#392719` | Novo     |
+| `beige-200`           | `#F3DFCB` | Novo     |
+| `beige-100`           | `#F8E9DC` | Novo     |
+| `beige-300`           | `#EBD0B7` | Novo     |
+| `cream-50`            | `#FFF8F1` | Novo     |
+| `taupe-500`           | `#85776D` | Novo     |
+| `green-600`           | `#198344` | Novo     |
+
+Os primitivos `brown-950` a `green-600` vêm da paleta da Home redesenhada (24/11/26) e definem o
+modo claro. Os primitivos `brown-1` a `brown-5` e `neutral-*` continuam valendo para o modo escuro.
 
 ### Espaço (grade de 8 pontos)
 
@@ -74,20 +87,46 @@
 
 | Token                      | Claro           | Escuro                | Uso                       | Origem   |
 | -------------------------- | --------------- | --------------------- | ------------------------- | -------- |
-| `color.action`             | `brown-5`       | `brown-1`             | Ações principais          | Adaptado |
+| `color.action`             | `brown-950`     | `brown-1`             | Ações principais          | Adaptado |
 | `color.on-action`          | `neutral-0`     | `neutral-900`         | Texto e ícone sobre ação  | Adaptado |
-| `color.secondary`          | `brown-3`       | `brown-2`             | Ações secundárias         | Adaptado |
-| `color.surface`            | `neutral-50`    | `neutral-950`         | Fundo das telas           | Adaptado |
-| `color.surface-container`  | `neutral-100`   | `neutral-900`         | Cards e áreas agrupadas   | Adaptado |
-| `color.on-surface`         | `neutral-900`   | `neutral-100`         | Texto principal           | Adaptado |
-| `color.on-surface-variant` | `brown-4`       | `brown-1`             | Texto secundário          | Adaptado |
-| `color.outline`            | `brown-3`       | `brown-2`             | Bordas e divisores        | Adaptado |
+| `color.secondary`          | `brown-800`     | `brown-2`             | Ações secundárias         | Adaptado |
+| `color.surface`            | `cream-50`      | `neutral-950`         | Fundo das telas           | Adaptado |
+| `color.surface-container`  | `beige-100`     | `neutral-900`         | Cards e áreas agrupadas   | Adaptado |
+| `color.on-surface`         | `brown-900`     | `neutral-100`         | Texto principal           | Adaptado |
+| `color.on-surface-variant` | `brown-700`     | `brown-1`             | Texto secundário          | Adaptado |
+| `color.outline`            | `taupe-500`     | `brown-2`             | Bordas e divisores        | Adaptado |
 | `color.error`              | `error-600`     | `error-300`           | Erros e ações destrutivas | Herdado  |
-| `color.focus`              | `brown-5`       | `brown-1`             | Anel de foco              | Adaptado |
+| `color.focus`              | `brown-950`     | `brown-1`             | Anel de foco              | Adaptado |
 | `color.action-hover`       | `brown-hover`   | `brown-light-hover`   | Ação sob foco do ponteiro | Novo     |
 | `color.action-pressed`     | `brown-pressed` | `brown-light-pressed` | Ação pressionada          | Novo     |
 | `color.disabled`           | `neutral-200`   | `neutral-600`         | Elementos desabilitados   | Adaptado |
+| `color.container`          | `beige-200`     | `brown-5`             | Card de destaque, categoria e barra inferior | Novo |
+| `color.secondary-container`| `beige-300`     | `brown-5`             | Pílulas, setas e indicadores tonais | Novo |
+| `color.success`            | `green-600`     | `green-600`           | Confirmado e "Aberto agora" (texto branco) | Novo |
+| `color.pending`            | `amber-200` (`#FFDF99`) | `amber-200`     | Selo Pendente e Aguardando cliente (texto `amber-900`, `#4D3300`) | Novo |
 | `color.on-disabled`        | `neutral-600`   | `neutral-200`         | Texto desabilitado        | Adaptado |
+
+Contraste do modo claro (WCAG 2.2, medido em 24/11/26): `brown-900` sobre `beige-100` 12,0:1;
+`brown-800` sobre `beige-100` 8,8:1; texto secundário `brown-700` sobre `cream-50` 6,1:1, sobre `beige-100` 5,4:1 e sobre `beige-200` 5,0:1 (sobre `beige-300` fica 4,3:1: não usar texto secundário nesse fundo); branco sobre `brown-950` 15,1:1; branco sobre `green-600` 4,8:1. `amber-900` sobre `amber-200` 9,1:1 (selo de pendência, pedido como "amarelo para pendências" em 27/11/26).
+
+**Conflitos registrados:**
+
+- `taupe-500` (`#85776D`), pedido como cinza dos textos auxiliares, mede 4,1:1 sobre `cream-50` e
+  3,6:1 sobre `beige-100`. Fica só em `color.outline` (componentes não textuais, mínimo 3:1); o texto
+  secundário usa `brown-700` (`#79583F`, desde 26/11/26).
+- O selo "Aberto agora" da referência tem texto verde sobre verde claro (3,5:1). O fundo tonal e o
+  ponto verde foram mantidos, mas o texto usa `color.on-surface`.
+- `color.action-hover` e `color.action-pressed` ainda apontam para tons do `brown-5`; falta definir
+  os estados da nova cor de ação.
+- O modo escuro não recebeu a nova paleta (a referência só define o claro).
+
+### Sobreposição
+
+| Token                  | Valor              | Uso                                                       | Origem |
+| ---------------------- | ------------------ | --------------------------------------------------------- | ------ |
+| `overlay.scrim`        | `#000000` a 55 %   | Véu na base das fotos das Inspirações (texto branco)      | Novo   |
+| `overlay.status-tint`  | `green-600` a 12 % | Fundo do selo "Aberto agora"                              | Novo   |
+| `overlay.header-pattern` | `beige-200` a 18 % | Arcos decorativos do cabeçalho do Início                | Novo   |
 
 ### Tipografia
 

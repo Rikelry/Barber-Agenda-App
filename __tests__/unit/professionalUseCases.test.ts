@@ -31,6 +31,7 @@ const montar = (agenda: AgendaAppointmentData[]) => {
     ),
     addRecurringUnavailability: jest.fn(async () => undefined),
     removeRecurringUnavailability: jest.fn(async () => undefined),
+    listMyWorkplaces: jest.fn(async () => []),
   } as jest.Mocked<IProfessionalDataSource>;
   const barbearias = {
     listServices: jest.fn(async () => [{ id: "s1", barbershopId: "b1", name: "Corte Degradê", description: null, durationMinutes: 30, price: 40, imageUrl: null }]),

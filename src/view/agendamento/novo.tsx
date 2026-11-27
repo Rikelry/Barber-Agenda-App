@@ -59,8 +59,13 @@ const NovoAgendamento = () => {
               <Icon name="checkmark" size={spacing.massive} color={statusColors.confirmed.content} />
             </View>
             <Typography variant="titleLarge" weight="500" align="center" accessibilityRole="header">
-              {state.rescheduling ? "Horário remarcado" : "Horário reservado"}
+              {state.rescheduling ? "Horário remarcado" : "Pedido enviado"}
             </Typography>
+            {!state.rescheduling ? (
+              <Typography variant="bodyMedium" color="onSurfaceVariant" align="center">
+                O horário fica reservado enquanto a barbearia confirma. Acompanhe em Meus agendamentos.
+              </Typography>
+            ) : null}
             <Typography variant="bodyLarge" color="onSurfaceVariant" align="center">
               {diaCurto(diaEscolhido)}, às {state.time}
               {profissional ? ` com ${profissional.name.split(" ")[0]}` : ""}
@@ -152,7 +157,7 @@ const NovoAgendamento = () => {
             </Typography>
           ) : null}
           <Button variant="filled" size="medium" fullWidth onPress={actions.confirm} disabled={state.saving}>
-            {state.saving ? "Confirmando..." : state.rescheduling ? "Confirmar novo horário" : "Confirmar agendamento"}
+            {state.saving ? "Enviando..." : state.rescheduling ? "Confirmar novo horário" : "Solicitar horário"}
           </Button>
           <Button variant="text" size="medium" fullWidth onPress={actions.editChoice}>
             Alterar profissional ou horário

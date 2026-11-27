@@ -31,4 +31,8 @@ export interface IAppointmentUseCases {
   book(form: BookingForm, now?: Date): Promise<Appointment>;
   reschedule(appointment: Appointment, date: string, time: string | null, now?: Date): Promise<Appointment>;
   cancel(appointmentId: string): Promise<void>;
+  /** O barbeiro sugeriu outro horário: aceitar confirma no horário sugerido. */
+  acceptProposal(appointment: Appointment): Promise<void>;
+  /** Recusar a sugestão cancela o pedido. */
+  rejectProposal(appointment: Appointment): Promise<void>;
 }

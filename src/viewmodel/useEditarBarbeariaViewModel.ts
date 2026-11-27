@@ -26,9 +26,6 @@ export type EditarBarbeariaActions = {
   save: () => void;
   retry: () => void;
   goBack: () => void;
-  openHours: () => void;
-  openProfessionals: () => void;
-  openServices: () => void;
 };
 
 /** 11955554444 → (11) 95555-4444 */
@@ -94,8 +91,6 @@ export function useEditarBarbeariaViewModel(
       .finally(() => setSaving(false));
   };
 
-  const abrir = (tela: "horarios" | "profissionais" | "servicos") =>
-    router.push({ pathname: `/minhas-barbearias/[id]/${tela}`, params: { id } });
 
   return [
     { status, form, fieldErrors, logoUri: logo?.uri ?? fotoAtual, saving, successMessage, errorMessage },
@@ -114,9 +109,6 @@ export function useEditarBarbeariaViewModel(
         carregar();
       },
       goBack: () => (router.canGoBack() ? router.back() : router.replace("/gestao")),
-      openHours: () => abrir("horarios"),
-      openProfessionals: () => abrir("profissionais"),
-      openServices: () => abrir("servicos"),
     },
   ];
 }

@@ -16,6 +16,9 @@ export interface IAppointmentDataSource {
   listMine(): Promise<AppointmentData[]>;
   create(request: BookingRequest): Promise<AppointmentData>;
   cancel(appointmentId: string): Promise<void>;
+  /** Responde ao horário sugerido pelo profissional. */
+  acceptProposal(appointmentId: string): Promise<void>;
+  rejectProposal(appointmentId: string): Promise<void>;
   reschedule(appointmentId: string, date: string, time: string): Promise<AppointmentData>;
   /** Horários livres ("HH:mm") do profissional para o serviço na data. */
   listAvailableSlots(barbershopId: string, professionalId: string, serviceId: string, date: string): Promise<string[]>;

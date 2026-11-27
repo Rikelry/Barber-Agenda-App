@@ -26,6 +26,8 @@ export interface IBarbershopDataSource {
   /** Cria ou atualiza o horário de um dia (a API não apaga dias). */
   saveBusinessHours(barbershopId: string, hours: BusinessHours): Promise<void>;
   createProfessional(barbershopId: string, data: ProfessionalData): Promise<Professional>;
+  /** O dono logado passa a atender na própria barbearia, com a mesma conta. */
+  joinAsProfessional(barbershopId: string, specialty?: string): Promise<Professional>;
   updateProfessional(barbershopId: string, professionalId: string, data: ProfessionalUpdate): Promise<Professional>;
   removeProfessional(barbershopId: string, professionalId: string): Promise<void>;
   createService(barbershopId: string, data: ServiceData): Promise<Service>;

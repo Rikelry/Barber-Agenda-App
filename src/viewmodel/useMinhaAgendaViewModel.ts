@@ -1,149 +1,78 @@
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import { professionalUseCases } from "@/di/container";
+import { agendaUseCases } from "@/di/container";
 import { DomainError } from "@/model/errors";
-import { toIsoDate } from "@/usecase/appointmentUseCases";
-import type { AgendaItem, IProfessionalUseCases } from "@/usecase/iProfessionalUseCases";
-
-export type MinhaAgendaStatus = "loading" | "error" | "content";
-
-export type DiaAgenda = { iso: string; date: Date; selected: boolean; today: boolean };
+import type { AgendaWorkplace, IAgendaUseCases } from "@/usecase/iAgendaUseCases";
+import { useAgendaViewModel, type AgendaActions, type AgendaState } from "@/viewmodel/useAgendaViewModel";
 
 export type MinhaAgendaState = {
-  status: MinhaAgendaStatus;
-  week: DiaAgenda[];
-  date: string;
-  closed: boolean;
-  items: AgendaItem[];
-  /** Agendamento tocado: mostra as ações Concluir e Cancelar. */
-  selectedId: string | null;
-  confirmingCancel: boolean;
-  acting: boolean;
-  actionMessage: string | null;
-  errorMessage: string | null;
+  /** Carregamento das barbearias onde o barbeiro atende (a agenda tem o próprio status). */
+  workplacesStatus: "loading" | "error" | "content";
+  workplaces: AgendaWorkplace[];
+  selectedBarbershopId: string | null;
+  workplacesError: string | null;
+  agenda: AgendaState;
 };
 
-export type MinhaAgendaActions = {
-  selectDate: (iso: string) => void;
-  retry: () => void;
+export type MinhaAgendaActions = AgendaActions & {
+  selectBarbershop: (barbershopId: string) => void;
+  retryWorkplaces: () => void;
+  /** Bloqueios: folgas e horários em que o barbeiro não atende. */
   openBlocks: () => void;
-  openWorkplace: () => void;
-  select: (appointmentId: string) => void;
-  complete: () => void;
-  askCancel: () => void;
-  dismissCancel: () => void;
-  confirmCancel: () => void;
 };
 
-/** Segunda a domingo da semana atual, como no layout. */
-const semanaAtual = (hoje: Date): Date[] => {
-  const segunda = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - ((hoje.getDay() + 6) % 7));
-  return Array.from({ length: 7 }, (_, i) => new Date(segunda.getFullYear(), segunda.getMonth(), segunda.getDate() + i));
-};
-
+/**
+ * Aba Trabalho do barbeiro (rota agenda): a agenda dele na barbearia escolhida. Quem atende em
+ * mais de uma barbearia troca pelo seletor; o backend só devolve os horários dele.
+ */
 export function useMinhaAgendaViewModel(
-  useCases: IProfessionalUseCases = professionalUseCases,
+  useCases: IAgendaUseCases = agendaUseCases,
 ): [MinhaAgendaState, MinhaAgendaActions] {
-  const hoje = toIsoDate(new Date());
-  const [date, setDate] = useState(hoje);
-  const [status, setStatus] = useState<MinhaAgendaStatus>("loading");
-  const [closed, setClosed] = useState(false);
-  const [items, setItems] = useState<AgendaItem[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [confirmingCancel, setConfirmingCancel] = useState(false);
-  const [acting, setActing] = useState(false);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const pedido = useRef(0);
-  const diaAtual = useRef(hoje);
+  const [workplacesStatus, setWorkplacesStatus] = useState<MinhaAgendaState["workplacesStatus"]>("loading");
+  const [workplaces, setWorkplaces] = useState<AgendaWorkplace[]>([]);
+  const [selectedBarbershopId, setSelectedBarbershopId] = useState<string | null>(null);
+  const [workplacesError, setWorkplacesError] = useState<string | null>(null);
 
-  const carregar = useCallback(
-    (dia: string) => {
-      const atual = ++pedido.current;
-      useCases.getDayAgenda(dia).then(
-        (agenda) => {
-          if (atual !== pedido.current) return;
-          setClosed(agenda.closed);
-          setItems(agenda.items);
-          setErrorMessage(null);
-          setStatus("content");
-        },
-        (erro: unknown) => {
-          if (atual !== pedido.current) return;
-          setErrorMessage(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo.");
-          setStatus("error");
-        },
-      );
-    },
-    [useCases],
-  );
+  const carregar = useCallback(() => {
+    useCases.listWorkplaces().then(
+      (lista) => {
+        setWorkplaces(lista);
+        setSelectedBarbershopId((atual) =>
+          atual && lista.some((w) => w.barbershopId === atual) ? atual : (lista[0]?.barbershopId ?? null),
+        );
+        setWorkplacesError(null);
+        setWorkplacesStatus("content");
+      },
+      (erro: unknown) => {
+        setWorkplacesError(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo.");
+        setWorkplacesStatus("error");
+      },
+    );
+  }, [useCases]);
 
-  // Recarrega ao voltar (ex.: depois de mexer nas indisponibilidades).
   useFocusEffect(
     useCallback(() => {
-      carregar(diaAtual.current);
+      carregar();
     }, [carregar]),
   );
 
-  const week = semanaAtual(new Date()).map((d) => {
-    const iso = toIsoDate(d);
-    return { iso, date: d, selected: iso === date, today: iso === hoje };
-  });
-
-  const agir = (acao: Promise<void>, sucesso: string) => {
-    setActing(true);
-    setActionMessage(null);
-    acao
-      .then(
-        () => {
-          setSelectedId(null);
-          setConfirmingCancel(false);
-          setActionMessage(sucesso);
-          carregar(diaAtual.current);
-        },
-        (erro: unknown) =>
-          setActionMessage(erro instanceof DomainError ? erro.message : "Erro inesperado. Tente de novo."),
-      )
-      .finally(() => setActing(false));
-  };
-
-  const selecionado = items.find((i) => i.kind === "appointment" && i.id === selectedId);
+  const escopo = useMemo(
+    () => (selectedBarbershopId ? { kind: "professional" as const, barbershopId: selectedBarbershopId } : null),
+    [selectedBarbershopId],
+  );
+  const [agenda, actions] = useAgendaViewModel(escopo, useCases);
 
   return [
-    { status, week, date, closed, items, selectedId, confirmingCancel, acting, actionMessage, errorMessage },
+    { workplacesStatus, workplaces, selectedBarbershopId, workplacesError, agenda },
     {
-      selectDate: (iso) => {
-        setDate(iso);
-        setSelectedId(null);
-        setActionMessage(null);
-        diaAtual.current = iso;
-        setStatus("loading");
-        carregar(iso);
-      },
-      retry: () => {
-        setStatus("loading");
-        carregar(date);
+      ...actions,
+      selectBarbershop: setSelectedBarbershopId,
+      retryWorkplaces: () => {
+        setWorkplacesStatus("loading");
+        carregar();
       },
       openBlocks: () => router.push("/indisponibilidades"),
-      openWorkplace: () => router.push("/meu-trabalho"),
-      select: (id) => {
-        setSelectedId((atual) => (atual === id ? null : id));
-        setConfirmingCancel(false);
-        setActionMessage(null);
-      },
-      complete: () => {
-        if (selecionado?.kind === "appointment" && !acting) {
-          agir(useCases.completeAppointment(selecionado.id, selecionado.startsAt), "Atendimento concluído.");
-        }
-      },
-      askCancel: () => setConfirmingCancel(true),
-      dismissCancel: () => setConfirmingCancel(false),
-      confirmCancel: () => {
-        if (selecionado?.kind === "appointment" && !acting) {
-          agir(useCases.cancelAppointment(selecionado.id), "Agendamento cancelado.");
-        }
-      },
     },
   ];
 }

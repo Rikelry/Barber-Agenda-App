@@ -1,7 +1,7 @@
 // Imagem de barbearia ou serviço, com ícone de tesoura enquanto carrega, sem foto ou se ela falhar.
 
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { StyleSheet, View, type DimensionValue } from "react-native";
 
 import { Icon } from "@/view/components/icon";
@@ -12,12 +12,14 @@ export type ThumbnailProps = {
     /** Texto para leitor de tela (ex.: "Foto da Barbearia Central"). */
     label: string;
     width: DimensionValue;
-    height: number;
+    height: DimensionValue;
     /** Canto arredondado; padrão 12 (medium). */
     radius?: number;
+    /** O que aparece sem foto (ou enquanto carrega); padrão: ícone de tesoura. */
+    placeholder?: ReactNode;
 };
 
-export const Thumbnail = ({ uri, label, width, height, radius }: ThumbnailProps) => {
+export const Thumbnail = ({ uri, label, width, height, radius, placeholder }: ThumbnailProps) => {
     const { theme } = useDesignSystem();
     const [falhou, setFalhou] = useState(false);
 
@@ -37,7 +39,7 @@ export const Thumbnail = ({ uri, label, width, height, radius }: ThumbnailProps)
             }}
         >
             {/* O ícone fica por baixo: aparece enquanto a foto carrega e se ela falhar. */}
-            <Icon name="scissors" size={theme.spacing.xxxl} color={theme.colors.onPrimaryContainer} />
+            {placeholder ?? <Icon name="scissors" size={theme.spacing.xxxl} color={theme.colors.onPrimaryContainer} />}
             {uri && !falhou ? (
                 <Image
                     source={{ uri }}

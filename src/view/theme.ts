@@ -4,61 +4,62 @@
 
 import { Platform, type Insets, type TextStyle, type ViewStyle } from "react-native";
 
-// --- cores: design system marrom (design-system/02-tokens.md, 0.1.3). Os papéis do Material 3
-// que o documento não define (containers, tertiary, inverse, fixed) foram preenchidos só com os
-// primitivos brown-* e neutral-* dele, com contraste de texto >= 4,5:1 (aprovado em 17/11/26).
+// --- cores: design system marrom (design-system/02-tokens.md, 0.3.0). O modo claro usa a paleta
+// da Home redesenhada (espresso, bege e creme). O cinza taupe-500 (#85776D) não chega a 4,5:1 sobre
+// as superfícies, por isso fica só em bordas; o texto secundário usa brown-700 (#79583F). O modo escuro
+// continua com os primitivos brown-* e neutral-* da 0.1.3 (lacuna registrada no 02-tokens.md).
 // --- tokens/colors.ts ------------------------------------------------------
 
 export const lightColors = {
-    primary: "#63452C",
+    primary: "#39200F",
     onPrimary: "#FFFFFF",
-    primaryContainer: "#CDAB8F",
-    onPrimaryContainer: "#241A14",
-    secondary: "#986A44",
+    primaryContainer: "#F3DFCB",
+    onPrimaryContainer: "#39200F",
+    secondary: "#603514",
     onSecondary: "#FFFFFF",
-    secondaryContainer: "#CDAB8F",
-    onSecondaryContainer: "#241A14",
-    tertiary: "#63452C",
+    secondaryContainer: "#EBD0B7",
+    onSecondaryContainer: "#39200F",
+    tertiary: "#603514",
     onTertiary: "#FFFFFF",
-    tertiaryContainer: "#E7DED6",
-    onTertiaryContainer: "#63452C",
+    tertiaryContainer: "#F3DFCB",
+    onTertiaryContainer: "#39200F",
     error: "#BA1A1A",
     onError: "#FFFFFF",
     errorContainer: "#FFDAD6",
     onErrorContainer: "#93000A",
-    background: "#FFF8F3",
-    onBackground: "#241A14",
-    surface: "#FFF8F3",
-    onSurface: "#241A14",
-    surfaceVariant: "#F5EDE6",
-    onSurfaceVariant: "#865E3C",
-    surfaceDim: "#E7DED6",
-    surfaceBright: "#FFF8F3",
+    background: "#FFF8F1",
+    onBackground: "#392719",
+    surface: "#FFF8F1",
+    onSurface: "#392719",
+    surfaceVariant: "#F8E9DC",
+    onSurfaceVariant: "#79583F",
+    surfaceDim: "#EBD0B7",
+    surfaceBright: "#FFF8F1",
     surfaceContainerLowest: "#FFFFFF",
-    surfaceContainerLow: "#FFF8F3",
-    surfaceContainer: "#F5EDE6",
-    surfaceContainerHigh: "#F5EDE6",
-    surfaceContainerHighest: "#F5EDE6",
-    outline: "#986A44",
-    outlineVariant: "#E7DED6",
-    inverseSurface: "#241A14",
-    inverseOnSurface: "#FFF8F3",
-    inversePrimary: "#CDAB8F",
-    primaryFixed: "#CDAB8F",
-    primaryFixedDim: "#B5835A",
-    onPrimaryFixed: "#241A14",
-    onPrimaryFixedVariant: "#63452C",
-    secondaryFixed: "#CDAB8F",
-    secondaryFixedDim: "#B5835A",
-    onSecondaryFixed: "#241A14",
-    onSecondaryFixedVariant: "#63452C",
-    tertiaryFixed: "#E7DED6",
-    tertiaryFixedDim: "#CDAB8F",
-    onTertiaryFixed: "#241A14",
-    onTertiaryFixedVariant: "#63452C",
+    surfaceContainerLow: "#FFF8F1",
+    surfaceContainer: "#F8E9DC",
+    surfaceContainerHigh: "#F3DFCB",
+    surfaceContainerHighest: "#EBD0B7",
+    outline: "#85776D",
+    outlineVariant: "#EBD0B7",
+    inverseSurface: "#39200F",
+    inverseOnSurface: "#FFF8F1",
+    inversePrimary: "#EBD0B7",
+    primaryFixed: "#F3DFCB",
+    primaryFixedDim: "#EBD0B7",
+    onPrimaryFixed: "#39200F",
+    onPrimaryFixedVariant: "#603514",
+    secondaryFixed: "#F3DFCB",
+    secondaryFixedDim: "#EBD0B7",
+    onSecondaryFixed: "#39200F",
+    onSecondaryFixedVariant: "#603514",
+    tertiaryFixed: "#F8E9DC",
+    tertiaryFixedDim: "#EBD0B7",
+    onTertiaryFixed: "#39200F",
+    onTertiaryFixedVariant: "#603514",
     scrim: "#000000",
-    shadow: "#000000",
-    surfaceTint: "#63452C",
+    shadow: "#39200F",
+    surfaceTint: "#39200F",
 } as const;
 
 export const darkColors = {
@@ -595,10 +596,14 @@ export const darkTheme: DesignTheme = {
 export const componentSizes = {
     /** avatar.md: pequeno (listas compactas), médio (listas e Home), grande (perfil). */
     avatar: { small: 32, medium: 48, large: 96 },
-    /** Canvas de telas: marca do login (88 dp, canto 24). */
-    brandMark: { size: 88, radius: 24 },
+    /** Logo do app na tela de login (assets/images/logo.svg). */
+    brandMark: { size: 112, radius: 24 },
     /** tabs.md (variante linha): espessura do indicador da aba ativa. */
     tabs: { indicator: 3 },
+    /** perfil-menu.md: item de duas linhas, recuo do divisor (depois do ícone) e foto da barbearia. */
+    profileMenu: { itemHeight: 72, dividerInset: 80, barbershopImage: 64 },
+    /** segmented-button.md (M3 outlined segmented button): altura e ícone. */
+    segmentedButton: { height: 40, icon: 18 },
     /** Linha de lista com duas linhas de texto (menu do Perfil, profissionais). */
     listItem: { twoLine: 64 },
     /** Imagem de barbearia: miniatura nos cards e capa no detalhe. */
@@ -612,12 +617,48 @@ export const componentSizes = {
     portfolio: { gridHeight: 118, previewHeight: 260 },
     /** Esqueleto de carregamento (padrão 2 de 05-padroes.md). */
     skeleton: { line: 16, card: 96 },
+    /** upload-imagem.md: botão de câmera sobre a foto. */
+    photoPicker: { badge: 36 },
+    /** campo-de-texto.md: altura do outlined text field (M3). */
+    textField: { height: 56 },
     /** barra-busca.md: altura do contêiner. */
     searchBar: { height: 56 },
     /** tab-bar.md: indicador de fundo da aba ativa. */
     tabBar: { indicatorWidth: 64, indicatorHeight: 32 },
     /** 06-acessibilidade.md: alvo de toque mínimo. */
     touchTarget: 48,
+    /** Detalhe da barbearia: foto de topo, galeria de trabalhos e cards de serviço. */
+    barbershopDetail: {
+        /** Fração da altura da tela ocupada pela foto de topo. */
+        heroRatio: 0.29,
+        heroMinHeight: 240,
+        workWidth: 128,
+        workHeight: 160,
+        serviceImage: 84,
+    },
+    /** Home: foto do próximo agendamento, cards de categoria, de barbearia e de inspiração. */
+    home: {
+        appointmentImage: 88,
+        /** Chips de categoria (estilo abas de filtro): cápsula com a largura do texto. */
+        categoryChipHeight: 36,
+        barbershopImageWidth: "36%",
+        barbershopMinHeight: 120,
+        inspirationWidth: 156,
+        inspirationHeight: 196,
+        statusDot: 8,
+    },
+    /** agenda.md (aba Trabalho): marca de dia com horários, coluna da hora, trilho da linha do tempo e bottom sheet. */
+    agenda: {
+        dayMark: 4,
+        timeColumn: 48,
+        timelineRail: 2,
+        sheetHandleWidth: 32,
+        sheetHandleHeight: 4,
+        /** Fração máxima da altura da tela ocupada pelo bottom sheet. */
+        sheetMaxRatio: 0.85,
+        /** Arrasto (dp) a partir do qual soltar o sheet fecha. */
+        sheetDismissDrag: 96,
+    },
 } as const;
 
 export type AvatarSize = keyof typeof componentSizes.avatar;
@@ -625,9 +666,27 @@ export type AvatarSize = keyof typeof componentSizes.avatar;
 // --- cores de status de agendamento ------------------------------------------
 
 /**
- * 05-padroes.md, padrão 7: o verde do "Confirmado" (#2E7D32) está documentado como
- * pendente de token semântico; pendente e cancelado reaproveitam papéis do esquema.
+ * 05-padroes.md, padrão 7: verde de confirmação green-600 (#198344, 4,8:1 com branco), também
+ * usado no "Aberto agora". Pendente e cancelado reaproveitam papéis do esquema.
  */
 export const statusColors = {
-    confirmed: { container: "#2E7D32", content: "#FFFFFF" },
+    confirmed: { container: "#198344", content: "#FFFFFF" },
+    /** Pendente e aguardando o cliente: âmbar (amber-200 com amber-900, 9,1:1). */
+    pending: { container: "#FFDF99", content: "#4D3300" },
+} as const;
+
+/**
+ * Véu sobre fotos (02-tokens.md, "Sobreposição"): escurece a base das fotos das Inspirações para
+ * o nome em branco ficar legível, igual nos dois temas. statusTint é o fundo tonal do selo
+ * "Aberto agora" (verde de statusColors com essa opacidade sobre o card).
+ */
+export const overlay = {
+    scrim: "#000000",
+    scrimOpacity: 0.55,
+    onScrim: "#FFFFFF",
+    statusTint: 0.12,
+    /** Arcos decorativos do cabeçalho do Início: bege claro nessa opacidade sobre o marrom. */
+    headerPattern: 0.18,
+    /** Fundo dos botões redondos sobre fotos (ex.: voltar no detalhe da barbearia). */
+    controlScrim: 0.45,
 } as const;

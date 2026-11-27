@@ -33,6 +33,7 @@ const StackComTema = () => {
       <Stack.Screen name="portfolio/index" options={{ headerShown: false }} />
       <Stack.Screen name="portfolio/nova" options={{ headerShown: false }} />
       <Stack.Screen name="portfolio/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="inspiracoes" options={{ headerShown: false }} />
     </Stack>
   );
 };

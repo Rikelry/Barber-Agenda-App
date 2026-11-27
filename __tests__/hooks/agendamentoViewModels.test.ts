@@ -9,7 +9,6 @@ import { DomainError, ValidationError } from "@/model/errors";
 import type { IAppointmentUseCases } from "@/usecase/iAppointmentUseCases";
 import type { IBarbershopUseCases } from "@/usecase/iBarbershopUseCases";
 import { useAgendamentosViewModel } from "@/viewmodel/useAgendamentosViewModel";
-import { useBarbeariasViewModel } from "@/viewmodel/useBarbeariasViewModel";
 import { useNovoAgendamentoViewModel } from "@/viewmodel/useNovoAgendamentoViewModel";
 import { abasDoPapel, useTabBarViewModel } from "@/viewmodel/useTabBarViewModel";
 
@@ -53,7 +52,7 @@ const AGENDADO: Appointment = {
 
 const barbeariasFalsas = (profissionais = [pro("p1", "Alessandro"), pro("p2", "Lucas")]): jest.Mocked<IBarbershopUseCases> => ({
   listBarbershops: jest.fn(async () => [BARBEARIA]),
-  getBarbershopDetail: jest.fn(async () => ({ barbershop: BARBEARIA, services: [SERVICO], professionals: profissionais, hoursToday: null })),
+  getBarbershopDetail: jest.fn(async () => ({ barbershop: BARBEARIA, services: [SERVICO], professionals: profissionais, hoursToday: null, openNow: false })),
   listBarbers: jest.fn(async () => []),
   getBarberProfile: jest.fn(async () => {
     throw new Error("não usado");
@@ -67,6 +66,8 @@ const agendamentosFalsos = (): jest.Mocked<IAppointmentUseCases> => ({
   book: jest.fn(async () => AGENDADO),
   reschedule: jest.fn(async () => AGENDADO),
   cancel: jest.fn(async () => undefined),
+  acceptProposal: jest.fn(async () => undefined),
+  rejectProposal: jest.fn(async () => undefined),
 });
 
 beforeEach(() => {
@@ -83,33 +84,22 @@ describe("useTabBarViewModel", () => {
     const { result } = await renderHook(() => useTabBarViewModel("inicio", auth));
     await agir(() => result.current[1].navigate("inicio"));
     await agir(() => result.current[1].navigate("agendas"));
-    await agir(() => result.current[1].navigate("buscar"));
     await agir(() => result.current[1].navigate("agenda"));
     await agir(() => result.current[1].navigate("gestao"));
-    expect(mockNavigate.mock.calls).toEqual([["/agendamentos"], ["/barbearias"], ["/agenda"], ["/gestao"]]);
+    expect(mockNavigate.mock.calls).toEqual([["/agendamentos"], ["/agenda"], ["/gestao"]]);
   });
 
   it("mostra as abas do papel de quem entrou", async () => {
     const auth = authFalso();
     auth.getSession.mockReturnValue({ ...SESSAO, roles: ["cliente", "profissional"] });
     const { result } = await renderHook(() => useTabBarViewModel("perfil", auth));
-    expect(result.current[0].tabs).toEqual(["inicio", "buscar", "agendas", "agenda", "perfil"]);
+    expect(result.current[0].tabs).toEqual(["inicio", "agendas", "agenda", "perfil"]);
   });
 
   it("monta no máximo 5 abas para cada combinação de papéis", () => {
-    expect(abasDoPapel(["cliente"])).toEqual(["inicio", "buscar", "agendas", "perfil"]);
-    expect(abasDoPapel(["cliente", "owner"])).toEqual(["inicio", "buscar", "agendas", "gestao", "perfil"]);
-    expect(abasDoPapel(["cliente", "profissional", "owner"])).toEqual(["inicio", "agendas", "agenda", "gestao", "perfil"]);
-  });
-});
-
-describe("useBarbeariasViewModel", () => {
-  it("carrega a lista e abre o detalhe", async () => {
-    const casos = barbeariasFalsas();
-    const { result } = await renderHook(() => useBarbeariasViewModel(casos));
-    await waitFor(() => expect(result.current[0].status).toBe("content"));
-    await agir(() => result.current[1].openBarbershop("b1"));
-    expect(mockPush).toHaveBeenCalledWith({ pathname: "/barbearia/[id]", params: { id: "b1" } });
+    expect(abasDoPapel(["cliente"])).toEqual(["inicio", "agendas", "perfil"]);
+    expect(abasDoPapel(["cliente", "owner"])).toEqual(["inicio", "agendas", "gestao", "perfil"]);
+    expect(abasDoPapel(["cliente", "profissional", "owner"])).toEqual(["inicio", "agendas", "gestao", "perfil"]);
   });
 });
 
