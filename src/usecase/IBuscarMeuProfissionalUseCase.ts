@@ -6,5 +6,8 @@ export interface MeuProfissionalResponseDTO {
 }
 
 export interface IBuscarMeuProfissionalUseCase {
-  executar(userId: string): Promise<MeuProfissionalResponseDTO>
+  /** Com barbershopId, o vínculo naquela barbearia; sem, o primeiro. */
+  executar(userId: string, barbershopId?: string): Promise<MeuProfissionalResponseDTO>
+  /** Todos os vínculos do usuário (um por barbearia onde atende). */
+  listar(userId: string): Promise<MeuProfissionalResponseDTO[]>
 }

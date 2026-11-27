@@ -60,6 +60,12 @@ import { CancelarAgendamentoUseCase } from '../../usecase/CancelarAgendamentoUse
 import { ConcluirAgendamentoUseCase } from '../../usecase/ConcluirAgendamentoUseCase'
 import { ReagendarAgendamentoUseCase } from '../../usecase/ReagendarAgendamentoUseCase'
 import { SupabaseAgendamentoRepository } from '../datasources/SupabaseAgendamentoRepository'
+import { MontarItensDeAgenda } from '../../usecase/MontarItensDeAgenda'
+import { ListarAgendaBarbeariaUseCase } from '../../usecase/ListarAgendaBarbeariaUseCase'
+import { ResponderSolicitacaoUseCase } from '../../usecase/ResponderSolicitacaoUseCase'
+import { MudarAtendimentoUseCase } from '../../usecase/MudarAtendimentoUseCase'
+import { SugerirHorarioUseCase } from '../../usecase/SugerirHorarioUseCase'
+import { ResponderSugestaoUseCase } from '../../usecase/ResponderSugestaoUseCase'
 import { routerIndisponibilidade } from './routes/unavailability.routes'
 import { IndisponibilidadeController } from './controllers/IndisponibilidadeController'
 import { SupabaseIndisponibilidadeRepository } from '../datasources/SupabaseIndisponibilidadeRepository'
@@ -243,7 +249,18 @@ const verificarBloqueioUseCase = new VerificarBloqueioUseCase(
 )
 
 const agendamentoRepository = new SupabaseAgendamentoRepository()
-const listarAgendaProfissionalUseCase = new ListarAgendaProfissionalUseCase(agendamentoRepository)
+const montarItensDeAgenda = new MontarItensDeAgenda(profissionalRepository, servicoRepository, usuarioRepository)
+const listarAgendaProfissionalUseCase = new ListarAgendaProfissionalUseCase(agendamentoRepository, montarItensDeAgenda)
+const listarAgendaBarbeariaUseCase = new ListarAgendaBarbeariaUseCase(
+  agendamentoRepository,
+  barbeariaRepository,
+  montarItensDeAgenda
+)
+const responderSolicitacaoUseCase = new ResponderSolicitacaoUseCase(
+  agendamentoRepository,
+  profissionalRepository,
+  barbeariaRepository
+)
 const listarAgendamentosClienteUseCase = new ListarAgendamentosClienteUseCase(
   agendamentoRepository,
   profissionalRepository,
@@ -288,7 +305,19 @@ const agendamentoController = new AgendamentoController(
   criarAgendamentoUseCase,
   cancelarAgendamentoUseCase,
   concluirAgendamentoUseCase,
-  reagendarAgendamentoUseCase
+  reagendarAgendamentoUseCase,
+  responderSolicitacaoUseCase,
+  listarAgendaBarbeariaUseCase,
+  new MudarAtendimentoUseCase(agendamentoRepository, profissionalRepository, barbeariaRepository),
+  new SugerirHorarioUseCase(
+    agendamentoRepository,
+    profissionalRepository,
+    barbeariaRepository,
+    servicoRepository,
+    businessHoursRepository,
+    verificarBloqueioUseCase
+  ),
+  new ResponderSugestaoUseCase(agendamentoRepository)
 )
 
 const listarHorariosDisponiveisUseCase = new ListarHorariosDisponiveisUseCase(

@@ -50,8 +50,8 @@ export class ReagendarAgendamentoUseCase implements IReagendarAgendamentoUseCase
       throw new AppError('Não autorizado para reagendar este agendamento.', 403, 'UNAUTHORIZED')
     }
 
-    if (agendamento.status === 'cancelado' || agendamento.status === 'concluido') {
-        throw new AppError('Não é possível reagendar um agendamento cancelado ou concluído.', 400, 'INVALID_STATUS')
+    if (agendamento.status !== 'pendente' && agendamento.status !== 'agendado') {
+        throw new AppError('Só é possível reagendar um agendamento pendente ou aprovado.', 400, 'INVALID_STATUS')
     }
 
     if (dataNoPassado(dados.date)) {

@@ -74,10 +74,22 @@ export class SupabaseProfissionalRepository implements IProfissionalRepository {
       .from('professionals')
       .select('*')
       .eq('user_id', userId)
-      .maybeSingle()
+      .order('created_at', { ascending: true })
+      .limit(1)
 
     if (error) throw new Error(`Erro ao buscar profissional por userId: ${error.message}`)
-    return data ? mapRowParaProfissional(data) : null
+    return data && data[0] ? mapRowParaProfissional(data[0]) : null
+  }
+
+  async listarPorUserId(userId: string): Promise<Profissional[]> {
+    const { data, error } = await supabase
+      .from('professionals')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+
+    if (error) throw new Error(`Erro ao listar vínculos do profissional: ${error.message}`)
+    return (data ?? []).map(mapRowParaProfissional)
   }
 
   async buscarCompletoPorId(id: string, barbershopId: string): Promise<Profissional | null> {

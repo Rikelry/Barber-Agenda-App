@@ -4,6 +4,7 @@ import { IProfissionalRepository } from '../model/datasources/IProfissionalRepos
 import { IServicoRepository } from '../model/datasources/IServicoRepository'
 import { IUsuarioRepository } from '../model/datasources/IUsuarioRepository'
 import { AgendamentoResponseDTO } from '../infra/http/dtos/AgendamentoDTO'
+import { propostaDe } from '../model/entities/Agendamento'
 
 export class ListarAgendamentosClienteUseCase {
   constructor(
@@ -31,6 +32,8 @@ export class ListarAgendamentosClienteUseCase {
                 date: agendamento.date,
                 startTime: agendamento.startTime.slice(0, 5),
                 endTime: agendamento.endTime.slice(0, 5),
+                rejectionReason: agendamento.rejectionReason ?? null,
+                proposal: propostaDe(agendamento),
                 createdAt: agendamento.createdAt,
             }
         })

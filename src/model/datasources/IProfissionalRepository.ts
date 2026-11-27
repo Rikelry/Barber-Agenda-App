@@ -5,7 +5,10 @@ export interface IProfissionalRepository {
   criar(data: Omit<Profissional, 'id' | 'createdAt'>): Promise<Profissional>
   listarPorBarbershopId(barbershopId: string): Promise<ProfissionalPublico[]>
   buscarPorId(id: string, barbershopId: string): Promise<ProfissionalPublico | null>
+  /** O primeiro vínculo do usuário (o mais antigo); quem atende em várias barbearias tem um por barbearia. */
   buscarPorUserId(userId: string): Promise<Profissional | null>
+  /** Todos os vínculos de profissional do usuário, um por barbearia. */
+  listarPorUserId(userId: string): Promise<Profissional[]>
   buscarCompletoPorId(id: string, barbershopId: string): Promise<Profissional | null>
   buscarPorIdGlobal(id: string): Promise<Profissional | null>
   atualizar(id: string, dados: Partial<Pick<Profissional, 'specialty'>>): Promise<Profissional>

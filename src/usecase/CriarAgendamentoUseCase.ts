@@ -100,7 +100,8 @@ export class CriarAgendamentoUseCase implements ICriarAgendamentoUseCase {
       date: dados.date,
       startTime: dados.time,
       endTime,
-      status: 'agendado',
+      // Nasce pendente: o profissional ou o dono aprova ou recusa (o horário já fica reservado).
+      status: 'pendente',
     })
 
     const usuarioProfissional = await this.usuarioRepository.buscarPorId(profissional.userId)

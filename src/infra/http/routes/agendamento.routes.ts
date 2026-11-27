@@ -18,6 +18,26 @@ export function routerAgendamento(controller: AgendamentoController) {
     controller.listarMinhaAgenda(req, res, next)
   )
 
+  // Agenda da barbearia (owner)
+  router.get('/barbearia/:barbershopId', autenticar, (req, res, next) =>
+    controller.listarAgendaBarbearia(req, res, next)
+  )
+
+  // Pedido de horário: aprovar ou recusar (profissional do agendamento ou owner)
+  router.patch('/:id/aprovar', autenticar, controller.responder('aprovar'))
+  router.patch('/:id/recusar', autenticar, controller.responder('recusar'))
+
+  // Atendimento: iniciar e não compareceu (profissional do agendamento ou owner)
+  router.patch('/:id/iniciar', autenticar, controller.mudar('iniciar'))
+  router.patch('/:id/nao-compareceu', autenticar, controller.mudar('nao_compareceu'))
+
+  // Sugestão de outro horário: o profissional sugere, o cliente aceita ou recusa
+  router.patch('/:id/sugerir', autenticar, validate(reagendarAgendamentoSchema), (req, res, next) =>
+    controller.sugerir(req, res, next)
+  )
+  router.patch('/:id/aceitar-sugestao', autenticar, controller.responderSugestao('aceitar'))
+  router.patch('/:id/recusar-sugestao', autenticar, controller.responderSugestao('recusar'))
+
   // RF006, RF007 — Cria agendamento (só cliente pode agendar, ADR-007)
   router.post('/', autenticar, autorizar('cliente'), validate(criarAgendamentoSchema), (req, res, next) =>
     controller.criar(req, res, next)

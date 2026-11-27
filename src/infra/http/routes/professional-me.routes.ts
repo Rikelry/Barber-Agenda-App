@@ -12,6 +12,7 @@ export function routerProfissionalMe(controller: ProfissionalController) {
   const router = Router()
 
   router.get('/me', autenticar, (req, res, next) => controller.buscarMeuProfissional(req, res, next))
+  router.get('/me/vinculos', autenticar, (req, res, next) => controller.listarMeusVinculos(req, res, next))
 
   return router
 }

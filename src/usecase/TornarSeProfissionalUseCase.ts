@@ -10,9 +10,9 @@ import { AppError } from '../infra/errors/AppError'
 /**
  * Owner se auto-cadastra como profissional na própria barbearia — reaproveita
  * a mesma conta (user_id), diferente de CadastrarProfissionalUseCase, que
- * sempre cria uma conta nova para contratar alguém de fora. Um usuário só
- * pode ser profissional em uma única barbearia (barbershops.md), então
- * bloqueia se ele já tiver um vínculo de profissional em qualquer lugar.
+ * sempre cria uma conta nova para contratar alguém de fora. Um usuário pode
+ * atender em várias barbearias (um vínculo por barbearia, desde 26/11/26);
+ * bloqueia só se ele já for profissional nesta.
  */
 export class TornarSeProfissionalUseCase implements ITornarSeProfissionalUseCase {
   constructor(
@@ -32,10 +32,10 @@ export class TornarSeProfissionalUseCase implements ITornarSeProfissionalUseCase
       throw new AppError('Você não tem permissão para acessar este recurso.', 403, 'FORBIDDEN')
     }
 
-    const jaEhProfissional = await this.profissionalRepository.buscarPorUserId(dados.ownerId)
+    const vinculos = await this.profissionalRepository.listarPorUserId(dados.ownerId)
 
-    if (jaEhProfissional) {
-      throw new AppError('Você já é profissional em uma barbearia.', 409, 'ALREADY_PROFESSIONAL')
+    if (vinculos.some((v) => v.barbershopId === dados.barbershopId)) {
+      throw new AppError('Você já atende nesta barbearia.', 409, 'ALREADY_PROFESSIONAL')
     }
 
     const usuario = await this.usuarioRepository.buscarPorId(dados.ownerId)

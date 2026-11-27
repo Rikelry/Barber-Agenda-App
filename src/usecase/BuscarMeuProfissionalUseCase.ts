@@ -16,8 +16,18 @@ import { AppError } from '../infra/errors/AppError'
 export class BuscarMeuProfissionalUseCase implements IBuscarMeuProfissionalUseCase {
   constructor(private readonly profissionalRepository: IProfissionalRepository) {}
 
-  async executar(userId: string): Promise<MeuProfissionalResponseDTO> {
-    const profissional = await this.profissionalRepository.buscarPorUserId(userId)
+  async listar(userId: string): Promise<MeuProfissionalResponseDTO[]> {
+    return (await this.profissionalRepository.listarPorUserId(userId)).map((p) => ({
+      id: p.id,
+      barbershopId: p.barbershopId,
+      specialty: p.specialty,
+    }))
+  }
+
+  async executar(userId: string, barbershopId?: string): Promise<MeuProfissionalResponseDTO> {
+    const profissional = barbershopId
+      ? (await this.profissionalRepository.listarPorUserId(userId)).find((p) => p.barbershopId === barbershopId) ?? null
+      : await this.profissionalRepository.buscarPorUserId(userId)
 
     if (!profissional) {
       throw new AppError('Profissional não encontrado para este usuário.', 404, 'PROFESSIONAL_NOT_FOUND')

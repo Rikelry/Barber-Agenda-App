@@ -33,8 +33,8 @@ export class ConcluirAgendamentoUseCase implements IConcluirAgendamentoUseCase {
       throw new AppError('Agendamento já está concluído.', 400, 'ALREADY_COMPLETED')
     }
 
-    if (agendamento.status === 'cancelado') {
-      throw new AppError('Não é possível concluir um agendamento cancelado.', 400, 'INVALID_STATUS')
+    if (agendamento.status !== 'agendado' && agendamento.status !== 'em_andamento') {
+      throw new AppError('Só é possível concluir um atendimento aprovado ou em andamento.', 400, 'INVALID_STATUS')
     }
 
     const profissional = await this.profissionalRepository.buscarPorIdGlobal(agendamento.professionalId)

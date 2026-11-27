@@ -27,9 +27,22 @@ export class ProfissionalController {
         throw new AppError('Usuário não autenticado.', 401, 'UNAUTHORIZED')
       }
 
-      const profissional = await this.buscarMeuProfissionalUseCase.executar(req.usuario.id)
+      const barbershopId = typeof req.query.barbershopId === 'string' ? req.query.barbershopId : undefined
+      const profissional = await this.buscarMeuProfissionalUseCase.executar(req.usuario.id, barbershopId)
 
       res.status(200).json(profissional)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // Todos os vínculos de profissional do usuário logado (uma linha por barbearia)
+  async listarMeusVinculos(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.usuario) {
+        throw new AppError('Usuário não autenticado.', 401, 'UNAUTHORIZED')
+      }
+      res.status(200).json({ vinculos: await this.buscarMeuProfissionalUseCase.listar(req.usuario.id) })
     } catch (error) {
       next(error)
     }
