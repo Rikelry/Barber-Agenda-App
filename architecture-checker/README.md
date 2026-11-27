@@ -106,6 +106,47 @@ Model; e Routes pode encaminhar para Views.
 As heurísticas indicam possíveis problemas, não provas definitivas. Ajuste de
 severidade não é configurável pela CLI nesta versão.
 
+## Exemplos
+
+Dois projetos de referência ficam em `tests/fixtures/`.
+
+`valid-project` segue a arquitetura: a View depende do ViewModel, o Use Case
+depende do contrato do Model e a Infra implementa esse contrato.
+
+```bash
+npm run dev -- tests/fixtures/valid-project
+```
+
+```text
+Arquivos encontrados: 6
+Erros: 0
+Warnings: 0
+Código de saída: 0
+```
+
+`invalid-project` viola a matriz de dependências e a separação de contratos: a
+View e o Use Case importam a Infra diretamente, e o repositório não implementa
+contrato do domínio.
+
+```bash
+npm run dev -- tests/fixtures/invalid-project
+```
+
+```text
+Erros: 2
+Warnings: 1
+- LAYER_DEPENDENCY_001
+  Arquivo: src/usecase/AuthUseCase.ts
+  Descrição: A camada usecase não pode depender da camada infra.
+- LAYER_DEPENDENCY_001
+  Arquivo: src/view/AuthView.ts
+  Descrição: A camada view não pode depender da camada infra.
+- HEUR_INFRA_CONTRACT_001
+  Arquivo: src/infra/AuthRepository.ts
+  Descrição: A classe AuthRepository da camada Infra não implementa nenhum contrato do domínio.
+Código de saída: 2
+```
+
 ## Saída e códigos de saída
 
 A saída em texto mostra camadas, estatísticas, resolução de imports e
@@ -167,8 +208,11 @@ npm test
 - A regra DI reconhece padrões de import e instanciação representados pela AST;
   factories e outras composições indiretas podem não ser conclusivas.
 - A resolução de aliases depende das opções TypeScript carregadas do projeto.
-- O projeto Barber Agenda ainda precisa de uma execução de validação
-  fim-a-fim; até lá, a cobertura de comportamento vem das fixtures e testes.
+- Especificadores de pacotes sem `node_modules` instalado são classificados
+  como `external`, não como `unresolved`.
+- A validação fim-a-fim foi executada no projeto Barber Agenda (236 arquivos,
+  1025 imports): nenhum erro estrutural ou de composição DI, com warnings
+  heurísticos remanescentes no código do app.
 
 ## Distribuição
 
