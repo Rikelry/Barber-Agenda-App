@@ -438,6 +438,17 @@ describe("HEUR_VIEW_001 — View (tela) deve depender de um ViewModel", () => {
         expect(validateViewHasViewModel(project)).toHaveLength(1);
     });
 
+    it("não deve gerar violação para módulos da view que não são telas (.ts)", () => {
+        const project = createProjectModel([
+            {
+                relativePath: "src/view/theme.ts",
+                layer: "view",
+            },
+        ]);
+
+        expect(validateViewHasViewModel(project)).toHaveLength(0);
+    });
+
     it("não deve gerar violação para arquivos em pasta 'components'", () => {
         const project = createProjectModel([
             {

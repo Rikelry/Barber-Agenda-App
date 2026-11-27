@@ -242,11 +242,19 @@ function isInIgnoredFolder(
     return ignoredFolders.some((folder) => segments.includes(folder));
 }
 
+/** Considera "tela" apenas arquivos de componente React (`.tsx`). */
+function isViewScreen(relativePath: string): boolean {
+    return relativePath.toLowerCase().endsWith(".tsx");
+}
+
 /**
  * HEUR_VIEW_001: toda View (tela) deve depender de um ViewModel, delegando a
  * ele as ações e o estado. Um import apenas de tipo não conta como delegação:
  * é preciso que algum binding importado do ViewModel seja referenciado como
  * valor na AST (ex.: `use<Screen>ViewModel()`).
+ *
+ * A regra só se aplica a telas (arquivos `.tsx`): módulos de estilo/utilitários
+ * da pasta `view/` (ex.: `theme.ts`) não são Views e não precisam de ViewModel.
  */
 export function validateViewHasViewModel(
     project: ProjectModel,
@@ -258,11 +266,11 @@ export function validateViewHasViewModel(
     const filesByAbsolutePath = indexByAbsolutePath(project);
 
     for (const file of project.files) {
-        if (file.layer !== "view") {
-            continue;
-        }
-
-        if (isInIgnoredFolder(file.relativePath, ignoredFolders)) {
+        if (
+            file.layer !== "view" ||
+            !isViewScreen(file.relativePath) ||
+            isInIgnoredFolder(file.relativePath, ignoredFolders)
+        ) {
             continue;
         }
 
