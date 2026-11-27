@@ -86,10 +86,26 @@ export function useHomeViewModel(
 
   // As Inspirações são um extra: sem sessão ou com erro, a seção só não aparece. Recarrega
   // ao voltar para a aba, para mostrar fotos publicadas enquanto o Início estava aberto.
+  // Só busca depois de restaurar a sessão; senão, na abertura deslogado, o app chamaria o
+  // endpoint protegido GET /portfolio/featured sem token (401).
   useFocusEffect(
     useCallback(() => {
-      portfolio.listInspirations().then(setInspirations, () => setInspirations([]));
-    }, [portfolio]),
+      let ativo = true;
+      auth.restoreSession().then((sessao) => {
+        if (!ativo || !sessao) return;
+        portfolio.listInspirations().then(
+          (fotos) => {
+            if (ativo) setInspirations(fotos);
+          },
+          () => {
+            if (ativo) setInspirations([]);
+          },
+        );
+      });
+      return () => {
+        ativo = false;
+      };
+    }, [portfolio, auth]),
   );
 
   const selectCategory = (escolhida: ServiceCategory) => {

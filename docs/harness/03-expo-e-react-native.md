@@ -24,4 +24,5 @@ npx expo install --fix      # corrige versões incompatíveis
 - Navegação só com **Expo Router**. Rotas ficam em `src/app/` e são finas (`_layout.tsx` define navegadores).
 - `ios/` e `android/` são gerados (CNG): nunca crie nem edite à mão — configure em `app.json` e config plugins.
 - Prefira módulos Expo recomendados a bibliotecas de terceiros. Ao adicionar lib com código nativo, use development build (`npx expo run:ios|android` ou `eas build --profile development`).
+- Serviço que só existe em algumas plataformas: separe por sufixo (`xService.ts` nativo / `xService.web.ts` web) e carregue no `container.ts` via `await import()`, só quando o módulo existir (`TurboModuleRegistry.get(...) != null`) — importar módulo nativo ausente é erro fatal. Na web do Google, use `renderButton` (nunca One Tap/`prompt()`, que aborta por FedCM) com a origem registrada em *Authorized JavaScript origins*.
 - Builds e envios pela nuvem via EAS (`eas build`, `eas submit`, `eas update`).

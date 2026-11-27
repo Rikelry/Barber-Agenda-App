@@ -9,10 +9,13 @@ import { HttpPortfolioDataSource } from "@/infra/datasources/httpPortfolioDataSo
 import { InMemoryHomeDataSource } from "@/infra/datasources/inMemoryHomeDataSource";
 import { HttpClient } from "@/infra/http/httpClient";
 import { ExpoImagePickerService } from "@/infra/services/expoImagePickerService";
-import { GoogleAuthService } from "@/infra/services/googleAuthService";
 import { HttpImageStorageService } from "@/infra/services/httpImageStorageService";
 import { MemoryAuthSessionService } from "@/infra/services/memoryAuthSessionService";
 import { SecureSessionStorageService } from "@/infra/services/secureSessionStorageService";
+import { Platform, TurboModuleRegistry } from "react-native";
+
+import { DomainError } from "@/model/errors";
+import type { IGoogleAuthService } from "@/model/services/iGoogleAuthService";
 import { AppointmentUseCases } from "@/usecase/appointmentUseCases";
 import { AuthUseCases } from "@/usecase/authUseCases";
 import { BarbershopUseCases } from "@/usecase/barbershopUseCases";
@@ -47,11 +50,32 @@ export const appointmentUseCases = new AppointmentUseCases(
   new HttpAppointmentDataSource(httpClient),
   barbershopDataSource,
 );
+// O login com Google é um módulo nativo: no Expo Go (ou num build que não o inclua) o
+// TurboModule "RNGoogleSignin" não existe e o import derrubaria o app com um erro fatal.
+// Carregamos sob demanda e só importamos quando o módulo está de fato disponível; na web o
+// serviço resolvido é o do Google Identity Services (googleAuthService.web.ts), que não usa módulo nativo.
+const moduloGoogleDisponivel = (): boolean =>
+  Platform.OS === "web" || TurboModuleRegistry.get("RNGoogleSignin") != null;
+
+const googleAuthService: IGoogleAuthService = {
+  signIn: async () => {
+    if (!moduloGoogleDisponivel()) {
+      throw new DomainError(
+        "O login com Google só funciona no app instalado por um build de desenvolvimento, não no Expo Go.",
+        "SERVER",
+      );
+    }
+
+    const { GoogleAuthService } = await import("@/infra/services/googleAuthService");
+    return new GoogleAuthService().signIn();
+  },
+};
+
 export const authUseCases = new AuthUseCases(
   new HttpAuthDataSource(httpClient),
   authSession,
   new SecureSessionStorageService(),
-  new GoogleAuthService(),
+  googleAuthService,
 );
 
 export const profileUseCases = new ProfileUseCases(new HttpUserDataSource(httpClient));
